@@ -6,3 +6,8 @@ type ApiResponse struct {
 	Data 		any
 }
 
+type ErrorResponse struct {
+	Code		int
+	Error		string
+}
+
