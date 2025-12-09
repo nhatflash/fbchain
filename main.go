@@ -9,6 +9,7 @@ import (
 	"os"
 	"log"
 	env "github.com/joho/godotenv"
+	"github.com/nhatflash/fbchain/middleware"
 )
 
 func main() {
@@ -20,6 +21,7 @@ func main() {
 		return;
 	}
 	router := gin.Default()
+	router.Use(middleware.ErrorHandler())
 
 	serverPort := os.Getenv("PORT")
 	if serverPort == "" {

@@ -12,7 +12,7 @@ type ApiResponse struct {
 
 type ErrorResponse struct {
 	Code		int
-	Error		string
+	Error		error
 	Message		string
 }
 
@@ -24,10 +24,11 @@ func SuccessMessage(code int, message string, data any, c *gin.Context) {
 	})
 }
 
-func ErrorMessage(code int, e string, message string, c *gin.Context) {
+func ErrorMessage(code int, e error, message string, c *gin.Context) {
 	c.JSON(code, ErrorResponse {
 		Code: code,
 		Error: e,
 		Message: message,
 	})
 }
+

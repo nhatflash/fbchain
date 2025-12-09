@@ -14,7 +14,7 @@ import (
 
 func GetSignInUser(email string, password string, db *sql.DB) *model.User {
 	
-	rows, err := db.Query("SELECT * FROM users WHERE email = $1 AND password = $2", email, password)
+	rows, err := db.Query("SELECT * FROM users WHERE email = $1 AND password = $2 LIMIT 1", email, password)
 	if err != nil {
 		log.Fatalln("Error when checking user in database", err)
 		return nil

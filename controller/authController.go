@@ -6,6 +6,7 @@ import (
 	"github.com/nhatflash/fbchain/api"
 	"github.com/nhatflash/fbchain/client"
 	"github.com/nhatflash/fbchain/service"
+	"net/http"
 )
 
 type AuthController struct {
@@ -16,15 +17,15 @@ func (authController AuthController) Login(c *gin.Context) {
 	var loginRequest client.LoginRequest
 
 	if reqErr := c.ShouldBindJSON(&loginRequest); reqErr != nil {
-		api.ErrorMessage(400, "VALIDATION_ERROR", "JSON binding error: " + reqErr.Error(), c)
+		c.Error(reqErr)
 		return
 	}
 	userEmail, logErr := service.HandleLogin(&loginRequest, authController.Db, c)
 	if logErr != nil {
-		api.ErrorMessage(401, "LOGIN_FAILED", logErr.Error(), c)
+		c.Error(logErr)
 		return
 	}
-	api.SuccessMessage(200, "Login successfully", userEmail, c)
+	api.SuccessMessage(http.StatusOK, "Login successfully", userEmail, c)
 }
 
 
@@ -33,14 +34,14 @@ func (authController AuthController) RegisterTenant(c *gin.Context) {
 	var registerTenantRequest client.RegisterTenantRequest
 
 	if reqErr := c.ShouldBindJSON(&registerTenantRequest); reqErr != nil {
-		api.ErrorMessage(400, "VALIDATION_ERROR", "JSON binding error: " + reqErr.Error(), c)
+		c.Error(reqErr)
 		return
 	}
 
 	userTenantResponse, resErr := service.HandleRegisterTenant(&registerTenantRequest, authController.Db, c)
 
 	if resErr != nil {
-		api.ErrorMessage(400, "REGISTER_ERROR", resErr.Error(), c)
+		c.Error(resErr)
 		return
 	}
 	api.SuccessMessage(201, "Register successfully", userTenantResponse, c)
