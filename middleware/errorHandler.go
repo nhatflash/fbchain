@@ -1,13 +1,9 @@
 package middleware
 
 import (
-	"errors"
-	"strings"
-	"github.com/gin-gonic/gin"
-	"github.com/nhatflash/fbchain/api"
-	"github.com/nhatflash/fbchain/error"
 	"net/http"
-	"log"
+	"github.com/gin-gonic/gin"
+	appError "github.com/nhatflash/fbchain/error"
 )
 
 func ErrorHandler() gin.HandlerFunc {
@@ -16,32 +12,20 @@ func ErrorHandler() gin.HandlerFunc {
 
 		if (len(c.Errors) > 0) {
 			err := c.Errors[0].Err
-
-			code := http.StatusInternalServerError
-			message := "An unexpected error occurred"
-			switch {
-			case errors.Is(err, error.ErrBadRequest):
-				code = http.StatusBadRequest
-				message = "The requested resource is invalid"
-
-			case errors.Is(err, error.ErrNotFound):
-				code = http.StatusNotFound
-				message = "The requested resource is not found"
-
-			case errors.Is(err, error.ErrUnauthorized):
-				code = http.StatusUnauthorized
-				message = "You must be authenticated first"
-
-			case errors.Is(err, error.ErrForbidden):
-				code = http.StatusForbidden
-				message = "Access denied"
-			case strings.Contains(err.Error(), "timeout"):
-				code = http.StatusServiceUnavailable
-				message = "Service temporarily unavailable"
-			default:
-				log.Fatalln("Unhandled error details", err.Error())
+			if e, ok := err.(*appError.ErrorResponse); ok {
+				c.JSON(e.Status, gin.H{
+					"status": e.Status,
+					"error": e.Code.Error(),
+					"message": e.Message,
+				})
+				return
 			}
-			api.ErrorMessage(code, err, message, c)
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status": http.StatusInternalServerError,
+				"error": err.Error(),
+				"message": "An unexpected error occurred",
+			})
 		}
 	}
 }

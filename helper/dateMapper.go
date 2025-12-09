@@ -1,8 +1,8 @@
 package helper
 
 import (
-	"errors"
 	"time"
+	appError "github.com/nhatflash/fbchain/error"
 )
 
 var dateFormat string = "2006-01-02"
@@ -13,11 +13,11 @@ var timeZone = "Asia/Bangkok"
 func ConvertToDate(dateStr string) (*time.Time, error) {
 	loc, locErr := time.LoadLocation(timeZone);
 	if locErr != nil {
-		return nil, errors.New("error when retrieving location: " + locErr.Error())
+		return nil, appError.InternalError("Error of location: " + locErr.Error())
 	}
 	date, dateErr := time.ParseInLocation(dateFormat, dateStr, loc)
 	if dateErr != nil {
-		return nil, errors.New("error when parsing date: " + dateErr.Error())
+		return nil, appError.InternalError("Error when parsing date: " + dateStr)
 	}
 	return &date, nil
 }
@@ -25,11 +25,11 @@ func ConvertToDate(dateStr string) (*time.Time, error) {
 func ConvertToDateTime(dateTimeStr string) (*time.Time, error) {
 	loc, locErr := time.LoadLocation(timeZone);
 	if locErr != nil {
-		return nil, errors.New("error when retrieving location: " + locErr.Error())
+		return nil, appError.InternalError("Error of location: " + locErr.Error())
 	}
 	dateTime, dateTimeErr := time.ParseInLocation(dateTimeFormat, dateTimeStr, loc)
 	if dateTimeErr != nil {
-		return nil, errors.New("error when parsing date: " + dateTimeErr.Error())
+		return nil, appError.InternalError("Error when parsing date time: " + dateTimeStr)
 	}
 	return &dateTime, nil
 }
@@ -38,11 +38,11 @@ func ConvertToDateTime(dateTimeStr string) (*time.Time, error) {
 func ConvertToTime(timeStr string) (*time.Time, error) {
 	loc, locErr := time.LoadLocation(timeZone);
 	if locErr != nil {
-		return nil, errors.New("error when retrieving location: " + locErr.Error())
+		return nil, appError.InternalError("Error of location: " + locErr.Error())
 	}
 	time, timeErr := time.ParseInLocation(timeFormat, timeStr, loc)
 	if timeErr != nil {
-		return nil, errors.New("error when parsing date: " + timeErr.Error())
+		return nil, appError.InternalError("Error when parsing time: " + timeStr)
 	}
 	return &time, nil
 }

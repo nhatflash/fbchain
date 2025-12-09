@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/api"
+	appError "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/client"
 	"github.com/nhatflash/fbchain/service"
 	"net/http"
@@ -17,7 +18,7 @@ func (authController AuthController) Login(c *gin.Context) {
 	var loginRequest client.LoginRequest
 
 	if reqErr := c.ShouldBindJSON(&loginRequest); reqErr != nil {
-		c.Error(reqErr)
+		c.Error(appError.BadRequestError("Validation failed."))
 		return
 	}
 	userEmail, logErr := service.HandleLogin(&loginRequest, authController.Db, c)
@@ -34,7 +35,7 @@ func (authController AuthController) RegisterTenant(c *gin.Context) {
 	var registerTenantRequest client.RegisterTenantRequest
 
 	if reqErr := c.ShouldBindJSON(&registerTenantRequest); reqErr != nil {
-		c.Error(reqErr)
+		c.Error(appError.BadRequestError("Validation failed."))
 		return
 	}
 

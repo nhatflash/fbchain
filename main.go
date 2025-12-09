@@ -28,9 +28,9 @@ func main() {
 		serverPort = ":8080"
 	}
 
-	db := pg.HandleConnection()
-	if db == nil {
-		log.Fatalln("Internal server error when trying to connect to DB")
+	db, dbErr := pg.HandleConnection()
+	if dbErr != nil {
+		log.Fatalln("Connect to PostgreSQL failed", dbErr.Error())
 		return
 	}
 

@@ -7,12 +7,13 @@ import (
 	"github.com/nhatflash/fbchain/client"
 	"github.com/nhatflash/fbchain/repository"
 	"github.com/nhatflash/fbchain/helper"
+	appError "github.com/nhatflash/fbchain/error"
 )
 
 func HandleLogin(loginReq *client.LoginRequest, db *sql.DB, c *gin.Context) (string, error) {
-	user := repository.GetSignInUser(loginReq.Login, loginReq.Password, db)
-	if user == nil {
-		return "", errors.New("invalid credential")
+	user, userErr := repository.GetSignInUser(loginReq.Login, loginReq.Password, db)
+	if userErr != nil {
+		return "", userErr
 	}
 	return user.Email, nil
 }
@@ -27,10 +28,10 @@ func HandleRegisterTenant(registerTenantReq *client.RegisterTenantRequest, db *s
 	birthdateStr := registerTenantReq.Birthdate
 
 	if repository.CheckUserEmailExists(email, db) {
-		return nil, errors.New("user with this email already exist: " + email)
+		return nil, appError.BadRequestError("User with this email already exists.")
 	}
 	if (password != confirmPassword) {
-		return nil, errors.New("confirm password does not match")
+		return nil, appError.BadRequestError("Confirm password does not match.")
 	}
 	birthdate, dateErr := helper.ConvertToDate(birthdateStr)
 	if dateErr != nil {
@@ -38,7 +39,7 @@ func HandleRegisterTenant(registerTenantReq *client.RegisterTenantRequest, db *s
 	}
 	newTenant, dbErr := repository.RegisterTenant(email, firstName, lastName, password, &gender, birthdate, db)
 	if dbErr != nil {
-		return nil, errors.New(dbErr.Error())
+		return nil, dbErr
 	}
 	return helper.MapToUserResponse(newTenant), nil
 }

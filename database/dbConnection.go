@@ -4,10 +4,9 @@ import (
 	_ "github.com/lib/pq"
 	sql "database/sql"
 	"os"
-	"log"
 )
 
-func HandleConnection() *sql.DB {
+func HandleConnection() (*sql.DB, error) {
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
 	dbSslMode := os.Getenv("DB_SSLMODE")
@@ -16,8 +15,7 @@ func HandleConnection() *sql.DB {
 
 	db, dbErr := sql.Open("postgres", connStr)
 	if dbErr != nil {
-		log.Fatalln("Error when connecting to PostgreSQL:", dbErr)
-		return nil
+		return nil, dbErr
 	}
-	return db
+	return db, nil
 }
