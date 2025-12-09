@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	routes "github.com/nhatflash/fbchain/routes"
 	_ "github.com/lib/pq"
-	pg "github.com/nhatflash/fbchain/db"
+	pg "github.com/nhatflash/fbchain/database"
 	"os"
 	"log"
 	env "github.com/joho/godotenv"
@@ -27,10 +27,14 @@ func main() {
 	}
 
 	db := pg.HandleConnection()
+	if db == nil {
+		log.Fatalln("Internal server error when trying to connect to DB")
+		return
+	}
 
 	defer db.Close()
 
-	routes.MainRoutes(router)
+	routes.MainRoutes(router, db)
 
 	router.Run(serverPort)
 }

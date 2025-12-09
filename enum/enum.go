@@ -24,6 +24,7 @@ type UserStatus string
 const (
 	ACTIVE UserStatus = "ACTIVE"
 	INACTIVE UserStatus = "INACTIVE"
+	PENDING UserStatus = "PENDING"
 	LOCKED UserStatus = "LOCKED"
 	DELETED UserStatus = "DELETED"
 )

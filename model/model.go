@@ -10,17 +10,17 @@ type User struct {
 	Id				int64				`json:"id"`
 	Email			string				`json:"email"`
 	Password		string				`json:"password"`
-	Role			enum.Role			`json:"role"`
+	Role			*enum.Role			`json:"role"`
 	Phone			sql.NullString		`json:"phone"`
 	Identity		sql.NullString		`json:"identity"`
 	FirstName		string				`json:"firstName"`
 	LastName		string				`json:"lastName"`
-	Gender			enum.Gender			`json:"gender"`
+	Gender			*enum.Gender		`json:"gender"`
 	Birthdate		time.Time			`json:"birthdate"`
 	PostalCode		sql.NullString		`json:"postalCode"`
 	Address			sql.NullString		`json:"address"`
 	ProfileImage	sql.NullString		`json:"profileImage"`
-	Status			enum.UserStatus		`json:"status"`
+	Status			*enum.UserStatus	`json:"status"`
 	CreatedAt 		time.Time			`json:"createdAt"`
 	UpdatedAt 		time.Time			`json:"updatedAt"`
 }
@@ -51,21 +51,21 @@ type Subscription struct {
 
 
 type Restaurant struct {
-	Id				int64				`json:"id"`
-	TenantId		int64				`json:"tenantId"`
-	Name			string				`json:"name"`
-	Location		string				`json:"location"`
-	Description 	sql.NullString		`json:"description"`
-	ContactEmail	sql.NullString		`json:"contactEmail"`
-	ContactPhone	sql.NullString		`json:"contactPhone"`
-	PostalCode		string				`json:"postalCode"`
-	Type			enum.RestaurantType	`json:"type"`
-	AvgRating		float32				`json:"avgRating"`
-	IsActive		bool				`json:"isActive"`
-	Notes			sql.NullString		`json:"notes"`
-	CreatedAt		time.Time			`json:"createdAt"`
-	UpdatedAt 		time.Time			`json:"updatedAt"`
-	SubscriptionId	int64				`json:"subsciptionId"`
+	Id				int64					`json:"id"`
+	TenantId		int64					`json:"tenantId"`
+	Name			string					`json:"name"`
+	Location		string					`json:"location"`
+	Description 	sql.NullString			`json:"description"`
+	ContactEmail	sql.NullString			`json:"contactEmail"`
+	ContactPhone	sql.NullString			`json:"contactPhone"`
+	PostalCode		string					`json:"postalCode"`
+	Type			*enum.RestaurantType	`json:"type"`
+	AvgRating		float32					`json:"avgRating"`
+	IsActive		bool					`json:"isActive"`
+	Notes			sql.NullString			`json:"notes"`
+	CreatedAt		time.Time				`json:"createdAt"`
+	UpdatedAt 		time.Time				`json:"updatedAt"`
+	SubscriptionId	int64					`json:"subsciptionId"`
 	Tenant			*Tenant
 	Subscription	*Subscription
 	Images			[]RestaurantImage
