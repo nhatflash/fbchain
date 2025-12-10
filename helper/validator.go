@@ -15,8 +15,8 @@ const (
 var PhoneNumberValidator validator.Func = func(fl validator.FieldLevel) bool {
 	phone, ok := fl.Field().Interface().(string)
 	if ok {
-		_, err := regexp.MatchString(PhonePattern, phone)
-		if err != nil {
+		match, err := regexp.MatchString(PhonePattern, phone)
+		if err != nil || !match {
 			return false
 		}
 	}
@@ -26,8 +26,8 @@ var PhoneNumberValidator validator.Func = func(fl validator.FieldLevel) bool {
 var IdentityNumberValidator validator.Func = func(fl validator.FieldLevel) bool {
 	identity, ok := fl.Field().Interface().(string)
 	if ok {
-		_, err := regexp.MatchString(IdentityPattern, identity)
-		if err != nil {
+		match, err := regexp.MatchString(IdentityPattern, identity)
+		if err != nil || !match {
 			return false
 		}
 	}
@@ -37,8 +37,8 @@ var IdentityNumberValidator validator.Func = func(fl validator.FieldLevel) bool 
 var NameValidator validator.Func = func(fl validator.FieldLevel) bool {
 	name, ok := fl.Field().Interface().(string)
 	if ok {
-		_, err := regexp.MatchString(NamePattern, name)
-		if err != nil {
+		match, err := regexp.MatchString(NamePattern, name)
+		if err != nil || !match {
 			return false
 		}
 	}

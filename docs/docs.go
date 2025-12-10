@@ -15,6 +15,12 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/": {
+            "get": {
+                "summary": "Ping",
+                "responses": {}
+            }
+        },
         "/auth/login": {
             "post": {
                 "consumes": [
@@ -44,9 +50,7 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/error.ErrorResponse"
-                        }
+                        "schema": {}
                     }
                 }
             }
@@ -80,9 +84,7 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/error.ErrorResponse"
-                        }
+                        "schema": {}
                     }
                 }
             }
@@ -239,18 +241,13 @@ const docTemplate = `{
                 "LOCKED",
                 "DELETED"
             ]
-        },
-        "error.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "code": {},
-                "message": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "integer"
-                }
-            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

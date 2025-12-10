@@ -22,6 +22,9 @@ import (
 // @description API Documentation for FB Chain Management API - Developed by Ducking Team
 // @host localhost:8080
 // @BasePath /api
+// @securityDefinitions.apiKey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	envErr := env.Load(".env")
 	if envErr != nil {
@@ -32,10 +35,22 @@ func main() {
 	r.Use(middleware.ErrorHandler())
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		_ = v.RegisterValidation("phone", helper.PhoneNumberValidator)
-		_ = v.RegisterValidation("identity", helper.IdentityNumberValidator)
-		_ = v.RegisterValidation("name", helper.NameValidator)
-		_ = v.RegisterValidation("postalcode", helper.PostalCodeValidator)
+		phoneVErr := v.RegisterValidation("phone", helper.PhoneNumberValidator)
+		if phoneVErr != nil {
+			panic(phoneVErr)
+		}
+		identityVErr := v.RegisterValidation("identity", helper.IdentityNumberValidator)
+		if identityVErr != nil {
+			panic(identityVErr)
+		}
+		nameVErr := v.RegisterValidation("name", helper.NameValidator)
+		if nameVErr != nil {
+			panic(nameVErr)
+		}
+		pCVErr := v.RegisterValidation("postalcode", helper.PostalCodeValidator)
+		if pCVErr != nil {
+			panic(pCVErr)
+		}
 	}
 
 	port := os.Getenv("PORT")

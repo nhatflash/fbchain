@@ -10,7 +10,7 @@ var ErrNotFound = errors.New("NOT_FOUND")
 var ErrInternal = errors.New("INTERNAL_SERVER_ERROR")
 var ErrUnauthorized = errors.New("UNAUTHORIZED")
 var ErrForbidden = errors.New("FORBIDDEN")
-
+var ErrValidationFailed = errors.New("VALIDATION_FAILED")
 
 type ErrorResponse struct {
 	Status		int				`json:"status"`

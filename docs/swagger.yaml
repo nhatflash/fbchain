@@ -107,14 +107,6 @@ definitions:
     - PENDING
     - LOCKED
     - DELETED
-  error.ErrorResponse:
-    properties:
-      code: {}
-      message:
-        type: string
-      status:
-        type: integer
-    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -123,6 +115,10 @@ info:
   title: FB Chain Management API
   version: "1.0"
 paths:
+  /:
+    get:
+      responses: {}
+      summary: Ping
   /auth/login:
     post:
       consumes:
@@ -143,8 +139,7 @@ paths:
             $ref: '#/definitions/client.SignInResponse'
         "400":
           description: Bad Request
-          schema:
-            $ref: '#/definitions/error.ErrorResponse'
+          schema: {}
       summary: Sign in API
   /auth/register/tenant/initial:
     post:
@@ -166,7 +161,11 @@ paths:
             $ref: '#/definitions/client.UserResponse'
         "400":
           description: Bad Request
-          schema:
-            $ref: '#/definitions/error.ErrorResponse'
+          schema: {}
       summary: Intial tenant sign up API
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

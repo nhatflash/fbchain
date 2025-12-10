@@ -4,16 +4,22 @@ import (
 	"database/sql"
 	_ "github.com/nhatflash/fbchain/docs"
 	"github.com/gin-gonic/gin"
-	api "github.com/nhatflash/fbchain/api"
+	"github.com/nhatflash/fbchain/api"
+	"net/http"
 )
 
-func MainRoutes(router *gin.Engine, db *sql.DB) {
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(200, api.ApiResponse {
-			Status: 200,
-			Message: "Server alive.",
-			Data: nil,
-		})
+func MainRoutes(r *gin.Engine, db *sql.DB) {
+	r.GET("/", Ping)
+	AuthRoutes(r, "/api/auth", db)
+}
+
+
+// @Summary Ping
+// @Router / [get]
+func Ping(c *gin.Context) {
+	c.JSON(http.StatusOK, api.ApiResponse {
+		Status: http.StatusOK,
+		Message: "Server alive.",
+		Data: nil,
 	})
-	AuthRoutes(router, "/api/auth", db)
 }
