@@ -9,7 +9,7 @@ import (
 )
 
 func MainRoutes(r *gin.Engine, db *sql.DB) {
-	r.GET("/", Ping)
+	r.GET("/api", Ping)
 	AuthRoutes(r, "/api/auth", db)
 }
 

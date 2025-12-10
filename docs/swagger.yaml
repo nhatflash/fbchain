@@ -1,5 +1,23 @@
 basePath: /api
 definitions:
+  client.CompletedTenantRegisterRequest:
+    properties:
+      address:
+        type: string
+      identity:
+        type: string
+      phone:
+        type: string
+      postalCode:
+        type: string
+      profileImage:
+        type: string
+    required:
+    - address
+    - identity
+    - phone
+    - postalCode
+    type: object
   client.InitialTenantRegisterRequest:
     properties:
       birthdate:
@@ -141,6 +159,30 @@ paths:
           description: Bad Request
           schema: {}
       summary: Sign in API
+  /auth/register/tenant/completed:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: CompletedTenantRegister body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.CompletedTenantRegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/client.UserResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - BearerAuth: []
+      summary: Completed tenant register API
   /auth/register/tenant/initial:
     post:
       consumes:

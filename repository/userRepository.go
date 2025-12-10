@@ -11,7 +11,7 @@ import (
 )
 
 
-func RegisterTenant(email string, firstName string, lastName string, password string, gender *enum.Gender, birthdate *time.Time, db *sql.DB) (*model.User, error) {
+func InitialRegisterTenant(email string, firstName string, lastName string, password string, gender *enum.Gender, birthdate *time.Time, db *sql.DB) (*model.User, error) {
 	
 	_, dbErr := db.Exec("INSERT INTO users (email, first_name, last_name, password, gender, birthdate, role, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", email, firstName, lastName, password, gender, birthdate, enum.TENANT, enum.PENDING)
 	if dbErr != nil {
@@ -22,6 +22,19 @@ func RegisterTenant(email string, firstName string, lastName string, password st
 		return nil, userErr
 	}
 	return newUser, nil
+}
+
+
+func CompletedRegisterTenant(email string, phone string, identity string, address string, postalCode string, profileImage string, db *sql.DB) (*model.User, error) {
+	_, dbErr := db.Exec("UPDATE users SET phone = $1, identity = $2, address = $3, postal_code = $4, profile_image = $5, status = $6 WHERE email = $7", phone, identity, address, postalCode, profileImage, enum.ACTIVE, email)
+	if dbErr != nil {
+		return nil, appError.ErrInternal
+	}
+	updatedUser, userErr := GetUserByEmail(email, db)
+	if userErr != nil {
+		return nil, userErr
+	}
+	return updatedUser, nil
 }
 
 

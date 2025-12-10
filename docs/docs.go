@@ -55,6 +55,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/register/tenant/completed": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Completed tenant register API",
+                "parameters": [
+                    {
+                        "description": "CompletedTenantRegister body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.CompletedTenantRegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/client.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/auth/register/tenant/initial": {
             "post": {
                 "consumes": [
@@ -91,6 +130,32 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "client.CompletedTenantRegisterRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "identity",
+                "phone",
+                "postalCode"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "identity": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "postalCode": {
+                    "type": "string"
+                },
+                "profileImage": {
+                    "type": "string"
+                }
+            }
+        },
         "client.InitialTenantRegisterRequest": {
             "type": "object",
             "required": [

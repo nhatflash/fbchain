@@ -3,6 +3,7 @@ package controller
 import (
 	"database/sql"
 	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/api"
 	"github.com/nhatflash/fbchain/client"
@@ -44,23 +45,31 @@ func (authController AuthController) SignIn(c *gin.Context) {
 // @Failure 400 {object} error
 // @Router /auth/register/tenant/initial [post]
 func (authController AuthController) InitialTenantRegister(c *gin.Context) {
-	var initialRegisterTenantReq client.InitialTenantRegisterRequest
+	var initialTenantRegisterReq client.InitialTenantRegisterRequest
 
-	if reqErr := c.ShouldBindJSON(&initialRegisterTenantReq); reqErr != nil {
+	if reqErr := c.ShouldBindJSON(&initialTenantRegisterReq); reqErr != nil {
 		c.Error(reqErr)
 		return
 	}
 
-	userTenantResponse, resErr := service.HandleInitialTenantRegister(&initialRegisterTenantReq, authController.Db, c)
+	userTenantRes, resErr := service.HandleInitialTenantRegister(&initialTenantRegisterReq, authController.Db, c)
 
 	if resErr != nil {
 		c.Error(resErr)
 		return
 	}
-	api.SuccessMessage(201, "Register successfully", userTenantResponse, c)
+	api.SuccessMessage(http.StatusCreated, "Initial registration successfully", userTenantRes, c)
 }
 
 
+// @Summary Completed tenant register API
+// @Accept json
+// @Produce json
+// @Param request body client.CompletedTenantRegisterRequest true "CompletedTenantRegister body"
+// @Success 200 {object} client.UserResponse
+// @Failure 400 {object} error
+// @Security BearerAuth
+// @Router /auth/register/tenant/completed [post]
 func (authController AuthController) CompletedTenantRegister(c *gin.Context) {
 	var completedTenantRegisterReq client.CompletedTenantRegisterRequest
 
@@ -69,5 +78,10 @@ func (authController AuthController) CompletedTenantRegister(c *gin.Context) {
 		return
 	}
 
-	
+	userTenantRes, err := service.HandleCompletedTenantRegister(&completedTenantRegisterReq, authController.Db, c)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	api.SuccessMessage(http.StatusOK, "Completed registration successfully", userTenantRes, c)
 }
