@@ -10,7 +10,7 @@ import (
 func MainRoutes(router *gin.Engine, db *sql.DB) {
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, api.ApiResponse {
-			Code: 200,
+			Status: 200,
 			Message: "Server alive.",
 			Data: nil,
 		})

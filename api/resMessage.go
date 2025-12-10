@@ -5,14 +5,14 @@ import (
 )
 
 type ApiResponse struct {
-	Code		int
+	Status		int
 	Message 	string
 	Data 		any
 }
 
-func SuccessMessage(code int, message string, data any, c *gin.Context) {
-	c.JSON(code, ApiResponse {
-		Code: code,
+func SuccessMessage(status int, message string, data any, c *gin.Context) {
+	c.JSON(status, ApiResponse {
+		Status: status,
 		Message: message,
 		Data: data,
 	})
