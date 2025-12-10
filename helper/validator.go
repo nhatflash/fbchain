@@ -5,15 +5,17 @@ import (
 	"regexp"
 )
 
-const PHONE_PATTERN string = "^(0|\\+84|84)?(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-9]|9[0-9])[0-9]{7}$"
-const IDENTITY_PATTERN string = "^0[0-9]{11}$"
-const NAME_PATTERN string = "^[a-zA-ZàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ\\s]+$"
+const (
+	PhonePattern string = "^(0|\\+84|84)?(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-9]|9[0-9])[0-9]{7}$"
+	IdentityPattern string = "^0[0-9]{11}$"
+	NamePattern string = "^[a-zA-ZàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ\\s]+$"
+)
 
 
 var PhoneNumberValidator validator.Func = func(fl validator.FieldLevel) bool {
 	phone, ok := fl.Field().Interface().(string)
 	if ok {
-		_, err := regexp.MatchString(PHONE_PATTERN, phone)
+		_, err := regexp.MatchString(PhonePattern, phone)
 		if err != nil {
 			return false
 		}
@@ -24,7 +26,7 @@ var PhoneNumberValidator validator.Func = func(fl validator.FieldLevel) bool {
 var IdentityNumberValidator validator.Func = func(fl validator.FieldLevel) bool {
 	identity, ok := fl.Field().Interface().(string)
 	if ok {
-		_, err := regexp.MatchString(IDENTITY_PATTERN, identity)
+		_, err := regexp.MatchString(IdentityPattern, identity)
 		if err != nil {
 			return false
 		}
@@ -35,7 +37,7 @@ var IdentityNumberValidator validator.Func = func(fl validator.FieldLevel) bool 
 var NameValidator validator.Func = func(fl validator.FieldLevel) bool {
 	name, ok := fl.Field().Interface().(string)
 	if ok {
-		_, err := regexp.MatchString(NAME_PATTERN, name)
+		_, err := regexp.MatchString(NamePattern, name)
 		if err != nil {
 			return false
 		}

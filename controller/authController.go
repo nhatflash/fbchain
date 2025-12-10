@@ -15,12 +15,12 @@ type AuthController struct {
 }
 
 func (authController AuthController) Login(c *gin.Context) {
-	var loginRequest client.LoginRequest
-	if reqErr := c.ShouldBindJSON(&loginRequest); reqErr != nil {
-		c.Error(appError.BadRequestError("Validation failed."))
+	var signInRequest client.SignInRequest
+	if reqErr := c.ShouldBindJSON(&signInRequest); reqErr != nil {
+		c.Error(appError.BadRequestError("Validation failed on fields: " + reqErr.Error()))
 		return
 	}
-	signInResponse, logErr := service.HandleLogin(&loginRequest, authController.Db, c)
+	signInResponse, logErr := service.HandleSignIn(&signInRequest, authController.Db, c)
 	if logErr != nil {
 		c.Error(logErr)
 		return
@@ -34,7 +34,7 @@ func (authController AuthController) InitializedTenantRegister(c *gin.Context) {
 	var registerTenantRequest client.InitializedTenantRegisterRequest
 
 	if reqErr := c.ShouldBindJSON(&registerTenantRequest); reqErr != nil {
-		c.Error(appError.BadRequestError("Validation failed."))
+		c.Error(appError.BadRequestError("Validation failed on fields: " + reqErr.Error()))
 		return
 	}
 

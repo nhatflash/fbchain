@@ -4,7 +4,7 @@ import (
 	"github.com/nhatflash/fbchain/enum"
 )
 
-type LoginRequest struct {
+type SignInRequest struct {
 	Login			string				`json:"login" binding:"required"`
 	Password		string				`json:"password" binding:"required"`
 }

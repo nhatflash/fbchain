@@ -10,18 +10,39 @@ import (
 	appError "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/security"
 	"time"
+	"strings"
+	"github.com/nhatflash/fbchain/model"
 )
 
-func HandleLogin(loginReq *client.LoginRequest, db *sql.DB, c *gin.Context) (*client.SignInResponse, error) {
-	user, userErr := repository.GetSignInUser(loginReq.Login, loginReq.Password, db)
-	if userErr != nil {
-		return nil, userErr
+
+// Sign in method
+func HandleSignIn(signInReq *client.SignInRequest, db *sql.DB, c *gin.Context) (*client.SignInResponse, error) {
+	login := signInReq.Login
+
+	var loggedUser *model.User
+	if strings.Contains(login, "@") {
+		user, userErr := repository.GetUserByEmail(signInReq.Login, db)
+		if userErr != nil {
+			return nil, appError.UnauthorizedError("Invalid credentials.")
+		}
+		loggedUser = user
+	} else {
+		user, userErr := repository.GetUserByPhone(signInReq.Login, db)
+		if userErr != nil {
+			return nil, appError.UnauthorizedError("Invalid credentials.")
+		}
+		loggedUser = user
 	}
-	accessToken, accessErr := security.GenerateJwtAccessToken(user)
+
+	if !security.VerifyPassword(signInReq.Password, loggedUser.Password) {
+		return nil, appError.UnauthorizedError("Invalid credentials.")
+	}
+	
+	accessToken, accessErr := security.GenerateJwtAccessToken(loggedUser)
 	if accessErr != nil {
 		return nil, accessErr
 	}
-	refreshToken, refreshErr := security.GenerateJwtRefreshToken(user)
+	refreshToken, refreshErr := security.GenerateJwtRefreshToken(loggedUser)
 	if refreshErr != nil {
 		return nil, refreshErr
 	}
@@ -33,6 +54,9 @@ func HandleLogin(loginReq *client.LoginRequest, db *sql.DB, c *gin.Context) (*cl
 	return res, nil
 }
 
+
+
+// intialized sign up method for tenant
 func HandleInitializedTenantRegister(registerTenantReq *client.InitializedTenantRegisterRequest, db *sql.DB, c *gin.Context) (*client.UserResponse, error) {
 	email := registerTenantReq.Email
 	firstName := registerTenantReq.FirstName
@@ -52,7 +76,11 @@ func HandleInitializedTenantRegister(registerTenantReq *client.InitializedTenant
 	if dateErr != nil {
 		return nil, errors.New(dateErr.Error())
 	}
-	newTenant, dbErr := repository.RegisterTenant(email, firstName, lastName, password, &gender, birthdate, db)
+	hashedPassword, hashErr := security.GenerateHashedPassword(password)
+	if hashErr != nil {
+		return nil, appError.InternalError("An unexpected error when creating hash password")
+	}
+	newTenant, dbErr := repository.RegisterTenant(email, firstName, lastName, hashedPassword, &gender, birthdate, db)
 	if dbErr != nil {
 		return nil, dbErr
 	}
