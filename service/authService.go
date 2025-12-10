@@ -57,14 +57,14 @@ func HandleSignIn(signInReq *client.SignInRequest, db *sql.DB, c *gin.Context) (
 
 
 // intialized sign up method for tenant
-func HandleInitialTenantRegister(registerTenantReq *client.InitialTenantRegisterRequest, db *sql.DB, c *gin.Context) (*client.UserResponse, error) {
-	email := registerTenantReq.Email
-	firstName := registerTenantReq.FirstName
-	lastName := registerTenantReq.LastName
-	password := registerTenantReq.Password
-	confirmPassword := registerTenantReq.ConfirmPassword
-	gender := registerTenantReq.Gender
-	birthdateStr := registerTenantReq.Birthdate
+func HandleInitialTenantRegister(initialTenantRegisterReq *client.InitialTenantRegisterRequest, db *sql.DB, c *gin.Context) (*client.UserResponse, error) {
+	email := initialTenantRegisterReq.Email
+	firstName := initialTenantRegisterReq.FirstName
+	lastName := initialTenantRegisterReq.LastName
+	password := initialTenantRegisterReq.Password
+	confirmPassword := initialTenantRegisterReq.ConfirmPassword
+	gender := initialTenantRegisterReq.Gender
+	birthdateStr := initialTenantRegisterReq.Birthdate
 
 	if repository.CheckUserEmailExists(email, db) {
 		return nil, appError.BadRequestError("User with this email already exists.")
@@ -85,4 +85,9 @@ func HandleInitialTenantRegister(registerTenantReq *client.InitialTenantRegister
 		return nil, dbErr
 	}
 	return helper.MapToUserResponse(newTenant), nil
+}
+
+
+func HandleCompletedTenantRegister(completedTenantRegisterReq *client.CompletedTenantRegisterRequest, db *sql.DB, c *gin.Context) (*client.UserResponse, error) {
+	return nil, nil
 }

@@ -44,18 +44,30 @@ func (authController AuthController) SignIn(c *gin.Context) {
 // @Failure 400 {object} error
 // @Router /auth/register/tenant/initial [post]
 func (authController AuthController) InitialTenantRegister(c *gin.Context) {
-	var registerTenantRequest client.InitialTenantRegisterRequest
+	var initialRegisterTenantReq client.InitialTenantRegisterRequest
 
-	if reqErr := c.ShouldBindJSON(&registerTenantRequest); reqErr != nil {
+	if reqErr := c.ShouldBindJSON(&initialRegisterTenantReq); reqErr != nil {
 		c.Error(reqErr)
 		return
 	}
 
-	userTenantResponse, resErr := service.HandleInitialTenantRegister(&registerTenantRequest, authController.Db, c)
+	userTenantResponse, resErr := service.HandleInitialTenantRegister(&initialRegisterTenantReq, authController.Db, c)
 
 	if resErr != nil {
 		c.Error(resErr)
 		return
 	}
 	api.SuccessMessage(201, "Register successfully", userTenantResponse, c)
+}
+
+
+func (authController AuthController) CompletedTenantRegister(c *gin.Context) {
+	var completedTenantRegisterReq client.CompletedTenantRegisterRequest
+
+	if reqErr := c.ShouldBindJSON(&completedTenantRegisterReq); reqErr != nil {
+		c.Error(reqErr)
+		return
+	}
+
+	
 }
