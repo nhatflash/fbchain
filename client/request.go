@@ -9,7 +9,7 @@ type SignInRequest struct {
 	Password		string				`json:"password" binding:"required"`
 }
 
-type InitializedTenantRegisterRequest struct {
+type InitialTenantRegisterRequest struct {
 	FirstName		string				`json:"firstName" binding:"required,name"`
 	LastName		string				`json:"lastName" binding:"required,name"`
 	Email			string 				`json:"email" binding:"required,email"`

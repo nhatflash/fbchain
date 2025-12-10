@@ -2,7 +2,7 @@ package routes
 
 import (
 	"database/sql"
-
+	_ "github.com/nhatflash/fbchain/docs"
 	"github.com/gin-gonic/gin"
 	api "github.com/nhatflash/fbchain/api"
 )

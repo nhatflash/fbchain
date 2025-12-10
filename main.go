@@ -12,16 +12,24 @@ import (
 	"github.com/nhatflash/fbchain/middleware"
 	"github.com/nhatflash/fbchain/routes"
 	"github.com/nhatflash/fbchain/helper"
+	ginSwg "github.com/swaggo/gin-swagger"
+	swgFiles "github.com/swaggo/files"
+	_ "github.com/nhatflash/fbchain/docs"
 )
 
+// @title FB Chain Management API
+// @version 1.0
+// @description API Documentation for FB Chain Management API - Developed by Ducking Team
+// @host localhost:8080
+// @BasePath /api
 func main() {
 	envErr := env.Load(".env")
 	if envErr != nil {
 		log.Fatalln("Error loading .env file")
 		return;
 	}
-	router := gin.Default()
-	router.Use(middleware.ErrorHandler())
+	r := gin.Default()
+	r.Use(middleware.ErrorHandler())
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		_ = v.RegisterValidation("phone", helper.PhoneNumberValidator)
@@ -30,9 +38,9 @@ func main() {
 		_ = v.RegisterValidation("postalcode", helper.PostalCodeValidator)
 	}
 
-	serverPort := os.Getenv("PORT")
-	if serverPort == "" {
-		serverPort = ":8080"
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = ":8080"
 	}
 
 	db, dbErr := pg.HandleConnection()
@@ -43,7 +51,8 @@ func main() {
 
 	defer db.Close()
 
-	routes.MainRoutes(router, db)
+	routes.MainRoutes(r, db)
+	r.GET("/swagger/*any", ginSwg.WrapHandler(swgFiles.Handler))
 
-	router.Run(serverPort)
+	r.Run(port)
 }

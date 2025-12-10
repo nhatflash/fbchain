@@ -57,7 +57,7 @@ func HandleSignIn(signInReq *client.SignInRequest, db *sql.DB, c *gin.Context) (
 
 
 // intialized sign up method for tenant
-func HandleInitializedTenantRegister(registerTenantReq *client.InitializedTenantRegisterRequest, db *sql.DB, c *gin.Context) (*client.UserResponse, error) {
+func HandleInitialTenantRegister(registerTenantReq *client.InitialTenantRegisterRequest, db *sql.DB, c *gin.Context) (*client.UserResponse, error) {
 	email := registerTenantReq.Email
 	firstName := registerTenantReq.FirstName
 	lastName := registerTenantReq.LastName

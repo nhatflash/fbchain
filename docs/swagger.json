@@ -1,0 +1,250 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API Documentation for FB Chain Management API - Developed by Ducking Team",
+        "title": "FB Chain Management API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api",
+    "paths": {
+        "/auth/login": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Sign in API",
+                "parameters": [
+                    {
+                        "description": "SignIn",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.SignInRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/client.SignInResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/error.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register/tenant/initial": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Intial tenant sign up API",
+                "parameters": [
+                    {
+                        "description": "InitialTenantRegister body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.InitialTenantRegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/client.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/error.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "client.InitialTenantRegisterRequest": {
+            "type": "object",
+            "required": [
+                "birthdate",
+                "confirmPassword",
+                "email",
+                "firstName",
+                "gender",
+                "lastName",
+                "password"
+            ],
+            "properties": {
+                "birthdate": {
+                    "type": "string"
+                },
+                "confirmPassword": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "$ref": "#/definitions/enum.Gender"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "client.SignInRequest": {
+            "type": "object",
+            "required": [
+                "login",
+                "password"
+            ],
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "client.SignInResponse": {
+            "type": "object",
+            "properties": {
+                "accessToken": {
+                    "type": "string"
+                },
+                "lastLogin": {
+                    "type": "string"
+                },
+                "refreshToken": {
+                    "type": "string"
+                }
+            }
+        },
+        "client.UserResponse": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "birthdate": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "$ref": "#/definitions/enum.Gender"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "identity": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "postalCode": {
+                    "type": "string"
+                },
+                "profileImage": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/enum.Role"
+                },
+                "status": {
+                    "$ref": "#/definitions/enum.UserStatus"
+                }
+            }
+        },
+        "enum.Gender": {
+            "type": "string",
+            "enum": [
+                "MALE",
+                "FEMALE"
+            ],
+            "x-enum-varnames": [
+                "MALE",
+                "FEMALE"
+            ]
+        },
+        "enum.Role": {
+            "type": "string",
+            "enum": [
+                "ADMIN",
+                "MANAGER",
+                "STAFF",
+                "TENANT"
+            ],
+            "x-enum-varnames": [
+                "ADMIN",
+                "MANAGER",
+                "STAFF",
+                "TENANT"
+            ]
+        },
+        "enum.UserStatus": {
+            "type": "string",
+            "enum": [
+                "ACTIVE",
+                "INACTIVE",
+                "PENDING",
+                "LOCKED",
+                "DELETED"
+            ],
+            "x-enum-varnames": [
+                "ACTIVE",
+                "INACTIVE",
+                "PENDING",
+                "LOCKED",
+                "DELETED"
+            ]
+        },
+        "error.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {},
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

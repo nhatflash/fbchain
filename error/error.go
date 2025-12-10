@@ -13,9 +13,9 @@ var ErrForbidden = errors.New("FORBIDDEN")
 
 
 type ErrorResponse struct {
-	Status		int				
-	Code		error			
-	Message		string			
+	Status		int				`json:"status"`
+	Code		error			`json:"code"`
+	Message		string			`json:"message"`
 }
 
 

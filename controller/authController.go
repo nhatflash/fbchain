@@ -8,13 +8,21 @@ import (
 	"github.com/nhatflash/fbchain/client"
 	"github.com/nhatflash/fbchain/service"
 	"net/http"
+	_ "github.com/nhatflash/fbchain/docs"
 )
 
 type AuthController struct {
 	Db   *sql.DB
 }
 
-func (authController AuthController) Login(c *gin.Context) {
+// @Summary Sign in API
+// @Accept json
+// @Produce json
+// @Param request body client.SignInRequest true "SignIn" body
+// @Success 200 {object} client.SignInResponse
+// @Failure 400 {object} appError.ErrorResponse
+// @Router /auth/login [post]
+func (authController AuthController) SignIn(c *gin.Context) {
 	var signInRequest client.SignInRequest
 	if reqErr := c.ShouldBindJSON(&signInRequest); reqErr != nil {
 		c.Error(appError.BadRequestError("Validation failed on fields: " + reqErr.Error()))
@@ -29,16 +37,22 @@ func (authController AuthController) Login(c *gin.Context) {
 }
 
 
-
-func (authController AuthController) InitializedTenantRegister(c *gin.Context) {
-	var registerTenantRequest client.InitializedTenantRegisterRequest
+// @Summary Intial tenant sign up API
+// @Accept json
+// @Produce json
+// @Param request body client.InitialTenantRegisterRequest true "InitialTenantRegister body"
+// @Success 201 {object} client.UserResponse
+// @Failure 400 {object} appError.ErrorResponse
+// @Router /auth/register/tenant/initial [post]
+func (authController AuthController) InitialTenantRegister(c *gin.Context) {
+	var registerTenantRequest client.InitialTenantRegisterRequest
 
 	if reqErr := c.ShouldBindJSON(&registerTenantRequest); reqErr != nil {
 		c.Error(appError.BadRequestError("Validation failed on fields: " + reqErr.Error()))
 		return
 	}
 
-	userTenantResponse, resErr := service.HandleInitializedTenantRegister(&registerTenantRequest, authController.Db, c)
+	userTenantResponse, resErr := service.HandleInitialTenantRegister(&registerTenantRequest, authController.Db, c)
 
 	if resErr != nil {
 		c.Error(resErr)
