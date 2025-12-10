@@ -5,9 +5,9 @@ import (
 )
 
 type ApiResponse struct {
-	Status		int
-	Message 	string
-	Data 		any
+	Status		int				`json:"status"`
+	Message 	string			`json:"message"`
+	Data 		any				`json:"data"`
 }
 
 func SuccessMessage(status int, message string, data any, c *gin.Context) {

@@ -11,7 +11,7 @@ func AuthRoutes(router *gin.Engine, prefix string, db *sql.DB) {
 	authController := controller.AuthController{
 		Db : db,
 	}
-	auth := router.Group(prefix, nil);
+	auth := router.Group(prefix);
 	auth.POST("/login", authController.Login)
-	auth.POST("/register", authController.RegisterTenant)
+	auth.POST("/register/tenant/initial", authController.InitializedTenantRegister)
 }

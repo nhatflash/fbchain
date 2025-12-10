@@ -1,20 +1,20 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"os"
 	"github.com/gin-gonic/gin"
-	routes "github.com/nhatflash/fbchain/routes"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
+	env "github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	pg "github.com/nhatflash/fbchain/database"
-	"os"
-	"log"
-	env "github.com/joho/godotenv"
 	"github.com/nhatflash/fbchain/middleware"
+	"github.com/nhatflash/fbchain/routes"
+	"github.com/nhatflash/fbchain/helper"
 )
 
 func main() {
-	fmt.Println("Starting project...")
-
 	envErr := env.Load(".env")
 	if envErr != nil {
 		log.Fatalln("Error loading .env file")
@@ -22,6 +22,13 @@ func main() {
 	}
 	router := gin.Default()
 	router.Use(middleware.ErrorHandler())
+
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		_ = v.RegisterValidation("phone", helper.PhoneNumberValidator)
+		_ = v.RegisterValidation("identity", helper.IdentityNumberValidator)
+		_ = v.RegisterValidation("name", helper.NameValidator)
+		_ = v.RegisterValidation("postalcode", helper.PostalCodeValidator)
+	}
 
 	serverPort := os.Getenv("PORT")
 	if serverPort == "" {

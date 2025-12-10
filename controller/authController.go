@@ -16,30 +16,29 @@ type AuthController struct {
 
 func (authController AuthController) Login(c *gin.Context) {
 	var loginRequest client.LoginRequest
-
 	if reqErr := c.ShouldBindJSON(&loginRequest); reqErr != nil {
 		c.Error(appError.BadRequestError("Validation failed."))
 		return
 	}
-	userEmail, logErr := service.HandleLogin(&loginRequest, authController.Db, c)
+	signInResponse, logErr := service.HandleLogin(&loginRequest, authController.Db, c)
 	if logErr != nil {
 		c.Error(logErr)
 		return
 	}
-	api.SuccessMessage(http.StatusOK, "Login successfully", userEmail, c)
+	api.SuccessMessage(http.StatusOK, "Login successfully", signInResponse, c)
 }
 
 
 
-func (authController AuthController) RegisterTenant(c *gin.Context) {
-	var registerTenantRequest client.RegisterTenantRequest
+func (authController AuthController) InitializedTenantRegister(c *gin.Context) {
+	var registerTenantRequest client.InitializedTenantRegisterRequest
 
 	if reqErr := c.ShouldBindJSON(&registerTenantRequest); reqErr != nil {
 		c.Error(appError.BadRequestError("Validation failed."))
 		return
 	}
 
-	userTenantResponse, resErr := service.HandleRegisterTenant(&registerTenantRequest, authController.Db, c)
+	userTenantResponse, resErr := service.HandleInitializedTenantRegister(&registerTenantRequest, authController.Db, c)
 
 	if resErr != nil {
 		c.Error(resErr)

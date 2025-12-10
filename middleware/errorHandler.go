@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+
 	"github.com/gin-gonic/gin"
 	appError "github.com/nhatflash/fbchain/error"
 )

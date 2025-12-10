@@ -8,17 +8,32 @@ import (
 	"github.com/nhatflash/fbchain/repository"
 	"github.com/nhatflash/fbchain/helper"
 	appError "github.com/nhatflash/fbchain/error"
+	"github.com/nhatflash/fbchain/security"
+	"time"
 )
 
-func HandleLogin(loginReq *client.LoginRequest, db *sql.DB, c *gin.Context) (string, error) {
+func HandleLogin(loginReq *client.LoginRequest, db *sql.DB, c *gin.Context) (*client.SignInResponse, error) {
 	user, userErr := repository.GetSignInUser(loginReq.Login, loginReq.Password, db)
 	if userErr != nil {
-		return "", userErr
+		return nil, userErr
 	}
-	return user.Email, nil
+	accessToken, accessErr := security.GenerateJwtAccessToken(user)
+	if accessErr != nil {
+		return nil, accessErr
+	}
+	refreshToken, refreshErr := security.GenerateJwtRefreshToken(user)
+	if refreshErr != nil {
+		return nil, refreshErr
+	}
+	res := &client.SignInResponse{
+		AccessToken: accessToken,
+		RefreshToken: refreshToken,
+		LastLogin: time.Now(),
+	}
+	return res, nil
 }
 
-func HandleRegisterTenant(registerTenantReq *client.RegisterTenantRequest, db *sql.DB, c *gin.Context) (*client.UserResponse, error) {
+func HandleInitializedTenantRegister(registerTenantReq *client.InitializedTenantRegisterRequest, db *sql.DB, c *gin.Context) (*client.UserResponse, error) {
 	email := registerTenantReq.Email
 	firstName := registerTenantReq.FirstName
 	lastName := registerTenantReq.LastName
