@@ -2,7 +2,6 @@ package repository
 
 import (
 	"database/sql"
-	"log"
 	"time"
 	appError "github.com/nhatflash/fbchain/error"
 	_ "github.com/lib/pq"
@@ -11,38 +10,32 @@ import (
 )
 
 
-func InitialRegisterTenant(email string, firstName string, lastName string, password string, gender *enum.Gender, birthdate *time.Time, db *sql.DB) (*model.User, error) {
-	
-	_, dbErr := db.Exec("INSERT INTO users (email, first_name, last_name, password, gender, birthdate, role, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", email, firstName, lastName, password, gender, birthdate, enum.TENANT, enum.PENDING)
-	if dbErr != nil {
-		return nil, appError.ErrInternal
-	}
-	newUser, userErr := GetUserByEmail(email, db)
-	if userErr != nil {
-		return nil, userErr
-	}
-	return newUser, nil
-}
-
-
-func CompletedRegisterTenant(email string, phone string, identity string, address string, postalCode string, profileImage string, db *sql.DB) (*model.User, error) {
-	_, dbErr := db.Exec("UPDATE users SET phone = $1, identity = $2, address = $3, postal_code = $4, profile_image = $5, status = $6 WHERE email = $7", phone, identity, address, postalCode, profileImage, enum.ACTIVE, email)
-	if dbErr != nil {
-		return nil, appError.ErrInternal
-	}
-
-	updatedUser, userErr := GetUserByEmail(email, db)
-	if userErr != nil {
-		return nil, userErr
-	}
-	return updatedUser, nil
-}
-
-
 func CheckUserEmailExists(email string, db *sql.DB) bool {
 	rows, err := db.Query("SELECT email FROM users WHERE email = $1 LIMIT 1", email)
 	if err != nil {
-		log.Fatalln("Error when checking email already exist in user table", err)
+		return false
+	}
+	if rows.Next() {
+		return true
+	}
+	return false
+}
+
+
+func CheckUserPhoneExists(phone string, db *sql.DB) bool {
+	rows, dbErr := db.Query("SELECT phone FROM users WHERE phone = $1 LIMIT 1", phone)
+	if dbErr != nil {
+		return false
+	}
+	if rows.Next() {
+		return true
+	}
+	return false
+}
+
+func CheckUserIdentityExists(identity string, db *sql.DB) bool {
+	rows, dbErr := db.Query("SELECT identity FROM users WHERE identity = $1 LIMIT 1", identity)
+	if dbErr != nil {
 		return false
 	}
 	if rows.Next() {
@@ -90,4 +83,17 @@ func GetUserByPhone(phone string, db *sql.DB) (*model.User, error) {
 		return nil, appError.ErrNotFound
 	} 
 	return &users[0], nil
+}
+
+
+func CreateTenantUser(firstName string, lastName string, email string, password string, birthdate *time.Time, gender *enum.Gender, phone string, identity string, address string, postalCode string, profileImage string, db *sql.DB) (*model.User, error) {
+	_, insertErr := db.Exec("INSERT INTO users (email, password, role, phone, identity, first_name, last_name, gender, birthdate, postal_code, address, profile_image, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)", email, password, enum.TENANT, phone, identity, firstName, lastName, gender, birthdate, postalCode, address, profileImage, enum.ACTIVE);
+	if insertErr != nil {
+		return nil, insertErr
+	}
+	tenantUser, err := GetUserByEmail(email, db)
+	if err != nil {
+		return nil, err
+	}
+	return tenantUser, nil
 }

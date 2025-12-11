@@ -7,11 +7,11 @@ import (
 	"github.com/nhatflash/fbchain/model"
 )
 
-func CompleteMissingFieldTenantRegistration(code string, description string, tenantType *enum.TenantType, userId int64, db *sql.DB) (*model.Tenant, error) {
+func CreateTenantInformation(code string, description string, tenantType *enum.TenantType, userId int64, db *sql.DB) (*model.Tenant, error) {
 
-	_, dbErr := db.Exec("INSERT INTO tenants (code, description, type, user_id) VALUES ($1, $2, $3, $4)", code, description, tenantType, userId)
-	if dbErr != nil {
-		return nil, dbErr
+	_, insertErr := db.Exec("INSERT INTO tenants (code, description, type, user_id) VALUES ($1, $2, $3, $4)", code, description, tenantType, userId)
+	if insertErr != nil {
+		return nil, insertErr
 	}
 	tenant, err := GetTenantByCode(code, db)
 	if err != nil {

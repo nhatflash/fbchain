@@ -7,6 +7,53 @@ import (
 
 
 func MapToUserResponse(u *model.User) *client.UserResponse {
+	phone, identity, postalCode, address, profileImage := getUserDataIfSqlNullString(u)
+	userRes := client.UserResponse{
+		Id: u.Id,
+		Email: u.Email,
+		Role: u.Role,
+		Phone: phone,
+		Identity: identity,
+		FirstName: u.FirstName,
+		LastName: u.LastName,
+		Gender: u.Gender,
+		Birthdate: u.Birthdate,
+		PostalCode: postalCode,
+		Address: address,
+		ProfileImage: profileImage,
+		Status: u.Status,
+	}
+	return &userRes
+}
+
+
+func MapToTenantResponse(u *model.User, t *model.Tenant) *client.TenantResponse {
+	phone, identity, postalCode, address, profileImage := getUserDataIfSqlNullString(u)
+	description, notes := getTenantDataIfSqlNullString(t)
+
+	tenantRes := client.TenantResponse{
+		UserId: u.Id,
+		Email: u.Email,
+		Phone: phone,
+		Identity: identity,
+		FirstName: u.FirstName,
+		LastName: u.LastName,
+		Gender: u.Gender,
+		Birthdate: u.Birthdate,
+		PostalCode: postalCode,
+		Address: address,
+		ProfileImage: profileImage,
+		Code: t.Code,
+		Description: description,
+		Type: t.Type,
+		Notes: notes,
+		Status: u.Status,
+	}
+	return &tenantRes
+}
+
+
+func getUserDataIfSqlNullString(u *model.User) (string, string, string, string, string) {
 	phone := ""
 	identity := ""
 	postalCode := ""
@@ -27,20 +74,18 @@ func MapToUserResponse(u *model.User) *client.UserResponse {
 	if u.PostalCode.Valid {
 		postalCode = u.PostalCode.String
 	}
-	userRes := client.UserResponse{
-		Id: u.Id,
-		Email: u.Email,
-		Role: u.Role,
-		Phone: phone,
-		Identity: identity,
-		FirstName: u.FirstName,
-		LastName: u.LastName,
-		Gender: u.Gender,
-		Birthdate: u.Birthdate,
-		PostalCode: postalCode,
-		Address: address,
-		ProfileImage: profileImage,
-		Status: u.Status,
+	return phone, identity, postalCode, address, profileImage
+}
+
+
+func getTenantDataIfSqlNullString(t *model.Tenant) (string, string) {
+	description := ""
+	notes := ""
+	if t.Description.Valid {
+		description = t.Description.String
 	}
-	return &userRes
+	if t.Notes.Valid {
+		notes = t.Notes.String
+	}
+	return description, notes
 }

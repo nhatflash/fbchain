@@ -1,52 +1,5 @@
 basePath: /api
 definitions:
-  client.CompletedTenantRegisterRequest:
-    properties:
-      address:
-        type: string
-      description:
-        type: string
-      identity:
-        type: string
-      phone:
-        type: string
-      postalCode:
-        type: string
-      profileImage:
-        type: string
-      type:
-        $ref: '#/definitions/enum.TenantType'
-    required:
-    - address
-    - identity
-    - phone
-    - postalCode
-    type: object
-  client.InitialTenantRegisterRequest:
-    properties:
-      birthdate:
-        type: string
-      confirmPassword:
-        type: string
-      email:
-        type: string
-      firstName:
-        type: string
-      gender:
-        $ref: '#/definitions/enum.Gender'
-      lastName:
-        type: string
-      password:
-        type: string
-    required:
-    - birthdate
-    - confirmPassword
-    - email
-    - firstName
-    - gender
-    - lastName
-    - password
-    type: object
   client.SignInRequest:
     properties:
       login:
@@ -66,11 +19,15 @@ definitions:
       refreshToken:
         type: string
     type: object
-  client.UserResponse:
+  client.TenantResponse:
     properties:
       address:
         type: string
       birthdate:
+        type: string
+      code:
+        type: string
+      description:
         type: string
       email:
         type: string
@@ -78,11 +35,11 @@ definitions:
         type: string
       gender:
         $ref: '#/definitions/enum.Gender'
-      id:
-        type: integer
       identity:
         type: string
       lastName:
+        type: string
+      notes:
         type: string
       phone:
         type: string
@@ -90,10 +47,56 @@ definitions:
         type: string
       profileImage:
         type: string
-      role:
-        $ref: '#/definitions/enum.Role'
       status:
         $ref: '#/definitions/enum.UserStatus'
+      type:
+        $ref: '#/definitions/enum.TenantType'
+      userId:
+        type: integer
+    type: object
+  client.TenantSignUpRequest:
+    properties:
+      address:
+        type: string
+      birthdate:
+        type: string
+      confirmPassword:
+        type: string
+      description:
+        type: string
+      email:
+        type: string
+      firstName:
+        type: string
+      gender:
+        $ref: '#/definitions/enum.Gender'
+      identity:
+        type: string
+      lastName:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      postalCode:
+        type: string
+      profileImage:
+        type: string
+      type:
+        $ref: '#/definitions/enum.TenantType'
+    required:
+    - address
+    - birthdate
+    - confirmPassword
+    - email
+    - firstName
+    - gender
+    - identity
+    - lastName
+    - password
+    - phone
+    - postalCode
+    - type
     type: object
   enum.Gender:
     enum:
@@ -103,18 +106,6 @@ definitions:
     x-enum-varnames:
     - MALE
     - FEMALE
-  enum.Role:
-    enum:
-    - ADMIN
-    - MANAGER
-    - STAFF
-    - TENANT
-    type: string
-    x-enum-varnames:
-    - ADMIN
-    - MANAGER
-    - STAFF
-    - TENANT
   enum.TenantType:
     enum:
     - PERSONAL
@@ -155,7 +146,7 @@ paths:
     get:
       responses: {}
       summary: Ping
-  /auth/login:
+  /auth/signin:
     post:
       consumes:
       - application/json
@@ -177,52 +168,28 @@ paths:
           description: Bad Request
           schema: {}
       summary: Sign in API
-  /auth/register/tenant/completed:
+  /auth/signup/tenant:
     post:
       consumes:
       - application/json
       parameters:
-      - description: CompletedTenantRegister body
+      - description: TenantSignUp body
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/client.CompletedTenantRegisterRequest'
+          $ref: '#/definitions/client.TenantSignUpRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/client.UserResponse'
+            $ref: '#/definitions/client.TenantResponse'
         "400":
           description: Bad Request
           schema: {}
-      security:
-      - BearerAuth: []
-      summary: Completed tenant register API
-  /auth/register/tenant/initial:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: InitialTenantRegister body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/client.InitialTenantRegisterRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/client.UserResponse'
-        "400":
-          description: Bad Request
-          schema: {}
-      summary: Intial tenant sign up API
+      summary: Tenant sign up API
 securityDefinitions:
   BearerAuth:
     in: header

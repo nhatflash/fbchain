@@ -28,3 +28,20 @@ type CompletedTenantRegisterRequest struct {
 	Description		string				`json:"description"`
 	Type			*enum.TenantType	`json:"type"`
 }
+
+type TenantSignUpRequest struct {
+	FirstName		string				`json:"firstName" binding:"required,name"`
+	LastName		string				`json:"lastName" binding:"required,name"`
+	Email			string 				`json:"email" binding:"required,email"`
+	Password 		string				`json:"password" binding:"required"`
+	ConfirmPassword	string				`json:"confirmPassword" binding:"required"`
+	Birthdate		string				`json:"birthdate" binding:"required"`
+	Gender			*enum.Gender		`json:"gender" binding:"required"`
+	Phone 			string				`json:"phone" binding:"required,phone"`
+	Identity		string 				`json:"identity" binding:"required,identity"`
+	Address			string				`json:"address" binding:"required"`
+	PostalCode		string				`json:"postalCode" binding:"required,postalcode"`
+	ProfileImage	string				`json:"profileImage"`
+	Description		string				`json:"description"`
+	Type			*enum.TenantType	`json:"type" binding:"required"`
+}

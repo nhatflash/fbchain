@@ -21,7 +21,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/auth/login": {
+        "/auth/signin": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -55,28 +55,23 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/register/tenant/completed": {
+        "/auth/signup/tenant": {
             "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Completed tenant register API",
+                "summary": "Tenant sign up API",
                 "parameters": [
                     {
-                        "description": "CompletedTenantRegister body",
+                        "description": "TenantSignUp body",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/client.CompletedTenantRegisterRequest"
+                            "$ref": "#/definitions/client.TenantSignUpRequest"
                         }
                     }
                 ],
@@ -84,41 +79,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/client.UserResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/auth/register/tenant/initial": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Intial tenant sign up API",
-                "parameters": [
-                    {
-                        "description": "InitialTenantRegister body",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/client.InitialTenantRegisterRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/client.UserResponse"
+                            "$ref": "#/definitions/client.TenantResponse"
                         }
                     },
                     "400": {
@@ -130,73 +91,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "client.CompletedTenantRegisterRequest": {
-            "type": "object",
-            "required": [
-                "address",
-                "identity",
-                "phone",
-                "postalCode"
-            ],
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "identity": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "postalCode": {
-                    "type": "string"
-                },
-                "profileImage": {
-                    "type": "string"
-                },
-                "type": {
-                    "$ref": "#/definitions/enum.TenantType"
-                }
-            }
-        },
-        "client.InitialTenantRegisterRequest": {
-            "type": "object",
-            "required": [
-                "birthdate",
-                "confirmPassword",
-                "email",
-                "firstName",
-                "gender",
-                "lastName",
-                "password"
-            ],
-            "properties": {
-                "birthdate": {
-                    "type": "string"
-                },
-                "confirmPassword": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "firstName": {
-                    "type": "string"
-                },
-                "gender": {
-                    "$ref": "#/definitions/enum.Gender"
-                },
-                "lastName": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
         "client.SignInRequest": {
             "type": "object",
             "required": [
@@ -226,13 +120,19 @@ const docTemplate = `{
                 }
             }
         },
-        "client.UserResponse": {
+        "client.TenantResponse": {
             "type": "object",
             "properties": {
                 "address": {
                     "type": "string"
                 },
                 "birthdate": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "description": {
                     "type": "string"
                 },
                 "email": {
@@ -244,13 +144,13 @@ const docTemplate = `{
                 "gender": {
                     "$ref": "#/definitions/enum.Gender"
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "identity": {
                     "type": "string"
                 },
                 "lastName": {
+                    "type": "string"
+                },
+                "notes": {
                     "type": "string"
                 },
                 "phone": {
@@ -262,11 +162,75 @@ const docTemplate = `{
                 "profileImage": {
                     "type": "string"
                 },
-                "role": {
-                    "$ref": "#/definitions/enum.Role"
-                },
                 "status": {
                     "$ref": "#/definitions/enum.UserStatus"
+                },
+                "type": {
+                    "$ref": "#/definitions/enum.TenantType"
+                },
+                "userId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "client.TenantSignUpRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "birthdate",
+                "confirmPassword",
+                "email",
+                "firstName",
+                "gender",
+                "identity",
+                "lastName",
+                "password",
+                "phone",
+                "postalCode",
+                "type"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "birthdate": {
+                    "type": "string"
+                },
+                "confirmPassword": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "$ref": "#/definitions/enum.Gender"
+                },
+                "identity": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "postalCode": {
+                    "type": "string"
+                },
+                "profileImage": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/enum.TenantType"
                 }
             }
         },
@@ -279,21 +243,6 @@ const docTemplate = `{
             "x-enum-varnames": [
                 "MALE",
                 "FEMALE"
-            ]
-        },
-        "enum.Role": {
-            "type": "string",
-            "enum": [
-                "ADMIN",
-                "MANAGER",
-                "STAFF",
-                "TENANT"
-            ],
-            "x-enum-varnames": [
-                "ADMIN",
-                "MANAGER",
-                "STAFF",
-                "TENANT"
             ]
         },
         "enum.TenantType": {

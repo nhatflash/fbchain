@@ -17,7 +17,7 @@ func ConvertToDate(dateStr string) (*time.Time, error) {
 	}
 	date, dateErr := time.ParseInLocation(dateFormat, dateStr, loc)
 	if dateErr != nil {
-		return nil, appError.InternalError("Error when parsing date: " + dateStr)
+		return nil, appError.BadRequestError("Error when parsing date: " + dateStr)
 	}
 	return &date, nil
 }
@@ -29,7 +29,7 @@ func ConvertToDateTime(dateTimeStr string) (*time.Time, error) {
 	}
 	dateTime, dateTimeErr := time.ParseInLocation(dateTimeFormat, dateTimeStr, loc)
 	if dateTimeErr != nil {
-		return nil, appError.InternalError("Error when parsing date time: " + dateTimeStr)
+		return nil, appError.BadRequestError("Error when parsing date time: " + dateTimeStr)
 	}
 	return &dateTime, nil
 }
@@ -42,7 +42,7 @@ func ConvertToTime(timeStr string) (*time.Time, error) {
 	}
 	time, timeErr := time.ParseInLocation(timeFormat, timeStr, loc)
 	if timeErr != nil {
-		return nil, appError.InternalError("Error when parsing time: " + timeStr)
+		return nil, appError.BadRequestError("Error when parsing time: " + timeStr)
 	}
 	return &time, nil
 }

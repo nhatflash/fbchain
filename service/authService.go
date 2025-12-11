@@ -2,7 +2,6 @@ package service
 
 import (
 	"database/sql"
-	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/client"
 	"github.com/nhatflash/fbchain/repository"
@@ -54,63 +53,64 @@ func HandleSignIn(signInReq *client.SignInRequest, db *sql.DB, c *gin.Context) (
 	return res, nil
 }
 
+// tenant sign up method
+func HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpRequest, db *sql.DB) (*client.TenantResponse, error) {
+	firstName := tenantSignUpReq.FirstName
+	lastName := tenantSignUpReq.LastName
+	email := tenantSignUpReq.Email
+	password := tenantSignUpReq.Password
+	confirmPassword := tenantSignUpReq.Password
+	birthdateStr := tenantSignUpReq.Birthdate
+	gender := tenantSignUpReq.Gender
+	phone := tenantSignUpReq.Phone
+	identity := tenantSignUpReq.Identity
+	address := tenantSignUpReq.Address
+	postalCode := tenantSignUpReq.PostalCode
+	profileImage := tenantSignUpReq.ProfileImage
+	description := tenantSignUpReq.Description
+	tenantType := tenantSignUpReq.Type
 
+	validateErr := validateSignUpRequest(email, phone, identity, password, confirmPassword, db)
 
-// intialized sign up method for tenant
-func HandleInitialTenantRegister(initialTenantRegisterReq *client.InitialTenantRegisterRequest, db *sql.DB, c *gin.Context) (*client.UserResponse, error) {
-	email := initialTenantRegisterReq.Email
-	firstName := initialTenantRegisterReq.FirstName
-	lastName := initialTenantRegisterReq.LastName
-	password := initialTenantRegisterReq.Password
-	confirmPassword := initialTenantRegisterReq.ConfirmPassword
-	gender := initialTenantRegisterReq.Gender
-	birthdateStr := initialTenantRegisterReq.Birthdate
-
-	if repository.CheckUserEmailExists(email, db) {
-		return nil, appError.BadRequestError("User with this email already exists.")
+	if validateErr != nil {
+		return nil, validateErr
 	}
-	if (password != confirmPassword) {
-		return nil, appError.BadRequestError("Confirm password does not match.")
-	}
+
 	birthdate, dateErr := helper.ConvertToDate(birthdateStr)
 	if dateErr != nil {
-		return nil, errors.New(dateErr.Error())
+		return nil, dateErr
 	}
 	hashedPassword, hashErr := security.GenerateHashedPassword(password)
 	if hashErr != nil {
 		return nil, appError.InternalError("An unexpected error when creating hash password")
 	}
-	newTenant, dbErr := repository.InitialRegisterTenant(email, firstName, lastName, hashedPassword, gender, birthdate, db)
-	if dbErr != nil {
-		return nil, dbErr
-	}
-	return helper.MapToUserResponse(newTenant), nil
-}
-
-
-// completed tenant sign up method
-func HandleCompletedTenantRegister(completedTenantRegisterReq *client.CompletedTenantRegisterRequest, db *sql.DB, c *gin.Context) (*client.UserResponse, error) {
-	currentUser, err := GetCurrentUser(c, db)
-	if err != nil {
-		return nil, err
-	}
-	phone := completedTenantRegisterReq.Phone
-	identity := completedTenantRegisterReq.Identity
-	address := completedTenantRegisterReq.Address
-	postalCode := completedTenantRegisterReq.PostalCode
-	profileImage := completedTenantRegisterReq.ProfileImage
-	description := completedTenantRegisterReq.Description
-	tenantType := completedTenantRegisterReq.Type
-
-	updatedTenantUser, updatedUserErr := repository.CompletedRegisterTenant(currentUser.Email, phone, identity, address, postalCode, profileImage, db)
-	if updatedUserErr != nil {
-		return nil, updatedUserErr
+	
+	userTenant, userErr := repository.CreateTenantUser(firstName, lastName, email, hashedPassword, birthdate, gender, phone, identity, address, postalCode, profileImage, db)
+	if userErr != nil {
+		return nil, userErr
 	}
 	code := GenerateTenantCode()
-	_, tenantErr := repository.CompleteMissingFieldTenantRegistration(code, description, tenantType, updatedTenantUser.Id, db)
+	tenant, tenantErr := repository.CreateTenantInformation(code, description, tenantType, userTenant.Id, db)
+
 	if tenantErr != nil {
 		return nil, tenantErr
 	}
+	return helper.MapToTenantResponse(userTenant, tenant), nil
+}
 
-	return helper.MapToUserResponse(updatedTenantUser), nil
+
+func validateSignUpRequest(email string, phone string, identity string, password string, confirmPassword string, db *sql.DB) error {
+	if repository.CheckUserEmailExists(email, db) {
+		return appError.BadRequestError("User with this email already exists.")
+	}
+	if repository.CheckUserPhoneExists(phone, db) {
+		return appError.BadRequestError("User with this phone already exists")
+	}
+	if repository.CheckUserIdentityExists(identity, db) {
+		return appError.BadRequestError("User with this identity already exists")
+	}
+	if password != confirmPassword {
+		return appError.BadRequestError("Confirm password does not match.")
+	}
+	return nil
 }
