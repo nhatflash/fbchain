@@ -80,7 +80,7 @@ func HandleInitialTenantRegister(initialTenantRegisterReq *client.InitialTenantR
 	if hashErr != nil {
 		return nil, appError.InternalError("An unexpected error when creating hash password")
 	}
-	newTenant, dbErr := repository.InitialRegisterTenant(email, firstName, lastName, hashedPassword, &gender, birthdate, db)
+	newTenant, dbErr := repository.InitialRegisterTenant(email, firstName, lastName, hashedPassword, gender, birthdate, db)
 	if dbErr != nil {
 		return nil, dbErr
 	}
@@ -99,11 +99,18 @@ func HandleCompletedTenantRegister(completedTenantRegisterReq *client.CompletedT
 	address := completedTenantRegisterReq.Address
 	postalCode := completedTenantRegisterReq.PostalCode
 	profileImage := completedTenantRegisterReq.ProfileImage
+	description := completedTenantRegisterReq.Description
+	tenantType := completedTenantRegisterReq.Type
 
-	updatedTenant, dbErr := repository.CompletedRegisterTenant(currentUser.Email, phone, identity, address, postalCode, profileImage, db)
-	if dbErr != nil {
-		return nil, dbErr
+	updatedTenantUser, updatedUserErr := repository.CompletedRegisterTenant(currentUser.Email, phone, identity, address, postalCode, profileImage, db)
+	if updatedUserErr != nil {
+		return nil, updatedUserErr
+	}
+	code := GenerateTenantCode()
+	_, tenantErr := repository.CompleteMissingFieldTenantRegistration(code, description, tenantType, updatedTenantUser.Id, db)
+	if tenantErr != nil {
+		return nil, tenantErr
 	}
 
-	return helper.MapToUserResponse(updatedTenant), nil
+	return helper.MapToUserResponse(updatedTenantUser), nil
 }

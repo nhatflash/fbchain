@@ -33,7 +33,6 @@ const (
 type TenantType string
 
 const (
-	FREE TenantType = "FREE"
 	PERSONAL TenantType = "PERSONAL"
 	BUSINESS TenantType = "BUSINESS"
 )

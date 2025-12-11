@@ -24,6 +24,9 @@ func MapToUserResponse(u *model.User) *client.UserResponse {
 	if u.ProfileImage.Valid {
 		profileImage = u.ProfileImage.String
 	}
+	if u.PostalCode.Valid {
+		postalCode = u.PostalCode.String
+	}
 	userRes := client.UserResponse{
 		Id: u.Id,
 		Email: u.Email,

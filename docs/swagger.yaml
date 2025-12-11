@@ -4,6 +4,8 @@ definitions:
     properties:
       address:
         type: string
+      description:
+        type: string
       identity:
         type: string
       phone:
@@ -12,6 +14,8 @@ definitions:
         type: string
       profileImage:
         type: string
+      type:
+        $ref: '#/definitions/enum.TenantType'
     required:
     - address
     - identity
@@ -111,6 +115,20 @@ definitions:
     - MANAGER
     - STAFF
     - TENANT
+  enum.TenantType:
+    enum:
+    - PERSONAL
+    - BUSINESS
+    - FOOD
+    - BEVERAGE
+    - FB
+    type: string
+    x-enum-varnames:
+    - PERSONAL
+    - BUSINESS
+    - FOOD
+    - BEVERAGE
+    - FOOD_AND_BEVERAGE
   enum.UserStatus:
     enum:
     - ACTIVE

@@ -16,7 +16,7 @@ type InitialTenantRegisterRequest struct {
 	Password 		string				`json:"password" binding:"required"`
 	ConfirmPassword	string				`json:"confirmPassword" binding:"required"`
 	Birthdate		string				`json:"birthdate" binding:"required"`
-	Gender			enum.Gender			`json:"gender" binding:"required"`	
+	Gender			*enum.Gender		`json:"gender" binding:"required"`	
 }
 
 type CompletedTenantRegisterRequest struct {
@@ -25,4 +25,6 @@ type CompletedTenantRegisterRequest struct {
 	Address			string				`json:"address" binding:"required"`
 	PostalCode		string				`json:"postalCode" binding:"required,postalcode"`
 	ProfileImage	string				`json:"profileImage"`
+	Description		string				`json:"description"`
+	Type			*enum.TenantType	`json:"type"`
 }

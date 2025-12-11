@@ -30,6 +30,7 @@ func CompletedRegisterTenant(email string, phone string, identity string, addres
 	if dbErr != nil {
 		return nil, appError.ErrInternal
 	}
+
 	updatedUser, userErr := GetUserByEmail(email, db)
 	if userErr != nil {
 		return nil, userErr

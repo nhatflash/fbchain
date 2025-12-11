@@ -142,6 +142,9 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
+                "description": {
+                    "type": "string"
+                },
                 "identity": {
                     "type": "string"
                 },
@@ -153,6 +156,9 @@ const docTemplate = `{
                 },
                 "profileImage": {
                     "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/enum.TenantType"
                 }
             }
         },
@@ -288,6 +294,23 @@ const docTemplate = `{
                 "MANAGER",
                 "STAFF",
                 "TENANT"
+            ]
+        },
+        "enum.TenantType": {
+            "type": "string",
+            "enum": [
+                "PERSONAL",
+                "BUSINESS",
+                "FOOD",
+                "BEVERAGE",
+                "FB"
+            ],
+            "x-enum-varnames": [
+                "PERSONAL",
+                "BUSINESS",
+                "FOOD",
+                "BEVERAGE",
+                "FOOD_AND_BEVERAGE"
             ]
         },
         "enum.UserStatus": {
