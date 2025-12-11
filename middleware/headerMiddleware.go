@@ -32,7 +32,7 @@ func FilterConfigurer(allowedOrigins ...string) gin.HandlerFunc {
 			return
 		}
 		
-		c.Header("X-Frame-Options", "DENY")
+		c.Header("X-Frame-Options", "SAMEORIGIN")
 		c.Header("X-Content-Type-Options", "nosniff")
 		c.Header("X-XSS-Protection", "1; mode=block")
 		c.Header("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
