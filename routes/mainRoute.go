@@ -2,10 +2,12 @@ package routes
 
 import (
 	"database/sql"
-	_ "github.com/nhatflash/fbchain/docs"
+	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/api"
-	"net/http"
+	_ "github.com/nhatflash/fbchain/docs"
 )
 
 func MainRoutes(r *gin.Engine, db *sql.DB) {
@@ -17,6 +19,7 @@ func MainRoutes(r *gin.Engine, db *sql.DB) {
 // @Summary Ping
 // @Router / [get]
 func Ping(c *gin.Context) {
+	fmt.Printf("Client IP: %s\n", c.ClientIP())
 	c.JSON(http.StatusOK, api.ApiResponse {
 		Status: http.StatusOK,
 		Message: "Server alive.",

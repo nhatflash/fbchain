@@ -9,11 +9,11 @@ import (
 )
 
 
-func AuthRoutes(router *gin.Engine, prefix string, db *sql.DB) {
+func AuthRoutes(r *gin.Engine, prefix string, db *sql.DB) {
 	authController := controller.AuthController{
 		Db : db,
 	}
-	auth := router.Group(prefix);
+	auth := r.Group(prefix);
 
 	auth.POST("/signin", authController.SignIn)
 	auth.POST("/signup/tenant", authController.TenantSignUp)

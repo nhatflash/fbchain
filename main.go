@@ -3,18 +3,19 @@ package main
 import (
 	"log"
 	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	env "github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	pg "github.com/nhatflash/fbchain/database"
+	_ "github.com/nhatflash/fbchain/docs"
+	"github.com/nhatflash/fbchain/helper"
 	"github.com/nhatflash/fbchain/middleware"
 	"github.com/nhatflash/fbchain/routes"
-	"github.com/nhatflash/fbchain/helper"
-	ginSwg "github.com/swaggo/gin-swagger"
 	swgFiles "github.com/swaggo/files"
-	_ "github.com/nhatflash/fbchain/docs"
+	ginSwg "github.com/swaggo/gin-swagger"
 )
 
 // @title FB Chain Management API
@@ -32,7 +33,10 @@ func main() {
 		return;
 	}
 	r := gin.Default()
+
+	r.SetTrustedProxies(nil)
 	r.Use(middleware.ErrorHandler())
+	r.Use(middleware.FilterConfigurer("http://localhost:5173"))
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		phoneVErr := v.RegisterValidation("phone", helper.PhoneNumberValidator)

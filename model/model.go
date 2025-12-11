@@ -2,8 +2,9 @@ package model
 
 import (
 	"time"
-	enum "github.com/nhatflash/fbchain/enum"
-	sql "database/sql"
+	"github.com/nhatflash/fbchain/enum"
+	"database/sql"
+	"github.com/shopspring/decimal"
 )
 
 type User struct {
@@ -43,7 +44,7 @@ type Subscription struct {
 	Name			string				`json:"name"`
 	Description		sql.NullString		`json:"description"`
 	DurationMonth	int					`json:"durationMonth"`
-	Price			float64				`json:"price"`
+	Price			decimal.Decimal		`json:"price"`
 	IsActive		bool				`json:"isActive"`
 	Image 			sql.NullString		`json:"image"`
 	Restaurants 	[]Restaurant
