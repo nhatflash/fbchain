@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	appError "github.com/nhatflash/fbchain/error"
+	appErr "github.com/nhatflash/fbchain/error"
 )
 
 func ErrorHandler() gin.HandlerFunc {
@@ -15,7 +15,7 @@ func ErrorHandler() gin.HandlerFunc {
 
 		if (len(c.Errors) > 0) {
 			err := c.Errors[0].Err
-			if e, ok := err.(*appError.ErrorResponse); ok {
+			if e, ok := err.(*appErr.ErrorResponse); ok {
 				c.JSON(e.Status, gin.H{
 					"status": e.Status,
 					"error": e.Code.Error(),
@@ -33,15 +33,19 @@ func ErrorHandler() gin.HandlerFunc {
 						case "required":
 							msg = fmt.Sprintf("The field '%s' is required", e.Field())
 						case "email":
-							msg = "Invalid email format"
+							msg = fmt.Sprintf("The field '%s' is not in valid email format", e.Field())
 						case "name":
-							msg = fmt.Sprintf("Person '%s' must not include numbers or special characters", e.Field())
+							msg = fmt.Sprintf("Field '%s' must not include numbers or special characters", e.Field())
 						case "phone":
-							msg = "Phone number is not valid with Vietnamese phone number"
+							msg = fmt.Sprintf("Field '%s' should be a valid Vietnamese phone number", e.Field())
 						case "identity":
-							msg = "Identity number is not valid"
+							msg = fmt.Sprintf("Field '%s' must be a valid Vietnamese identity number", e.Field())
 						case "postalcode":
-							msg = "Postal code is not valid"
+							msg = fmt.Sprintf("Field '%s' must be a valid postal code", e.Field())
+						case "price":
+							msg = fmt.Sprintf("Field '%s' should has be in valid format e.g. '100.99'", e.Field())
+						case "number":
+							msg = fmt.Sprintf("Field '%s' must not be lower than 0", e.Field())
 						default:
 							msg = fmt.Sprintf("Field '%s' validation failed on tag '%s'", e.Field(), e.Tag())
 					}

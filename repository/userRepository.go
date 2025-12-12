@@ -97,3 +97,25 @@ func CreateTenantUser(firstName string, lastName string, email string, password 
 	}
 	return tenantUser, nil
 }
+
+
+func CreateAdminUser(email string, password string, phone string, identity string, firstName string, lastName string, gender *enum.Gender, birthdate *time.Time, postalCode string, address string, profileImage string, db *sql.DB) error {
+	_, insertErr := db.Exec("INSERT INTO users (email, password, role, phone, identity, first_name, last_name, gender, birthdate, postal_code, address, profile_image, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)", email, password, enum.ADMIN, phone, identity, firstName, lastName, gender, birthdate, postalCode, address, profileImage, enum.ACTIVE)
+
+	if insertErr != nil {
+		return insertErr
+	}
+	return nil
+}
+
+
+func CheckIfAdminUserAlreadyExists(db *sql.DB) (bool, error) {
+	rows, rowErr := db.Query("SELECT id FROM users WHERE role = $1", enum.ADMIN)
+	if rowErr != nil {
+		return false, rowErr
+	}
+	if rows.Next() {
+		return true, nil
+	}
+	return false, nil
+}

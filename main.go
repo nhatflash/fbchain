@@ -16,6 +16,7 @@ import (
 	"github.com/nhatflash/fbchain/routes"
 	swgFiles "github.com/swaggo/files"
 	ginSwg "github.com/swaggo/gin-swagger"
+	"github.com/nhatflash/fbchain/initializer"
 )
 
 // @title FB Chain Management API
@@ -60,6 +61,11 @@ func main() {
 
 	defer db.Close()
 
+	initErr := initializer.CreateAdminUserIfNotExists(db)
+	if initErr != nil {
+		log.Fatalln("Error when perform initialize admin account.")
+		return
+	}
 	routes.MainRoutes(r, db)
 	r.GET("/swagger/*any", ginSwg.WrapHandler(swgFiles.Handler))
 

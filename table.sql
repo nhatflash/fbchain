@@ -35,7 +35,7 @@ CREATE TABLE tenants (
 )
 
 
-CREATE TABLE subscriptions {
+CREATE TABLE subscriptions (
 	id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	name VARCHAR(255) UNIQUE NOT NULL,
 	description TEXT,
@@ -43,5 +43,5 @@ CREATE TABLE subscriptions {
 	price DECIMAL(18,2) NOT NULL,
 	is_active BOOLEAN NOT NULL DEFAULT TRUE,
 	image TEXT
-}
+)
 
