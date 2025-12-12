@@ -21,6 +21,45 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/admin/subscription": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create subscription API",
+                "parameters": [
+                    {
+                        "description": "CreateSubscription body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.CreateSubscriptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/client.SubscriptionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/auth/signin": {
             "post": {
                 "consumes": [
@@ -91,6 +130,30 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "client.CreateSubscriptionRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "price"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "durationMonth": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "string"
+                }
+            }
+        },
         "client.SignInRequest": {
             "type": "object",
             "required": [
@@ -117,6 +180,32 @@ const docTemplate = `{
                 },
                 "refreshToken": {
                     "type": "string"
+                }
+            }
+        },
+        "client.SubscriptionResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "durationMonth": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
                 }
             }
         },

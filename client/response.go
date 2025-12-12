@@ -1,8 +1,10 @@
 package client
 
 import (
-	enum "github.com/nhatflash/fbchain/enum"
 	"time"
+
+	"github.com/nhatflash/fbchain/enum"
+	"github.com/shopspring/decimal"
 )
 
 type UserResponse struct {
@@ -44,4 +46,15 @@ type SignInResponse struct {
 	AccessToken 	string				`json:"accessToken"`
 	RefreshToken	string				`json:"refreshToken"`
 	LastLogin		time.Time			`json:"lastLogin"`
+}
+
+
+type SubscriptionResponse struct {
+	Id				int64				`json:"id"`
+	Name			string				`json:"name"`
+	Description		string				`json:"description"`
+	DurationMonth	int					`json:"durationMonth"`
+	Price			decimal.Decimal		`json:"price"`
+	IsActive		bool				`json:"isActive"`
+	Image			string				`json:"image"`
 }

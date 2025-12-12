@@ -39,22 +39,12 @@ func main() {
 	r.Use(middleware.FilterConfigurer("http://localhost:5173"))
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		phoneVErr := v.RegisterValidation("phone", helper.PhoneNumberValidator)
-		if phoneVErr != nil {
-			panic(phoneVErr)
-		}
-		identityVErr := v.RegisterValidation("identity", helper.IdentityNumberValidator)
-		if identityVErr != nil {
-			panic(identityVErr)
-		}
-		nameVErr := v.RegisterValidation("name", helper.NameValidator)
-		if nameVErr != nil {
-			panic(nameVErr)
-		}
-		pCVErr := v.RegisterValidation("postalcode", helper.PostalCodeValidator)
-		if pCVErr != nil {
-			panic(pCVErr)
-		}
+		_ = v.RegisterValidation("phone", helper.PhoneNumberValidator)
+		_= v.RegisterValidation("identity", helper.IdentityNumberValidator)
+		_ = v.RegisterValidation("name", helper.NameValidator)
+		_ = v.RegisterValidation("postalcode", helper.PostalCodeValidator)
+		_ = v.RegisterValidation("number", helper.PositiveNumberValidator)
+		_ = v.RegisterValidation("price", helper.PriceValidator)
 	}
 
 	port := os.Getenv("PORT")

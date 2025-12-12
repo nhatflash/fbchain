@@ -13,6 +13,7 @@ import (
 func MainRoutes(r *gin.Engine, db *sql.DB) {
 	r.GET("/api", Ping)
 	AuthRoutes(r, "/api/auth", db)
+	AdminRoutes(r, "/api/admin", db)
 }
 
 

@@ -1,5 +1,21 @@
 basePath: /api
 definitions:
+  client.CreateSubscriptionRequest:
+    properties:
+      description:
+        type: string
+      durationMonth:
+        type: integer
+      image:
+        type: string
+      name:
+        type: string
+      price:
+        type: string
+    required:
+    - name
+    - price
+    type: object
   client.SignInRequest:
     properties:
       login:
@@ -18,6 +34,23 @@ definitions:
         type: string
       refreshToken:
         type: string
+    type: object
+  client.SubscriptionResponse:
+    properties:
+      description:
+        type: string
+      durationMonth:
+        type: integer
+      id:
+        type: integer
+      image:
+        type: string
+      isActive:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
     type: object
   client.TenantResponse:
     properties:
@@ -146,6 +179,30 @@ paths:
     get:
       responses: {}
       summary: Ping
+  /admin/subscription:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: CreateSubscription body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.CreateSubscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/client.SubscriptionResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - BearerAuth: []
+      summary: Create subscription API
   /auth/signin:
     post:
       consumes:

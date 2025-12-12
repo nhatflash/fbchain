@@ -45,3 +45,12 @@ type TenantSignUpRequest struct {
 	Description		string				`json:"description"`
 	Type			*enum.TenantType	`json:"type" binding:"required"`
 }
+
+
+type CreateSubscriptionRequest struct {
+	Name			string				`json:"name" binding:"required"`
+	Description		string				`json:"description"`
+	DurationMonth	int					`json:"durationMonth" binding:"number"`
+	Price			string				`json:"price" binding:"required,price"`
+	Image			string				`json:"image"`
+}

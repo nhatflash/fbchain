@@ -53,6 +53,21 @@ func MapToTenantResponse(u *model.User, t *model.Tenant) *client.TenantResponse 
 }
 
 
+func MapToSubscriptionResponse(s *model.Subscription) *client.SubscriptionResponse {
+	description, image := getSubscriptionDataIfSqlNullString(s)
+	subscriptionRes := client.SubscriptionResponse{
+		Id: s.Id,
+		Name: s.Name,
+		Description: description,
+		DurationMonth: s.DurationMonth,
+		Price: s.Price,
+		IsActive: s.IsActive,
+		Image: image,
+	}
+	return &subscriptionRes
+}
+
+
 func getUserDataIfSqlNullString(u *model.User) (string, string, string, string, string) {
 	phone := ""
 	identity := ""
@@ -88,4 +103,16 @@ func getTenantDataIfSqlNullString(t *model.Tenant) (string, string) {
 		notes = t.Notes.String
 	}
 	return description, notes
+}
+
+func getSubscriptionDataIfSqlNullString(s *model.Subscription) (string, string) {
+	description := ""
+	image := ""
+	if s.Description.Valid {
+		description = s.Description.String
+	}
+	if s.Image.Valid {
+		image = s.Image.String
+	}
+	return description, image
 }
