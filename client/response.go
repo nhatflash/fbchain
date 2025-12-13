@@ -58,3 +58,20 @@ type SubscriptionResponse struct {
 	IsActive		bool				`json:"isActive"`
 	Image			string				`json:"image"`
 }
+
+
+type RestaurantResponse struct {
+	Id				int64				`json:"id"`
+	TenantId		int64				`json:"tenantId"`
+	Name 			string				`json:"name"`
+	Location		string				`json:"location"`
+	Description		string				`json:"description"`
+	ContactEmail	string				`json:"contactEmail"`
+	ContactPhone	string				`json:"contactPhone"`
+	PostalCode		string				`json:"postalCode"`
+	Type 			*enum.RestaurantType `json:"type"`
+	AvgRating		decimal.Decimal		`json:"avgRating"`
+	Notes			string				`json:"notes"`
+	SubscriptionId	int64				`json:"subscriptionId"`
+	Images			[]string			`json:"images"`
+}

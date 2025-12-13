@@ -1,5 +1,28 @@
 basePath: /api
 definitions:
+  client.CreateRestaurantRequest:
+    properties:
+      contactEmail:
+        type: string
+      contactPhone:
+        type: string
+      description:
+        type: string
+      image:
+        items:
+          type: string
+        type: array
+      location:
+        type: string
+      name:
+        type: string
+      notes:
+        type: string
+      postalCode:
+        type: string
+      type:
+        type: string
+    type: object
   client.CreateSubscriptionRequest:
     properties:
       description:
@@ -15,6 +38,37 @@ definitions:
     required:
     - name
     - price
+    type: object
+  client.RestaurantResponse:
+    properties:
+      avgRating:
+        type: number
+      contactEmail:
+        type: string
+      contactPhone:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      images:
+        items:
+          type: string
+        type: array
+      location:
+        type: string
+      name:
+        type: string
+      notes:
+        type: string
+      postalCode:
+        type: string
+      subscriptionId:
+        type: integer
+      tenantId:
+        type: integer
+      type:
+        type: string
     type: object
   client.SignInRequest:
     properties:
@@ -247,6 +301,30 @@ paths:
           description: Bad Request
           schema: {}
       summary: Tenant sign up API
+  /tenant/restaurant:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: CreateRestaurant body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.CreateRestaurantRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/client.RestaurantResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - BearerAuth: []
+      summary: Create restaurant API
 securityDefinitions:
   BearerAuth:
     in: header

@@ -54,3 +54,16 @@ type CreateSubscriptionRequest struct {
 	Price			string				`json:"price" binding:"required,price"`
 	Image			string				`json:"image"`
 }
+
+
+type CreateRestaurantRequest struct {
+	Name			string				`json:"name" binding:"required"`
+	Location		string				`json:"location" binding:"required"`
+	Description		string				`json:"description"`
+	ContactEmail	string				`json:"contactEmail" binding:"email"`
+	ContactPhone	string				`json:"contactPhone" binding:"phone"`
+	PostalCode		string				`json:"postalCode" binding:"required,postalcode"`
+	Type			*enum.RestaurantType `json:"type" binding:"required"`
+	Notes			string				`json:"notes" binding:"required"`
+	Images			[]string			`json:"image"`
+}

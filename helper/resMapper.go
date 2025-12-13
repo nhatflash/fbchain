@@ -68,6 +68,33 @@ func MapToSubscriptionResponse(s *model.Subscription) *client.SubscriptionRespon
 }
 
 
+func MapToRestaurantResponse(r *model.Restaurant) *client.RestaurantResponse {
+	description, contactEmail, contactPhone, notes := getRestaurantDataIfSqlNullString(r)
+
+	var images []string
+	for i := range r.Images {
+		image := r.Images[i]
+		images = append(images, image.Image)
+	}
+	restaurantRes := client.RestaurantResponse{
+		Id: r.Id,
+		TenantId: r.TenantId,
+		Name: r.Name,
+		Location: r.Location,
+		Description: description,
+		ContactEmail: contactEmail,
+		ContactPhone: contactPhone,
+		PostalCode: r.PostalCode,
+		Type: r.Type,
+		AvgRating: r.AvgRating,
+		Notes: notes,
+		SubscriptionId: r.SubscriptionId,
+		Images: images,
+	}
+	return &restaurantRes
+}
+
+
 func getUserDataIfSqlNullString(u *model.User) (string, string, string, string, string) {
 	phone := ""
 	identity := ""
@@ -115,4 +142,25 @@ func getSubscriptionDataIfSqlNullString(s *model.Subscription) (string, string) 
 		image = s.Image.String
 	}
 	return description, image
+}
+
+
+func getRestaurantDataIfSqlNullString(r *model.Restaurant) (string, string, string, string) {
+	description := ""
+	contactEmail := ""
+	contactPhone := ""
+	notes := ""
+	if r.Description.Valid {
+		description = r.Description.String
+	}
+	if r.ContactEmail.Valid {
+		contactEmail = r.ContactEmail.String
+	}
+	if r.ContactPhone.Valid {
+		contactPhone = r.ContactPhone.String
+	}
+	if r.Notes.Valid {
+		notes = r.Notes.String
+	}
+	return description, contactEmail, contactPhone, notes
 }

@@ -61,7 +61,7 @@ type Restaurant struct {
 	ContactPhone	sql.NullString			`json:"contactPhone"`
 	PostalCode		string					`json:"postalCode"`
 	Type			*enum.RestaurantType	`json:"type"`
-	AvgRating		float32					`json:"avgRating"`
+	AvgRating		decimal.Decimal			`json:"avgRating"`
 	IsActive		bool					`json:"isActive"`
 	Notes			sql.NullString			`json:"notes"`
 	CreatedAt		time.Time				`json:"createdAt"`
