@@ -25,14 +25,16 @@ type SubscriptionController struct {
 // @Router /admin/subscription [post]
 func (sc SubscriptionController) CreateSubscription(c *gin.Context) {
 	var createSubscriptionReq client.CreateSubscriptionRequest
+	var err error
 
-	if reqErr := c.ShouldBindJSON(&createSubscriptionReq); reqErr != nil {
-		c.Error(reqErr)
+	if err = c.ShouldBindJSON(&createSubscriptionReq); err != nil {
+		c.Error(err)
 		return
 	}
-	res, resErr := service.HandleCreateSubscription(&createSubscriptionReq, sc.Db)
-	if resErr != nil {
-		c.Error(resErr)
+	var res *client.SubscriptionResponse
+	res, err = service.HandleCreateSubscription(&createSubscriptionReq, sc.Db)
+	if err != nil {
+		c.Error(err)
 		return
 	}
 	api.SuccessMessage(http.StatusCreated, "Subscription created successfully.", res, c)

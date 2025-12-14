@@ -79,16 +79,18 @@ func GetRestaurantByName(name string, db *sql.DB) (*model.Restaurant, error) {
 }
 
 func GetRestaurantImages(rId int64, db *sql.DB) (*[]model.RestaurantImage, error) {
-	rows, rowErr := db.Query("SELECT * FROM restaurant_images WHERE restaurant_id = $1", rId)
-	if rowErr != nil {
-		return nil, rowErr
+	var err error
+	var rows *sql.Rows
+	rows, err = db.Query("SELECT * FROM restaurant_images WHERE restaurant_id = $1", rId)
+	if err != nil {
+		return nil, err
 	}
 	var images []model.RestaurantImage
 	for rows.Next() {
 		var i model.RestaurantImage
-		scanErr := rows.Scan(&i.Id, &i.Image, &i.CreatedAt, &i.RestaurantId)
-		if scanErr != nil {
-			return nil, scanErr
+		err = rows.Scan(&i.Id, &i.Image, &i.CreatedAt, &i.RestaurantId)
+		if err != nil {
+			return nil, err
 		}
 		images = append(images, i)
 	}
@@ -99,8 +101,10 @@ func GetRestaurantImages(rId int64, db *sql.DB) (*[]model.RestaurantImage, error
 }
 
 func IsRestaurantNameExist(name string, db *sql.DB) bool {
-	rows, rowErr := db.Query("SELECT id FROM restaurants WHERE name = $1 LIMIT 1", name)
-	if rowErr != nil {
+	var err error
+	var rows *sql.Rows
+	rows, err = db.Query("SELECT id FROM restaurants WHERE name = $1 LIMIT 1", name)
+	if err != nil {
 		return false
 	}
 	if rows.Next() {
@@ -121,22 +125,25 @@ func IsRestaurantExist(rId int64, db *sql.DB) bool {
 }
 
 func GetRestaurantById(rId int64, db *sql.DB) (*model.Restaurant, error) {
-	rows, rowErr := db.Query("SELECT * FROM restaurants WHERE id = $1 LIMIT 1", rId)
-	if rowErr != nil {
-		return nil, rowErr
+	var err error
+	var rows *sql.Rows
+	rows, err = db.Query("SELECT * FROM restaurants WHERE id = $1 LIMIT 1", rId)
+	if err != nil {
+		return nil, err
 	}
 	var restaurants []model.Restaurant
 	for rows.Next() {
 		var r model.Restaurant
-		scanErr := rows.Scan(&r.Id, &r.Name, &r.Location, &r.Description, &r.ContactEmail, &r.ContactPhone, &r.PostalCode, &r.Type, &r.AvgRating, &r.IsActive, &r.Notes, &r.CreatedAt, &r.UpdatedAt, &r.SubscriptionId, &r.TenantId)
-		if scanErr != nil {
-			return nil, scanErr
+		err = rows.Scan(&r.Id, &r.Name, &r.Location, &r.Description, &r.ContactEmail, &r.ContactPhone, &r.PostalCode, &r.Type, &r.AvgRating, &r.IsActive, &r.Notes, &r.CreatedAt, &r.UpdatedAt, &r.SubscriptionId, &r.TenantId)
+		if err != nil {
+			return nil, err
 		}
-		rImages, imgErr := GetRestaurantImages(r.Id, db)
-		if imgErr != nil {
-			return nil, imgErr
+		var rImgs *[]model.RestaurantImage
+		rImgs, err = GetRestaurantImages(r.Id, db)
+		if err != nil {
+			return nil, err
 		}
-		r.Images = *rImages
+		r.Images = *rImgs
 		restaurants = append(restaurants, r)
 	}
 	if len(restaurants) == 0 {

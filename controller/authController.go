@@ -23,17 +23,19 @@ type AuthController struct {
 // @Failure 400 {object} error
 // @Router /auth/signin [post]
 func (authController AuthController) SignIn(c *gin.Context) {
+	var err error
 	var signInRequest client.SignInRequest
-	if reqErr := c.ShouldBindJSON(&signInRequest); reqErr != nil {
-		c.Error(reqErr)
+	if err = c.ShouldBindJSON(&signInRequest); err != nil {
+		c.Error(err)
 		return
 	}
-	signInResponse, logErr := service.HandleSignIn(&signInRequest, authController.Db, c)
-	if logErr != nil {
-		c.Error(logErr)
+	var res *client.SignInResponse
+	res, err = service.HandleSignIn(&signInRequest, authController.Db, c)
+	if err != nil {
+		c.Error(err)
 		return
 	}
-	api.SuccessMessage(http.StatusOK, "Login successfully", signInResponse, c)
+	api.SuccessMessage(http.StatusOK, "Login successfully", res, c)
 }
 
 // @Summary Tenant sign up API
@@ -45,13 +47,15 @@ func (authController AuthController) SignIn(c *gin.Context) {
 // @Router /auth/signup/tenant [post]
 func (authController AuthController) TenantSignUp(c *gin.Context) {
 	var tenantSignUpReq client.TenantSignUpRequest
-	if reqErr := c.ShouldBindJSON(&tenantSignUpReq); reqErr != nil {
-		c.Error(reqErr)
+	var err error
+	if err = c.ShouldBindJSON(&tenantSignUpReq); err != nil {
+		c.Error(err)
 		return
 	}
-	res, resErr := service.HandleTenantSignUp(&tenantSignUpReq, authController.Db)
-	if resErr != nil {
-		c.Error(resErr)
+	var res *client.TenantResponse
+	res, err = service.HandleTenantSignUp(&tenantSignUpReq, authController.Db)
+	if err != nil {
+		c.Error(err)
 		return
 	}
 	api.SuccessMessage(http.StatusCreated, "Tenant signed up successfully.", res, c)

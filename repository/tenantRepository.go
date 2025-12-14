@@ -9,12 +9,14 @@ import (
 )
 
 func CreateTenantInformation(code string, description string, tenantType *enum.TenantType, userId int64, db *sql.DB) (*model.Tenant, error) {
-
-	_, insertErr := db.Exec("INSERT INTO tenants (code, description, type, user_id) VALUES ($1, $2, $3, $4)", code, description, tenantType, userId)
-	if insertErr != nil {
-		return nil, insertErr
+	var err error
+	_, err = db.Exec("INSERT INTO tenants (code, description, type, user_id) VALUES ($1, $2, $3, $4)", code, description, tenantType, userId)
+	if err != nil {
+		return nil, err
 	}
-	tenant, err := GetTenantByCode(code, db)
+
+	var tenant *model.Tenant
+	tenant, err = GetTenantByCode(code, db)
 	if err != nil {
 		return nil, err
 	}
@@ -22,18 +24,20 @@ func CreateTenantInformation(code string, description string, tenantType *enum.T
 }
 
 func GetTenantByCode(code string, db *sql.DB) (*model.Tenant, error) {
-	rows, dbErr := db.Query("SELECT * FROM tenants WHERE code = $1 LIMIT 1", code)
-	if dbErr != nil {
-		return nil, dbErr
+	var rows *sql.Rows
+	var err error
+	rows, err = db.Query("SELECT * FROM tenants WHERE code = $1 LIMIT 1", code)
+	if err != nil {
+		return nil, err
 	}
 	var tenants []model.Tenant
 	for rows.Next() {
-		var tenant model.Tenant
-		scanErr := rows.Scan(&tenant.Id, &tenant.Code, &tenant.Description, &tenant.Type, &tenant.Notes, &tenant.UserId)
-		if scanErr != nil {
-			return nil, scanErr
+		var t model.Tenant
+		err = rows.Scan(&t.Id, &t.Code, &t.Description, &t.Type, &t.Notes, &t.UserId)
+		if err != nil {
+			return nil, err
 		}
-		tenants = append(tenants, tenant)
+		tenants = append(tenants, t)
 	}
 	if len(tenants) == 0 {
 		return nil, appErr.NotFoundError("No tenant found")

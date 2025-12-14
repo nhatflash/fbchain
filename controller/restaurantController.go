@@ -7,6 +7,7 @@ import (
 	"github.com/nhatflash/fbchain/client"
 	"github.com/nhatflash/fbchain/service"
 	"github.com/nhatflash/fbchain/api"
+	"github.com/nhatflash/fbchain/model"
 	_ "github.com/nhatflash/fbchain/docs"
 )
 
@@ -25,21 +26,21 @@ type RestaurantController struct {
 // @Router /tenant/restaurant [post]
 func (rc RestaurantController) CreateRestaurant(c *gin.Context) {
 	var createRestaurantReq client.CreateRestaurantRequest
-
-	if reqErr := c.ShouldBindJSON(&createRestaurantReq); reqErr != nil {
-		c.Error(reqErr)
+	var err error
+	if err = c.ShouldBindJSON(&createRestaurantReq); err != nil {
+		c.Error(err)
 		return
 	}
-
-	currentUser, userErr := service.GetCurrentUser(c, rc.Db)
-	if userErr != nil {
-		c.Error(userErr)
+	var currUser *model.User
+	currUser, err = service.GetCurrentUser(c, rc.Db)
+	if err != nil {
+		c.Error(err)
 		return
 	}
-
-	res, resErr := service.HandleCreateRestaurant(&createRestaurantReq, currentUser.Id, rc.Db)
-	if resErr != nil {
-		c.Error(resErr)
+	var res *client.RestaurantResponse
+	res, err = service.HandleCreateRestaurant(&createRestaurantReq, currUser.Id, rc.Db)
+	if err != nil {
+		c.Error(err)
 		return
 	}
 	api.SuccessMessage(http.StatusCreated, "Restaurant created successfully.", res, c)
