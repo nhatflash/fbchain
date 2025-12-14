@@ -2,8 +2,9 @@ package repository
 
 import (
 	"database/sql"
-	appErr "github.com/nhatflash/fbchain/error"
+
 	"github.com/nhatflash/fbchain/enum"
+	appErr "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/model"
 )
 
@@ -36,6 +37,52 @@ func GetTenantByCode(code string, db *sql.DB) (*model.Tenant, error) {
 	}
 	if len(tenants) == 0 {
 		return nil, appErr.NotFoundError("No tenant found")
+	}
+	return &tenants[0], nil
+}
+
+func GetTenantById(tId int64, db *sql.DB) (*model.Tenant, error) {
+	var rows *sql.Rows
+	var err error
+
+	rows, err = db.Query("SELECT * FROM tenants WHERE id = $1 LIMIT 1", tId)
+	if err != nil {
+		return nil, err
+	}
+	var tenants []model.Tenant
+	for rows.Next() {
+		var tenant model.Tenant
+		err = rows.Scan(&tenant.Id, &tenant.Code, &tenant.Description, &tenant.Type, &tenant.Notes, &tenant.UserId)
+		if err != nil {
+			return nil, err
+		}
+		tenants = append(tenants, tenant)
+	}
+	if len(tenants) == 0 {
+		return nil, appErr.NotFoundError("No tenant found.")
+	}
+	return &tenants[0], nil
+}
+
+func GetTenantByUserId(uId int64, db *sql.DB) (*model.Tenant, error) {
+	var rows *sql.Rows
+	var err error
+
+	rows, err = db.Query("SELECT * FROM tenants WHERE user_id = $1 LIMIT 1", uId)
+	if err != nil {
+		return nil, err
+	}
+	var tenants []model.Tenant
+	for rows.Next() {
+		var tenant model.Tenant
+		err = rows.Scan(&tenant.Id, &tenant.Code, &tenant.Description, &tenant.Type, &tenant.Notes, &tenant.UserId)
+		if err != nil {
+			return nil, err
+		}
+		tenants = append(tenants, tenant)
+	}
+	if len(tenants) == 0 {
+		return nil, appErr.NotFoundError("No tenant found.")
 	}
 	return &tenants[0], nil
 }

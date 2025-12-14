@@ -2,10 +2,11 @@ package initializer
 
 import (
 	"database/sql"
-	"github.com/nhatflash/fbchain/repository"
 	"os"
+
 	"github.com/nhatflash/fbchain/enum"
 	"github.com/nhatflash/fbchain/helper"
+	"github.com/nhatflash/fbchain/repository"
 	"github.com/nhatflash/fbchain/security"
 )
 
@@ -23,7 +24,7 @@ func CreateAdminUserIfNotExists(db *sql.DB) error {
 	identity := os.Getenv("ADMIN_IDENTITY")
 	firstName := os.Getenv("ADMIN_FIRSTNAME")
 	lastName := os.Getenv("ADMIN_LASTNAME")
-	gender := enum.MALE
+	gender := enum.GENDER_MALE
 	birthdate, bdErr := helper.ConvertToDate(os.Getenv("ADMIN_BIRTHDATE"))
 	postalCode := os.Getenv("ADMIN_POSTALCODE")
 	address := os.Getenv("ADMIN_ADDRESS")

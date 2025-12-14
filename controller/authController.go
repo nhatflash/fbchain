@@ -12,13 +12,13 @@ import (
 )
 
 type AuthController struct {
-	Db   *sql.DB
+	Db *sql.DB
 }
 
 // @Summary Sign in API
 // @Accept json
 // @Produce json
-// @Param request body client.SignInRequest true "SignIn" body
+// @Param request body client.SignInRequest true "SignIn body"
 // @Success 200 {object} client.SignInResponse
 // @Failure 400 {object} error
 // @Router /auth/signin [post]
@@ -55,5 +55,5 @@ func (authController AuthController) TenantSignUp(c *gin.Context) {
 		return
 	}
 	api.SuccessMessage(http.StatusCreated, "Tenant signed up successfully.", res, c)
-	
+
 }

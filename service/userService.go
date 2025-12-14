@@ -2,7 +2,9 @@ package service
 
 import (
 	"database/sql"
+
 	"github.com/gin-gonic/gin"
+	"github.com/nhatflash/fbchain/enum"
 	appError "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/repository"
@@ -21,4 +23,8 @@ func GetCurrentUser(c *gin.Context, db *sql.DB) (*model.User, error) {
 		return nil, appError.NotFoundError("User not found")
 	}
 	return user, nil
+}
+
+func IsUserRoleTenant(u *model.User) bool {
+	return *u.Role == enum.ROLE_TENANT
 }

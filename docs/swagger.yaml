@@ -22,6 +22,12 @@ definitions:
         type: string
       type:
         type: string
+    required:
+    - location
+    - name
+    - notes
+    - postalCode
+    - type
     type: object
   client.CreateSubscriptionRequest:
     properties:
@@ -38,6 +44,31 @@ definitions:
     required:
     - name
     - price
+    type: object
+  client.OrderResponse:
+    properties:
+      amount:
+        type: number
+      id:
+        type: integer
+      orderDate:
+        type: string
+      restaurantId:
+        type: integer
+      status:
+        $ref: '#/definitions/enum.OrderStatus'
+      tenantId:
+        type: integer
+    type: object
+  client.PaySubscriptionRequest:
+    properties:
+      restaurantId:
+        type: integer
+      subscriptionId:
+        type: integer
+    required:
+    - restaurantId
+    - subscriptionId
     type: object
   client.RestaurantResponse:
     properties:
@@ -191,8 +222,18 @@ definitions:
     - FEMALE
     type: string
     x-enum-varnames:
-    - MALE
-    - FEMALE
+    - GENDER_MALE
+    - GENDER_FEMALE
+  enum.OrderStatus:
+    enum:
+    - PENDING
+    - COMPLETED
+    - CANCELED
+    type: string
+    x-enum-varnames:
+    - ORDER_PENDING
+    - ORDER_COMPLETED
+    - ORDER_CANCELED
   enum.TenantType:
     enum:
     - PERSONAL
@@ -202,11 +243,11 @@ definitions:
     - FB
     type: string
     x-enum-varnames:
-    - PERSONAL
-    - BUSINESS
-    - FOOD
-    - BEVERAGE
-    - FOOD_AND_BEVERAGE
+    - TENANT_PERSONAL
+    - TENANT_BUSINESS
+    - RESTAURANT_FOOD
+    - RESTAURANT_BEVERAGE
+    - RESTAURANT_FOOD_AND_BEVERAGE
   enum.UserStatus:
     enum:
     - ACTIVE
@@ -216,11 +257,11 @@ definitions:
     - DELETED
     type: string
     x-enum-varnames:
-    - ACTIVE
-    - INACTIVE
-    - PENDING
-    - LOCKED
-    - DELETED
+    - USER_ACTIVE
+    - USER_INACTIVE
+    - USER_PENDING
+    - USER_LOCKED
+    - USER_DELETED
 host: localhost:8080
 info:
   contact: {}
@@ -262,7 +303,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: SignIn
+      - description: SignIn body
         in: body
         name: request
         required: true
@@ -301,6 +342,30 @@ paths:
           description: Bad Request
           schema: {}
       summary: Tenant sign up API
+  /tenant/order:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: PaySubscription body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.PaySubscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/client.OrderResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - BearerAuth: []
+      summary: Pay subscription API
   /tenant/restaurant:
     post:
       consumes:

@@ -21,6 +21,13 @@ func HandleCreateRestaurant(createRestaurantReq *client.CreateRestaurantRequest,
 	notes := createRestaurantReq.Notes
 	images := createRestaurantReq.Images
 
+	sExist, sExistErr := repository.AnySubscriptionExists(db)
+	if sExistErr != nil {
+		return nil, sExistErr
+	}
+	if !sExist {
+		return nil, appErr.NotFoundError("There is no subscription available in the system.")
+	}
 	if repository.IsRestaurantNameExist(name, db) {
 		return nil, appErr.BadRequestError("Restaurant with this requested name is already exist.")
 	}

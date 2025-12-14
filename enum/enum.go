@@ -3,47 +3,49 @@ package enum
 type Role string
 
 const (
-	ADMIN Role = "ADMIN"
-	MANAGER Role = "MANAGER"
-	STAFF Role = "STAFF"
-	TENANT Role = "TENANT"
-	RESTAURANT_STAFF = "RESTAURANT_STAFF"
+	ROLE_ADMIN            Role = "ADMIN"
+	ROLE_MANAGER          Role = "MANAGER"
+	ROLE_STAFF            Role = "STAFF"
+	ROLE_TENANT           Role = "TENANT"
+	ROLE_RESTAURANT_STAFF      = "RESTAURANT_STAFF"
 )
-
 
 type Gender string
 
 const (
-	MALE Gender = "MALE"
-	FEMALE Gender = "FEMALE"
+	GENDER_MALE   Gender = "MALE"
+	GENDER_FEMALE Gender = "FEMALE"
 )
-
 
 type UserStatus string
 
 const (
-	ACTIVE UserStatus = "ACTIVE"
-	INACTIVE UserStatus = "INACTIVE"
-	PENDING UserStatus = "PENDING"
-	LOCKED UserStatus = "LOCKED"
-	DELETED UserStatus = "DELETED"
+	USER_ACTIVE   UserStatus = "ACTIVE"
+	USER_INACTIVE UserStatus = "INACTIVE"
+	USER_PENDING  UserStatus = "PENDING"
+	USER_LOCKED   UserStatus = "LOCKED"
+	USER_DELETED  UserStatus = "DELETED"
 )
-
 
 type TenantType string
 
 const (
-	PERSONAL TenantType = "PERSONAL"
-	BUSINESS TenantType = "BUSINESS"
+	TENANT_PERSONAL TenantType = "PERSONAL"
+	TENANT_BUSINESS TenantType = "BUSINESS"
 )
-
-
 
 type RestaurantType string
 
 const (
-	FOOD TenantType = "FOOD"
-	BEVERAGE TenantType = "BEVERAGE"
-	FOOD_AND_BEVERAGE TenantType = "FB"
+	RESTAURANT_FOOD              TenantType = "FOOD"
+	RESTAURANT_BEVERAGE          TenantType = "BEVERAGE"
+	RESTAURANT_FOOD_AND_BEVERAGE TenantType = "FB"
 )
 
+type OrderStatus string
+
+const (
+	ORDER_PENDING   OrderStatus = "PENDING"
+	ORDER_COMPLETED OrderStatus = "COMPLETED"
+	ORDER_CANCELED  OrderStatus = "CANCELED"
+)

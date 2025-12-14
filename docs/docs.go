@@ -71,7 +71,7 @@ const docTemplate = `{
                 "summary": "Sign in API",
                 "parameters": [
                     {
-                        "description": "SignIn",
+                        "description": "SignIn body",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -128,6 +128,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/tenant/order": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Pay subscription API",
+                "parameters": [
+                    {
+                        "description": "PaySubscription body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.PaySubscriptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/client.OrderResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/tenant/restaurant": {
             "post": {
                 "security": [
@@ -171,6 +210,13 @@ const docTemplate = `{
     "definitions": {
         "client.CreateRestaurantRequest": {
             "type": "object",
+            "required": [
+                "location",
+                "name",
+                "notes",
+                "postalCode",
+                "type"
+            ],
             "properties": {
                 "contactEmail": {
                     "type": "string"
@@ -225,6 +271,44 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "string"
+                }
+            }
+        },
+        "client.OrderResponse": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "orderDate": {
+                    "type": "string"
+                },
+                "restaurantId": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/enum.OrderStatus"
+                },
+                "tenantId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "client.PaySubscriptionRequest": {
+            "type": "object",
+            "required": [
+                "restaurantId",
+                "subscriptionId"
+            ],
+            "properties": {
+                "restaurantId": {
+                    "type": "integer"
+                },
+                "subscriptionId": {
+                    "type": "integer"
                 }
             }
         },
@@ -451,8 +535,21 @@ const docTemplate = `{
                 "FEMALE"
             ],
             "x-enum-varnames": [
-                "MALE",
-                "FEMALE"
+                "GENDER_MALE",
+                "GENDER_FEMALE"
+            ]
+        },
+        "enum.OrderStatus": {
+            "type": "string",
+            "enum": [
+                "PENDING",
+                "COMPLETED",
+                "CANCELED"
+            ],
+            "x-enum-varnames": [
+                "ORDER_PENDING",
+                "ORDER_COMPLETED",
+                "ORDER_CANCELED"
             ]
         },
         "enum.TenantType": {
@@ -465,11 +562,11 @@ const docTemplate = `{
                 "FB"
             ],
             "x-enum-varnames": [
-                "PERSONAL",
-                "BUSINESS",
-                "FOOD",
-                "BEVERAGE",
-                "FOOD_AND_BEVERAGE"
+                "TENANT_PERSONAL",
+                "TENANT_BUSINESS",
+                "RESTAURANT_FOOD",
+                "RESTAURANT_BEVERAGE",
+                "RESTAURANT_FOOD_AND_BEVERAGE"
             ]
         },
         "enum.UserStatus": {
@@ -482,11 +579,11 @@ const docTemplate = `{
                 "DELETED"
             ],
             "x-enum-varnames": [
-                "ACTIVE",
-                "INACTIVE",
-                "PENDING",
-                "LOCKED",
-                "DELETED"
+                "USER_ACTIVE",
+                "USER_INACTIVE",
+                "USER_PENDING",
+                "USER_LOCKED",
+                "USER_DELETED"
             ]
         }
     },

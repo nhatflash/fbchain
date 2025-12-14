@@ -5,25 +5,25 @@ import (
 	"os"
 	"strconv"
 	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/nhatflash/fbchain/enum"
 	"github.com/nhatflash/fbchain/model"
 )
 
 type JwtAccessClaims struct {
-	UserId		int64			`json:"userId"`
-	Email		string			`json:"email"`
-	Role		string			`json:"role"`
-	Type  		string			`json:"type"`
+	UserId int64  `json:"userId"`
+	Email  string `json:"email"`
+	Role   string `json:"role"`
+	Type   string `json:"type"`
 	jwt.RegisteredClaims
 }
 
 type JwtRefreshClaims struct {
-	UserId		int64			`json:"userId"`
-	Type		string			`json:"type"`
+	UserId int64  `json:"userId"`
+	Type   string `json:"type"`
 	jwt.RegisteredClaims
 }
- 
 
 func GenerateJwtAccessToken(u *model.User) (string, error) {
 	jwtSecret := os.Getenv("JWT_SECRET")
@@ -35,10 +35,10 @@ func GenerateJwtAccessToken(u *model.User) (string, error) {
 	}
 	userRole := getUserRole(u.Role)
 	accessClaims := JwtAccessClaims{
-		UserId: u.Id,
-		Email: u.Email,
-		Role: userRole,
-		Type: "ACCESS",
+		UserId:           u.Id,
+		Email:            u.Email,
+		Role:             userRole,
+		Type:             "ACCESS",
 		RegisteredClaims: buildClaims(u, expiration),
 	}
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
@@ -50,8 +50,6 @@ func GenerateJwtAccessToken(u *model.User) (string, error) {
 	return accessTokenStr, nil
 }
 
-
-
 func GenerateJwtRefreshToken(u *model.User) (string, error) {
 	jwtSecret := os.Getenv("JWT_SECRET")
 	jwtRefreshExpiration := os.Getenv("JWT_REFRESH_EXPIRATION_MIN")
@@ -62,8 +60,8 @@ func GenerateJwtRefreshToken(u *model.User) (string, error) {
 	}
 
 	refreshClaims := JwtRefreshClaims{
-		UserId: u.Id,
-		Type: "REFRESH",
+		UserId:           u.Id,
+		Type:             "REFRESH",
 		RegisteredClaims: buildClaims(u, expiration),
 	}
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
@@ -74,7 +72,6 @@ func GenerateJwtRefreshToken(u *model.User) (string, error) {
 	}
 	return refreshTokenStr, nil
 }
-
 
 func ValidateJwtAccessToken(accessTokenStr string) (*JwtAccessClaims, error) {
 	jwtSecret := os.Getenv("JWT_SECRET")
@@ -94,33 +91,29 @@ func ValidateJwtAccessToken(accessTokenStr string) (*JwtAccessClaims, error) {
 	return claims, nil
 }
 
-
 func buildClaims(u *model.User, expiration int) jwt.RegisteredClaims {
 	return jwt.RegisteredClaims{
-		Issuer: "fbchain",
-			Subject: strconv.FormatInt(u.Id, 10),
-			IssuedAt: jwt.NewNumericDate(time.Now()),
-			NotBefore: jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * time.Duration(expiration))),
+		Issuer:    "fbchain",
+		Subject:   strconv.FormatInt(u.Id, 10),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		NotBefore: jwt.NewNumericDate(time.Now()),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * time.Duration(expiration))),
 	}
 }
 
 func getUserRole(role *enum.Role) string {
 	var userRole string
-	switch (*role) {
-		case enum.ADMIN:
-			userRole = "ADMIN"
-		case enum.MANAGER:
-			userRole = "MANAGER"
-		case enum.STAFF:
-			userRole = "STAFF"
-		case enum.TENANT:
-			userRole = "TENANT"
-		default:
-			userRole = "RESTAURANT_STAFF"
+	switch *role {
+	case enum.ROLE_ADMIN:
+		userRole = "ADMIN"
+	case enum.ROLE_MANAGER:
+		userRole = "MANAGER"
+	case enum.ROLE_STAFF:
+		userRole = "STAFF"
+	case enum.ROLE_TENANT:
+		userRole = "TENANT"
+	default:
+		userRole = "RESTAURANT_STAFF"
 	}
 	return userRole
 }
-
-
-

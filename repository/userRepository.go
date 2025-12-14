@@ -3,12 +3,12 @@ package repository
 import (
 	"database/sql"
 	"time"
-	appError "github.com/nhatflash/fbchain/error"
+
 	_ "github.com/lib/pq"
 	"github.com/nhatflash/fbchain/enum"
+	appError "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/model"
 )
-
 
 func CheckUserEmailExists(email string, db *sql.DB) bool {
 	rows, err := db.Query("SELECT email FROM users WHERE email = $1 LIMIT 1", email)
@@ -20,7 +20,6 @@ func CheckUserEmailExists(email string, db *sql.DB) bool {
 	}
 	return false
 }
-
 
 func CheckUserPhoneExists(phone string, db *sql.DB) bool {
 	rows, dbErr := db.Query("SELECT phone FROM users WHERE phone = $1 LIMIT 1", phone)
@@ -64,7 +63,6 @@ func GetUserByEmail(email string, db *sql.DB) (*model.User, error) {
 	return &users[0], nil
 }
 
-
 func GetUserByPhone(phone string, db *sql.DB) (*model.User, error) {
 	rows, rowErr := db.Query("SELECT * FROM users WHERE phone = $1 LIMIT 1", phone)
 	if rowErr != nil {
@@ -79,15 +77,14 @@ func GetUserByPhone(phone string, db *sql.DB) (*model.User, error) {
 		}
 		users = append(users, user)
 	}
-	if (len(users) == 0) {
+	if len(users) == 0 {
 		return nil, appError.ErrNotFound
-	} 
+	}
 	return &users[0], nil
 }
 
-
 func CreateTenantUser(firstName string, lastName string, email string, password string, birthdate *time.Time, gender *enum.Gender, phone string, identity string, address string, postalCode string, profileImage string, db *sql.DB) (*model.User, error) {
-	_, insertErr := db.Exec("INSERT INTO users (email, password, role, phone, identity, first_name, last_name, gender, birthdate, postal_code, address, profile_image, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)", email, password, enum.TENANT, phone, identity, firstName, lastName, gender, birthdate, postalCode, address, profileImage, enum.ACTIVE);
+	_, insertErr := db.Exec("INSERT INTO users (email, password, role, phone, identity, first_name, last_name, gender, birthdate, postal_code, address, profile_image, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)", email, password, enum.ROLE_TENANT, phone, identity, firstName, lastName, gender, birthdate, postalCode, address, profileImage, enum.USER_ACTIVE)
 	if insertErr != nil {
 		return nil, insertErr
 	}
@@ -98,9 +95,8 @@ func CreateTenantUser(firstName string, lastName string, email string, password 
 	return tenantUser, nil
 }
 
-
 func CreateAdminUser(email string, password string, phone string, identity string, firstName string, lastName string, gender *enum.Gender, birthdate *time.Time, postalCode string, address string, profileImage string, db *sql.DB) error {
-	_, insertErr := db.Exec("INSERT INTO users (email, password, role, phone, identity, first_name, last_name, gender, birthdate, postal_code, address, profile_image, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)", email, password, enum.ADMIN, phone, identity, firstName, lastName, gender, birthdate, postalCode, address, profileImage, enum.ACTIVE)
+	_, insertErr := db.Exec("INSERT INTO users (email, password, role, phone, identity, first_name, last_name, gender, birthdate, postal_code, address, profile_image, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)", email, password, enum.ROLE_ADMIN, phone, identity, firstName, lastName, gender, birthdate, postalCode, address, profileImage, enum.USER_ACTIVE)
 
 	if insertErr != nil {
 		return insertErr
@@ -108,9 +104,8 @@ func CreateAdminUser(email string, password string, phone string, identity strin
 	return nil
 }
 
-
 func CheckIfAdminUserAlreadyExists(db *sql.DB) (bool, error) {
-	rows, rowErr := db.Query("SELECT id FROM users WHERE role = $1", enum.ADMIN)
+	rows, rowErr := db.Query("SELECT id FROM users WHERE role = $1", enum.ROLE_ADMIN)
 	if rowErr != nil {
 		return false, rowErr
 	}
