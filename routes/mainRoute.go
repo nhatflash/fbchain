@@ -11,15 +11,14 @@ import (
 )
 
 func MainRoutes(r *gin.Engine, db *sql.DB) {
-	r.GET("/api", Ping)
+	r.GET("/", Ping)
 	AuthRoutes(r, "/api/auth", db)
 	AdminRoutes(r, "/api/admin", db)
 	TenantRoutes(r, "/api/tenant", db)
 }
 
 
-// @Summary Ping
-// @Router / [get]
+
 func Ping(c *gin.Context) {
 	fmt.Printf("Client IP: %s\n", c.ClientIP())
 	c.JSON(http.StatusOK, api.ApiResponse {

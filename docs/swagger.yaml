@@ -270,10 +270,6 @@ info:
   title: FB Chain Management API
   version: "1.0"
 paths:
-  /:
-    get:
-      responses: {}
-      summary: Ping
   /admin/subscription:
     post:
       consumes:

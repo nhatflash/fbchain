@@ -20,12 +20,12 @@ func FilterConfigurer(allowedOrigins ...string) gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Headers", "Authorization, Content-Type")
 		c.Header("Access-Control-Allow-Credentials", "true")
 
-		c.Header("Content-Security-Policy", 
-		"default-src 'self'; " + 
-		"connect-src *; " +
-		"img-src 'self' data:; " +  
-		"script-src 'self'; " + 
-		"frame-ancestors 'none'")
+		// c.Header("Content-Security-Policy", 
+		// "default-src 'self'; " + 
+		// "connect-src *; " +
+		// "img-src 'self' data:; " +  
+		// "script-src 'self'; " + 
+		// "frame-ancestors 'none'")
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(http.StatusNoContent)

@@ -2,7 +2,6 @@ package service
 
 import (
 	"database/sql"
-	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/client"
 	"github.com/nhatflash/fbchain/repository"
 	"github.com/nhatflash/fbchain/helper"
@@ -13,9 +12,14 @@ import (
 	"github.com/nhatflash/fbchain/model"
 )
 
+type AuthService interface {
+	HandleSignIn(signInReq *client.SignInRequest, db *sql.DB) (*client.SignInResponse, error)
+	HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpRequest, db *sql.DB) (*client.TenantResponse, error)
+}
+
 
 // Sign in method
-func HandleSignIn(signInReq *client.SignInRequest, db *sql.DB, c *gin.Context) (*client.SignInResponse, error) {
+func HandleSignIn(signInReq *client.SignInRequest, db *sql.DB) (*client.SignInResponse, error) {
 	login := signInReq.Login
 
 	var loggedUser *model.User

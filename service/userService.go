@@ -11,6 +11,12 @@ import (
 	"github.com/nhatflash/fbchain/security"
 )
 
+type UserService interface {
+	GetCurrentUser(c *gin.Context, db *sql.DB) (*model.User, error)
+	IsUserRoleTenant(u *model.User) bool
+	GetListUser(db *sql.DB) (*[]model.User, error)
+}
+
 func GetCurrentUser(c *gin.Context, db *sql.DB) (*model.User, error) {
 	defaultClaims, exists := c.Get("user")
 	if !exists {
@@ -27,4 +33,9 @@ func GetCurrentUser(c *gin.Context, db *sql.DB) (*model.User, error) {
 
 func IsUserRoleTenant(u *model.User) bool {
 	return *u.Role == enum.ROLE_TENANT
+}
+
+
+func GetListUser(db *sql.DB) (*[]model.User, error) {
+	return nil, nil
 }

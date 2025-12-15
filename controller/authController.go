@@ -30,7 +30,7 @@ func (authController AuthController) SignIn(c *gin.Context) {
 		return
 	}
 	var res *client.SignInResponse
-	res, err = service.HandleSignIn(&signInRequest, authController.Db, c)
+	res, err = service.HandleSignIn(&signInRequest, authController.Db)
 	if err != nil {
 		c.Error(err)
 		return

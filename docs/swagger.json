@@ -9,12 +9,6 @@
     "host": "localhost:8080",
     "basePath": "/api",
     "paths": {
-        "/": {
-            "get": {
-                "summary": "Ping",
-                "responses": {}
-            }
-        },
         "/admin/subscription": {
             "post": {
                 "security": [
