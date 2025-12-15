@@ -17,6 +17,13 @@ import (
 	swgFiles "github.com/swaggo/files"
 	ginSwg "github.com/swaggo/gin-swagger"
 	"github.com/nhatflash/fbchain/initializer"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/nhatflash/fbchain/graph"
+	"github.com/vektah/gqlparser/v2/ast"
 )
 
 // @title FB Chain Management API
@@ -35,9 +42,29 @@ func main() {
 	}
 	r := gin.Default()
 
+	graphqlHandler := handler.New(
+		graph.NewExecutableSchema(
+			graph.Config{
+				Resolvers: &graph.Resolver{
+
+				},
+			},
+		),
+	)
+
 	r.SetTrustedProxies(nil)
 	r.Use(middleware.ErrorHandler())
 	r.Use(middleware.FilterConfigurer("http://localhost:5173"))
+
+	graphqlHandler.AddTransport(transport.Options{})
+	graphqlHandler.AddTransport(transport.GET{})
+	graphqlHandler.AddTransport(transport.POST{})
+
+	graphqlHandler.SetQueryCache(lru.New[*ast.QueryDocument](1000))
+	graphqlHandler.Use(extension.Introspection{})
+	graphqlHandler.Use(extension.AutomaticPersistedQuery{
+		Cache: lru.New[string](100),
+	})
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		_ = v.RegisterValidation("phone", helper.PhoneNumberValidator)
@@ -68,6 +95,14 @@ func main() {
 	}
 	routes.MainRoutes(r, db)
 	r.GET("/swagger/*any", ginSwg.WrapHandler(swgFiles.Handler))
+
+	r.GET("/graphql", func(c *gin.Context) {
+		playground.Handler("GraphQL", "/graphql")(c.Writer, c.Request)
+	})
+
+	r.POST("/graphql", middleware.JwtAccessHandler(), func(c *gin.Context) {
+		graphqlHandler.ServeHTTP(c.Writer, c.Request)
+	})
 
 	r.Run(port)
 }
