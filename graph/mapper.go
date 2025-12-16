@@ -16,10 +16,52 @@ func MapToGqlModelUser(u *model.User) *gqlModel.User {
 		Identity:     u.Identity,
 		FirstName:    &u.FirstName,
 		LastName:     &u.LastName,
-		Gender:       (*string)(&u.Gender),
+		Gender:       &u.Gender,
 		Birthdate:    (*scalar.CustomDate)(&u.Birthdate),
 		PostalCode:   u.PostalCode,
 		Address:      u.Address,
 		ProfileImage: u.ProfileImage,
+	}
+}
+
+func MapToGqlModelTenant(t *model.Tenant) *gqlModel.Tenant {
+	idStr := strconv.FormatInt(t.UserId, 10)
+	return &gqlModel.Tenant{
+		ID: strconv.FormatInt(t.Id, 10),
+		Code: t.Code,
+		Description: t.Description,
+		Type: &t.Type,
+		Notes: t.Notes,
+		UserID: &idStr,
+	}
+}
+
+func MapToGqlRestaurant(r *model.Restaurant) *gqlModel.Restaurant {
+	idStr := strconv.FormatInt(r.TenantId, 10)
+	avgRating64,_ := r.AvgRating.Float64()
+	return &gqlModel.Restaurant{
+		ID: strconv.FormatInt(r.Id, 10),
+		Name: r.Name,
+		Location: &r.Location,
+		Description: r.Description,
+		ContactEmail: r.ContactEmail,
+		ContactPhone: r.ContactPhone,
+		PostalCode: &r.PostalCode,
+		Type: &r.Type,
+		AvgRating: &avgRating64,
+		IsActive: &r.IsActive,
+		Notes: r.Notes,
+		TenantID: &idStr,
+	}
+}
+
+
+func MapToGqlRestaurantImage(rImg *model.RestaurantImage) *gqlModel.RestaurantImage {
+	idStr := strconv.FormatInt(rImg.RestaurantId, 10)
+	return &gqlModel.RestaurantImage{
+		ID: strconv.FormatInt(rImg.Id, 10),
+		Image: rImg.Image,
+		CreatedAt: &rImg.CreatedAt,
+		RestaurantID: &idStr,
 	}
 }

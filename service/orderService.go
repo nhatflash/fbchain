@@ -11,7 +11,7 @@ import (
 )
 
 type IOrderService interface {
-	HandlePaySubscription(paySubscriptionReq *client.PaySubscriptionRequest, tenantId int64) (*client.OrderResponse, error)
+	HandlePaySubPackage(paySubPackageReq *client.PaySubPackageRequest, tenantId int64) (*client.OrderResponse, error)
 }
 
 type OrderService struct {
@@ -24,14 +24,14 @@ func NewOrderService(db *sql.DB) IOrderService {
 	}
 }
 
-func (os *OrderService) HandlePaySubscription(paySubscriptionReq *client.PaySubscriptionRequest, tenantId int64) (*client.OrderResponse, error) {
-	restaurantId := paySubscriptionReq.RestaurantId
-	subscriptionId := paySubscriptionReq.SubscriptionId
+func (os *OrderService) HandlePaySubPackage(paySubPackageReq *client.PaySubPackageRequest, tenantId int64) (*client.OrderResponse, error) {
+	restaurantId := paySubPackageReq.RestaurantId
+	subPackageId := paySubPackageReq.SubPackageId
 
 	var err error
 	var r *model.Restaurant
 	var s *model.SubPackage
-	r, s, err = checkRestaurantAndSubPackageExist(restaurantId, subscriptionId, os.Db)
+	r, s, err = checkRestaurantAndSubPackageExist(restaurantId, subPackageId, os.Db)
 	if err != nil {
 		return nil, err
 	}
@@ -40,9 +40,9 @@ func (os *OrderService) HandlePaySubscription(paySubscriptionReq *client.PaySubs
 		return nil, err
 	}
 	if isRestaurantSubPackageMatchTheRequestedPaySubPackage(r, s.Id) {
-		return nil, appErr.BadRequestError("The requested subscription is already registered on this restaurant.")
+		return nil, appErr.BadRequestError("The requested subscription package is already registered on this restaurant.")
 	}
-	err = repository.CreateInitialOrder(restaurantId, subscriptionId, &s.Price, tenantId, os.Db)
+	err = repository.CreateInitialOrder(restaurantId, subPackageId, &s.Price, tenantId, os.Db)
 	if err != nil {
 		return nil, err
 	}

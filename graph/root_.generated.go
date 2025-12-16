@@ -37,6 +37,8 @@ type Config struct {
 type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
+	Restaurant() RestaurantResolver
+	RestaurantImage() RestaurantImageResolver
 	Tenant() TenantResolver
 }
 
@@ -49,19 +51,50 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Tenant  func(childComplexity int, id string) int
-		Tenants func(childComplexity int) int
-		User    func(childComplexity int, id string) int
-		Users   func(childComplexity int) int
+		Restaurant       func(childComplexity int, id string) int
+		RestaurantImage  func(childComplexity int, id string) int
+		RestaurantImages func(childComplexity int) int
+		Restaurants      func(childComplexity int) int
+		Tenant           func(childComplexity int, id string) int
+		Tenants          func(childComplexity int) int
+		User             func(childComplexity int, id string) int
+		Users            func(childComplexity int) int
+	}
+
+	Restaurant struct {
+		AvgRating    func(childComplexity int) int
+		ContactEmail func(childComplexity int) int
+		ContactPhone func(childComplexity int) int
+		Description  func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Images       func(childComplexity int) int
+		IsActive     func(childComplexity int) int
+		Location     func(childComplexity int) int
+		Name         func(childComplexity int) int
+		Notes        func(childComplexity int) int
+		PostalCode   func(childComplexity int) int
+		Tenant       func(childComplexity int) int
+		TenantID     func(childComplexity int) int
+		Type         func(childComplexity int) int
+	}
+
+	RestaurantImage struct {
+		CreatedAt    func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Image        func(childComplexity int) int
+		Restaurant   func(childComplexity int) int
+		RestaurantID func(childComplexity int) int
 	}
 
 	Tenant struct {
 		Code        func(childComplexity int) int
 		Description func(childComplexity int) int
-		Id          func(childComplexity int) int
+		ID          func(childComplexity int) int
 		Notes       func(childComplexity int) int
+		Restaurants func(childComplexity int) int
 		Type        func(childComplexity int) int
 		User        func(childComplexity int) int
+		UserID      func(childComplexity int) int
 	}
 
 	Todo struct {
@@ -117,6 +150,44 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.CreateTodo(childComplexity, args["input"].(model.NewTodo)), true
 
+	case "Query.restaurant":
+		if e.complexity.Query.Restaurant == nil {
+			break
+		}
+
+		args, err := ec.field_Query_restaurant_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Restaurant(childComplexity, args["id"].(string)), true
+
+	case "Query.restaurantImage":
+		if e.complexity.Query.RestaurantImage == nil {
+			break
+		}
+
+		args, err := ec.field_Query_restaurantImage_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.RestaurantImage(childComplexity, args["id"].(string)), true
+
+	case "Query.restaurantImages":
+		if e.complexity.Query.RestaurantImages == nil {
+			break
+		}
+
+		return e.complexity.Query.RestaurantImages(childComplexity), true
+
+	case "Query.restaurants":
+		if e.complexity.Query.Restaurants == nil {
+			break
+		}
+
+		return e.complexity.Query.Restaurants(childComplexity), true
+
 	case "Query.tenant":
 		if e.complexity.Query.Tenant == nil {
 			break
@@ -155,6 +226,139 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Users(childComplexity), true
 
+	case "Restaurant.avgRating":
+		if e.complexity.Restaurant.AvgRating == nil {
+			break
+		}
+
+		return e.complexity.Restaurant.AvgRating(childComplexity), true
+
+	case "Restaurant.contactEmail":
+		if e.complexity.Restaurant.ContactEmail == nil {
+			break
+		}
+
+		return e.complexity.Restaurant.ContactEmail(childComplexity), true
+
+	case "Restaurant.contactPhone":
+		if e.complexity.Restaurant.ContactPhone == nil {
+			break
+		}
+
+		return e.complexity.Restaurant.ContactPhone(childComplexity), true
+
+	case "Restaurant.description":
+		if e.complexity.Restaurant.Description == nil {
+			break
+		}
+
+		return e.complexity.Restaurant.Description(childComplexity), true
+
+	case "Restaurant.id":
+		if e.complexity.Restaurant.ID == nil {
+			break
+		}
+
+		return e.complexity.Restaurant.ID(childComplexity), true
+
+	case "Restaurant.images":
+		if e.complexity.Restaurant.Images == nil {
+			break
+		}
+
+		return e.complexity.Restaurant.Images(childComplexity), true
+
+	case "Restaurant.isActive":
+		if e.complexity.Restaurant.IsActive == nil {
+			break
+		}
+
+		return e.complexity.Restaurant.IsActive(childComplexity), true
+
+	case "Restaurant.location":
+		if e.complexity.Restaurant.Location == nil {
+			break
+		}
+
+		return e.complexity.Restaurant.Location(childComplexity), true
+
+	case "Restaurant.name":
+		if e.complexity.Restaurant.Name == nil {
+			break
+		}
+
+		return e.complexity.Restaurant.Name(childComplexity), true
+
+	case "Restaurant.notes":
+		if e.complexity.Restaurant.Notes == nil {
+			break
+		}
+
+		return e.complexity.Restaurant.Notes(childComplexity), true
+
+	case "Restaurant.postalCode":
+		if e.complexity.Restaurant.PostalCode == nil {
+			break
+		}
+
+		return e.complexity.Restaurant.PostalCode(childComplexity), true
+
+	case "Restaurant.tenant":
+		if e.complexity.Restaurant.Tenant == nil {
+			break
+		}
+
+		return e.complexity.Restaurant.Tenant(childComplexity), true
+
+	case "Restaurant.tenantId":
+		if e.complexity.Restaurant.TenantID == nil {
+			break
+		}
+
+		return e.complexity.Restaurant.TenantID(childComplexity), true
+
+	case "Restaurant.type":
+		if e.complexity.Restaurant.Type == nil {
+			break
+		}
+
+		return e.complexity.Restaurant.Type(childComplexity), true
+
+	case "RestaurantImage.createdAt":
+		if e.complexity.RestaurantImage.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.RestaurantImage.CreatedAt(childComplexity), true
+
+	case "RestaurantImage.id":
+		if e.complexity.RestaurantImage.ID == nil {
+			break
+		}
+
+		return e.complexity.RestaurantImage.ID(childComplexity), true
+
+	case "RestaurantImage.image":
+		if e.complexity.RestaurantImage.Image == nil {
+			break
+		}
+
+		return e.complexity.RestaurantImage.Image(childComplexity), true
+
+	case "RestaurantImage.restaurant":
+		if e.complexity.RestaurantImage.Restaurant == nil {
+			break
+		}
+
+		return e.complexity.RestaurantImage.Restaurant(childComplexity), true
+
+	case "RestaurantImage.restaurantId":
+		if e.complexity.RestaurantImage.RestaurantID == nil {
+			break
+		}
+
+		return e.complexity.RestaurantImage.RestaurantID(childComplexity), true
+
 	case "Tenant.code":
 		if e.complexity.Tenant.Code == nil {
 			break
@@ -170,11 +374,11 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		return e.complexity.Tenant.Description(childComplexity), true
 
 	case "Tenant.id":
-		if e.complexity.Tenant.Id == nil {
+		if e.complexity.Tenant.ID == nil {
 			break
 		}
 
-		return e.complexity.Tenant.Id(childComplexity), true
+		return e.complexity.Tenant.ID(childComplexity), true
 
 	case "Tenant.notes":
 		if e.complexity.Tenant.Notes == nil {
@@ -182,6 +386,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Tenant.Notes(childComplexity), true
+
+	case "Tenant.restaurants":
+		if e.complexity.Tenant.Restaurants == nil {
+			break
+		}
+
+		return e.complexity.Tenant.Restaurants(childComplexity), true
 
 	case "Tenant.type":
 		if e.complexity.Tenant.Type == nil {
@@ -196,6 +407,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Tenant.User(childComplexity), true
+
+	case "Tenant.userId":
+		if e.complexity.Tenant.UserID == nil {
+			break
+		}
+
+		return e.complexity.Tenant.UserID(childComplexity), true
 
 	case "Todo.done":
 		if e.complexity.Todo.Done == nil {

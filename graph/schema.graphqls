@@ -3,10 +3,22 @@
 # https://gqlgen.com/getting-started/
 
 scalar Date
+scalar DateTime
 
 enum TenantType {
   TENANT_PERSONAL
   TENANT_BUSINESS
+}
+
+enum Gender {
+  GENDER_MALE
+  GENDER_FEMALE
+}
+
+enum RestaurantType {
+  RESTAURANT_FOOD
+  RESTAURANT_BEVERAGE
+  RESTAURANT_FOOD_AND_BEVERAGE
 }
 
 type Todo {
@@ -23,7 +35,7 @@ type User {
   identity: String
   firstName: String
   lastName: String
-  gender: String
+  gender: Gender
   birthdate: Date
   postalCode: String
   address: String
@@ -36,24 +48,35 @@ type Tenant {
   description: String
   type: TenantType
   notes: String
+  userId: String
   user: User
+  restaurants: [Restaurant!]!
 }
 
-# type Restaurant {
-#   id: ID!
-#   name: String!
-#   location: String
-#   description: String
-#   contactEmail: String
-#   contactPhone: String
-#   postalCode: String
-#   type: String
-#   avgRating: Float
-#   isActive: Boolean
-#   notes: String
-#   tenant: Tenant
-#   images: [String]
-# }
+type Restaurant {
+  id: ID!
+  name: String!
+  location: String
+  description: String
+  contactEmail: String
+  contactPhone: String
+  postalCode: String
+  type: RestaurantType
+  avgRating: Float
+  isActive: Boolean
+  notes: String
+  tenantId: String
+  tenant: Tenant
+  images: [RestaurantImage!]!
+}
+
+type RestaurantImage {
+  id: ID!
+  image: String!
+  createdAt: DateTime
+  restaurantId: String
+  restaurant: Restaurant
+}
 
 # type Order {
 #   id: ID!
@@ -71,6 +94,10 @@ type Query {
   user(id: ID!): User
   tenants: [Tenant!]!
   tenant(id: ID!): Tenant
+  restaurants: [Restaurant!]!
+  restaurant(id: ID!): Restaurant
+  restaurantImages: [RestaurantImage!]!
+  restaurantImage(id: ID!): RestaurantImage
 }
 
 input NewTodo {

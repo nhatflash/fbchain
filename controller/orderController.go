@@ -16,19 +16,19 @@ type OrderController struct {
 	Db *sql.DB
 }
 
-// @Summary Pay subscription API
+// @Summary Pay subscription package API
 // @Accept json
 // @Produce json
-// @Param request body client.PaySubscriptionRequest true "PaySubscription body"
+// @Param request body client.PaySubPackageRequest true "PaySubPackage body"
 // @Success 201 {object} client.OrderResponse
 // @Failure 400 {object} error
 // @Security BearerAuth
 // @Router /tenant/order [post]
-func (oc OrderController) PaySubscription(c *gin.Context) {
-	var paySubscriptionReq client.PaySubscriptionRequest
+func (oc OrderController) PaySubPackage(c *gin.Context) {
+	var paySubPackageReq client.PaySubPackageRequest
 	var err error
 
-	if err = c.ShouldBindJSON(&paySubscriptionReq); err != nil {
+	if err = c.ShouldBindJSON(&paySubPackageReq); err != nil {
 		c.Error(err)
 		return
 	}
@@ -43,7 +43,7 @@ func (oc OrderController) PaySubscription(c *gin.Context) {
 
 	var res *client.OrderResponse
 	orderService := service.NewOrderService(oc.Db)
-	res, err = orderService.HandlePaySubscription(&paySubscriptionReq, currTenant.Id)
+	res, err = orderService.HandlePaySubPackage(&paySubPackageReq, currTenant.Id)
 	if err != nil {
 		c.Error(err)
 		return

@@ -60,7 +60,7 @@ type Restaurant struct {
 	Notes          *string              `json:"notes"`
 	CreatedAt      time.Time            `json:"createdAt"`
 	UpdatedAt      time.Time            `json:"updatedAt"`
-	SubPackageId int64                  `json:"subPackageId"`
+	SubPackageId   int64                  `json:"subPackageId"`
 }
 
 type RestaurantImage struct {
@@ -68,7 +68,6 @@ type RestaurantImage struct {
 	RestaurantId int64     `json:"restaurantId"`
 	Image        string    `json:"image"`
 	CreatedAt    time.Time `json:"createdAt"`
-	Restaurant   *Restaurant
 }
 
 type Order struct {

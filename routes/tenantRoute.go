@@ -17,5 +17,5 @@ func TenantRoutes(r *gin.Engine, prefix string, db *sql.DB) {
 	}
 	tenant := r.Group(prefix, middleware.JwtRestHandler(), middleware.RoleBasedHandler("TENANT"))
 	tenant.POST("/restaurant", middleware.JwtRestHandler(), middleware.RoleBasedHandler("TENANT"), restaurantController.CreateRestaurant)
-	tenant.POST("/order", orderController.PaySubscription)
+	tenant.POST("/order", orderController.PaySubPackage)
 }

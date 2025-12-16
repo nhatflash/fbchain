@@ -60,15 +60,15 @@ definitions:
       tenantId:
         type: integer
     type: object
-  client.PaySubscriptionRequest:
+  client.PaySubPackageRequest:
     properties:
       restaurantId:
         type: integer
-      subscriptionId:
+      subPackageId:
         type: integer
     required:
     - restaurantId
-    - subscriptionId
+    - subPackageId
     type: object
   client.RestaurantResponse:
     properties:
@@ -343,12 +343,12 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: PaySubscription body
+      - description: PaySubPackage body
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/client.PaySubscriptionRequest'
+          $ref: '#/definitions/client.PaySubPackageRequest'
       produces:
       - application/json
       responses:
@@ -361,7 +361,7 @@ paths:
           schema: {}
       security:
       - BearerAuth: []
-      summary: Pay subscription API
+      summary: Pay subscription package API
   /tenant/restaurant:
     post:
       consumes:

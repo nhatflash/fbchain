@@ -135,15 +135,15 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Pay subscription API",
+                "summary": "Pay subscription package API",
                 "parameters": [
                     {
-                        "description": "PaySubscription body",
+                        "description": "PaySubPackage body",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/client.PaySubscriptionRequest"
+                            "$ref": "#/definitions/client.PaySubPackageRequest"
                         }
                     }
                 ],
@@ -291,17 +291,17 @@ const docTemplate = `{
                 }
             }
         },
-        "client.PaySubscriptionRequest": {
+        "client.PaySubPackageRequest": {
             "type": "object",
             "required": [
                 "restaurantId",
-                "subscriptionId"
+                "subPackageId"
             ],
             "properties": {
                 "restaurantId": {
                     "type": "integer"
                 },
-                "subscriptionId": {
+                "subPackageId": {
                     "type": "integer"
                 }
             }

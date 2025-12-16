@@ -57,20 +57,21 @@ func (r *queryResolver) User(ctx context.Context, id string) (*gqlModel.User, er
 }
 
 // Tenants is the resolver for the tenants field.
-func (r *queryResolver) Tenants(ctx context.Context) ([]*model.Tenant, error) {
+func (r *queryResolver) Tenants(ctx context.Context) ([]*gqlModel.Tenant, error) {
 	t, err := r.TenantService.GetListTenant()
 	if err != nil {
 		return nil, err
 	}
-	var tenants []*model.Tenant
+	var tenants []*gqlModel.Tenant
 	for _, tenant := range t {
-		tenants = append(tenants, &tenant)
+		tn := MapToGqlModelTenant(&tenant)
+		tenants = append(tenants, tn)
 	}
 	return tenants, nil
 }
 
 // Tenant is the resolver for the tenant field.
-func (r *queryResolver) Tenant(ctx context.Context, id string) (*model.Tenant, error) {
+func (r *queryResolver) Tenant(ctx context.Context, id string) (*gqlModel.Tenant, error) {
 	var err error
 	var idNum int64
 	idNum, err = strconv.ParseInt(id, 10, 64)
@@ -82,18 +83,63 @@ func (r *queryResolver) Tenant(ctx context.Context, id string) (*model.Tenant, e
 	if err != nil {
 		return nil, err
 	}
-	return t, nil
+	return MapToGqlModelTenant(t), nil
+}
+
+// Restaurants is the resolver for the restaurants field.
+func (r *queryResolver) Restaurants(ctx context.Context) ([]*gqlModel.Restaurant, error) {
+	panic(fmt.Errorf("not implemented: Restaurants - restaurants"))
+}
+
+// Restaurant is the resolver for the restaurant field.
+func (r *queryResolver) Restaurant(ctx context.Context, id string) (*gqlModel.Restaurant, error) {
+	panic(fmt.Errorf("not implemented: Restaurant - restaurant"))
+}
+
+// RestaurantImages is the resolver for the restaurantImages field.
+func (r *queryResolver) RestaurantImages(ctx context.Context) ([]*gqlModel.RestaurantImage, error) {
+	panic(fmt.Errorf("not implemented: RestaurantImages - restaurantImages"))
+}
+
+// RestaurantImage is the resolver for the restaurantImage field.
+func (r *queryResolver) RestaurantImage(ctx context.Context, id string) (*gqlModel.RestaurantImage, error) {
+	panic(fmt.Errorf("not implemented: RestaurantImage - restaurantImage"))
+}
+
+// Tenant is the resolver for the tenant field.
+func (r *restaurantResolver) Tenant(ctx context.Context, obj *gqlModel.Restaurant) (*gqlModel.Tenant, error) {
+	panic(fmt.Errorf("not implemented: Tenant - tenant"))
+}
+
+// Images is the resolver for the images field.
+func (r *restaurantResolver) Images(ctx context.Context, obj *gqlModel.Restaurant) ([]*gqlModel.RestaurantImage, error) {
+	panic(fmt.Errorf("not implemented: Images - images"))
+}
+
+// Restaurant is the resolver for the restaurant field.
+func (r *restaurantImageResolver) Restaurant(ctx context.Context, obj *gqlModel.RestaurantImage) (*gqlModel.Restaurant, error) {
+	panic(fmt.Errorf("not implemented: Restaurant - restaurant"))
 }
 
 // User is the resolver for the user field.
-func (r *tenantResolver) User(ctx context.Context, obj *model.Tenant) (*gqlModel.User, error) {
+func (r *tenantResolver) User(ctx context.Context, obj *gqlModel.Tenant) (*gqlModel.User, error) {
 	var err error
+	var idNum int64
+	idNum, err = strconv.ParseInt(*obj.UserID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
 	var u *model.User
-	u, err = r.UserService.GetUserById(obj.UserId)
+	u, err = r.UserService.GetUserById(idNum)
 	if err != nil {
 		return nil, err
 	}
 	return MapToGqlModelUser(u), nil
+}
+
+// Restaurants is the resolver for the restaurants field.
+func (r *tenantResolver) Restaurants(ctx context.Context, obj *gqlModel.Tenant) ([]*gqlModel.Restaurant, error) {
+	panic(fmt.Errorf("not implemented: Restaurants - restaurants"))
 }
 
 // Mutation returns MutationResolver implementation.
@@ -102,9 +148,17 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// Restaurant returns RestaurantResolver implementation.
+func (r *Resolver) Restaurant() RestaurantResolver { return &restaurantResolver{r} }
+
+// RestaurantImage returns RestaurantImageResolver implementation.
+func (r *Resolver) RestaurantImage() RestaurantImageResolver { return &restaurantImageResolver{r} }
+
 // Tenant returns TenantResolver implementation.
 func (r *Resolver) Tenant() TenantResolver { return &tenantResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type restaurantResolver struct{ *Resolver }
+type restaurantImageResolver struct{ *Resolver }
 type tenantResolver struct{ *Resolver }

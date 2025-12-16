@@ -9,26 +9,6 @@ type SignInRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type InitialTenantRegisterRequest struct {
-	FirstName       string       `json:"firstName" binding:"required,name"`
-	LastName        string       `json:"lastName" binding:"required,name"`
-	Email           string       `json:"email" binding:"required,email"`
-	Password        string       `json:"password" binding:"required"`
-	ConfirmPassword string       `json:"confirmPassword" binding:"required"`
-	Birthdate       string       `json:"birthdate" binding:"required"`
-	Gender          *enum.Gender `json:"gender" binding:"required"`
-}
-
-type CompletedTenantRegisterRequest struct {
-	Phone        string           `json:"phone" binding:"required,phone"`
-	Identity     string           `json:"identity" binding:"required,identity"`
-	Address      string           `json:"address" binding:"required"`
-	PostalCode   string           `json:"postalCode" binding:"required,postalcode"`
-	ProfileImage string           `json:"profileImage"`
-	Description  string           `json:"description"`
-	Type         *enum.TenantType `json:"type"`
-}
-
 type TenantSignUpRequest struct {
 	FirstName       string           `json:"firstName" binding:"required,name"`
 	LastName        string           `json:"lastName" binding:"required,name"`
@@ -66,7 +46,7 @@ type CreateRestaurantRequest struct {
 	Images       []string             `json:"image"`
 }
 
-type PaySubscriptionRequest struct {
+type PaySubPackageRequest struct {
 	RestaurantId   int64 `json:"restaurantId" binding:"required"`
-	SubscriptionId int64 `json:"subscriptionId" binding:"required"`
+	SubPackageId int64 `json:"subPackageId" binding:"required"`
 }

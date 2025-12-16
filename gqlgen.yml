@@ -162,10 +162,27 @@ models:
     model: github.com/nhatflash/fbchain/scalar.CustomDate
   DateTime:
     model: github.com/99designs/gqlgen/graphql.Time
+  Gender:
+    model: github.com/nhatflash/fbchain/enum.Gender
   TenantType:
     model: github.com/nhatflash/fbchain/enum.TenantType
+  RestaurantType:
+    model: github.com/nhatflash/fbchain/enum.RestaurantType
   Tenant:
-    model: github.com/nhatflash/fbchain/model.Tenant
     fields:
       user:
         resolver: true
+      restaurants:
+        resolver: true
+  Restaurant:
+    fields:
+      tenant:
+        resolver: true
+      images:
+        resolver: true
+  RestaurantImage:
+    fields:
+      restaurant:
+        resolver: true
+  
+  

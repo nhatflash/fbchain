@@ -3,6 +3,9 @@
 package model
 
 import (
+	"time"
+
+	"github.com/nhatflash/fbchain/enum"
 	"github.com/nhatflash/fbchain/scalar"
 )
 
@@ -15,6 +18,42 @@ type NewTodo struct {
 }
 
 type Query struct {
+}
+
+type Restaurant struct {
+	ID           string               `json:"id"`
+	Name         string               `json:"name"`
+	Location     *string              `json:"location,omitempty"`
+	Description  *string              `json:"description,omitempty"`
+	ContactEmail *string              `json:"contactEmail,omitempty"`
+	ContactPhone *string              `json:"contactPhone,omitempty"`
+	PostalCode   *string              `json:"postalCode,omitempty"`
+	Type         *enum.RestaurantType `json:"type,omitempty"`
+	AvgRating    *float64             `json:"avgRating,omitempty"`
+	IsActive     *bool                `json:"isActive,omitempty"`
+	Notes        *string              `json:"notes,omitempty"`
+	TenantID     *string              `json:"tenantId,omitempty"`
+	Tenant       *Tenant              `json:"tenant,omitempty"`
+	Images       []*RestaurantImage   `json:"images"`
+}
+
+type RestaurantImage struct {
+	ID           string      `json:"id"`
+	Image        string      `json:"image"`
+	CreatedAt    *time.Time  `json:"createdAt,omitempty"`
+	RestaurantID *string     `json:"restaurantId,omitempty"`
+	Restaurant   *Restaurant `json:"restaurant,omitempty"`
+}
+
+type Tenant struct {
+	ID          string           `json:"id"`
+	Code        string           `json:"code"`
+	Description *string          `json:"description,omitempty"`
+	Type        *enum.TenantType `json:"type,omitempty"`
+	Notes       *string          `json:"notes,omitempty"`
+	UserID      *string          `json:"userId,omitempty"`
+	User        *User            `json:"user,omitempty"`
+	Restaurants []*Restaurant    `json:"restaurants"`
 }
 
 type Todo struct {
@@ -31,7 +70,7 @@ type User struct {
 	Identity     *string            `json:"identity,omitempty"`
 	FirstName    *string            `json:"firstName,omitempty"`
 	LastName     *string            `json:"lastName,omitempty"`
-	Gender       *string            `json:"gender,omitempty"`
+	Gender       *enum.Gender       `json:"gender,omitempty"`
 	Birthdate    *scalar.CustomDate `json:"birthdate,omitempty"`
 	PostalCode   *string            `json:"postalCode,omitempty"`
 	Address      *string            `json:"address,omitempty"`
