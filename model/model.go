@@ -35,7 +35,7 @@ type Tenant struct {
 	Notes       *string			 `json:"notes"`
 }
 
-type Subscription struct {
+type SubPackage struct {
 	Id            int64           `json:"id"`
 	Name          string          `json:"name"`
 	Description   *string  		  `json:"description"`
@@ -43,7 +43,6 @@ type Subscription struct {
 	Price         decimal.Decimal `json:"price"`
 	IsActive      bool            `json:"isActive"`
 	Image         *string  		  `json:"image"`
-	Restaurants   []Restaurant
 }
 
 type Restaurant struct {
@@ -61,10 +60,7 @@ type Restaurant struct {
 	Notes          *string              `json:"notes"`
 	CreatedAt      time.Time            `json:"createdAt"`
 	UpdatedAt      time.Time            `json:"updatedAt"`
-	SubscriptionId int64                `json:"subsciptionId"`
-	Tenant         *Tenant
-	Subscription   *Subscription
-	Images         []RestaurantImage
+	SubPackageId int64                  `json:"subPackageId"`
 }
 
 type RestaurantImage struct {
@@ -79,12 +75,9 @@ type Order struct {
 	Id             int64             `json:"id"`
 	TenantId       int64             `json:"tenantId"`
 	RestaurantId   int64             `json:"restaurantId"`
-	SubscriptionId int64             `json:"subscriptionId"`
+	SubPackageId   int64             `json:"subPackageId"`
 	OrderDate      time.Time         `json:"orderDate"`
-	Status         enum.OrderStatus `json:"status"`
+	Status         enum.OrderStatus  `json:"status"`
 	Amount         decimal.Decimal   `json:"amount"`
 	UpdatedAt      time.Time         `json:"updatedAt"`
-	Tenant         *Tenant
-	Restaurant     *Restaurant
-	Subscription   *Subscription
 }

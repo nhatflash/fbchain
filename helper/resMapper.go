@@ -46,8 +46,8 @@ func MapToTenantResponse(u *model.User, t *model.Tenant) *client.TenantResponse 
 	return &tenantRes
 }
 
-func MapToSubscriptionResponse(s *model.Subscription) *client.SubscriptionResponse {
-	subscriptionRes := client.SubscriptionResponse{
+func MapToSubPackageResponse(s *model.SubPackage) *client.SubPackageResponse {
+	subscriptionRes := client.SubPackageResponse{
 		Id:            s.Id,
 		Name:          s.Name,
 		Description:   s.Description,
@@ -59,10 +59,10 @@ func MapToSubscriptionResponse(s *model.Subscription) *client.SubscriptionRespon
 	return &subscriptionRes
 }
 
-func MapToRestaurantResponse(r *model.Restaurant) *client.RestaurantResponse {
+func MapToRestaurantResponse(r *model.Restaurant, rImgs []model.RestaurantImage) *client.RestaurantResponse {
 	var images []string
-	for i := range r.Images {
-		image := r.Images[i]
+	for i := range rImgs {
+		image := rImgs[i]
 		images = append(images, image.Image)
 	}
 	restaurantRes := client.RestaurantResponse{
@@ -77,7 +77,7 @@ func MapToRestaurantResponse(r *model.Restaurant) *client.RestaurantResponse {
 		Type:           r.Type,
 		AvgRating:      r.AvgRating,
 		Notes:          r.Notes,
-		SubscriptionId: r.SubscriptionId,
+		SubPackageId:   r.SubPackageId,
 		Images:         images,
 	}
 	return &restaurantRes

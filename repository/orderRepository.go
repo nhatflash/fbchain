@@ -47,7 +47,7 @@ func GetLatestTenantOrder(tId int64, db *sql.DB) (*model.Order, error) {
 	var orders []model.Order
 	for rows.Next() {
 		var o model.Order
-		err = rows.Scan(&o.Id, &o.OrderDate, &o.Status, &o.Amount, &o.UpdatedAt, &o.TenantId, &o.RestaurantId, &o.SubscriptionId)
+		err = rows.Scan(&o.Id, &o.OrderDate, &o.Status, &o.Amount, &o.UpdatedAt, &o.TenantId, &o.RestaurantId, &o.SubPackageId)
 		if err != nil {
 			return nil, err
 		}

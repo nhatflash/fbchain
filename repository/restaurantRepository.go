@@ -29,13 +29,6 @@ func CreateRestaurant(name string, location string, description string, email st
 	if err != nil {
 		return nil, err
 	}
-
-	var rImgs *[]model.RestaurantImage
-	rImgs, err = GetRestaurantImages(r.Id, db)
-	if err != nil {
-		return nil, err
-	}
-	r.Images = *rImgs
 	return r, nil
 }
 
@@ -60,16 +53,10 @@ func GetRestaurantByName(name string, db *sql.DB) (*model.Restaurant, error) {
 	var restaurants []model.Restaurant
 	for rows.Next() {
 		var r model.Restaurant
-		err = rows.Scan(&r.Id, &r.Name, &r.Location, &r.Description, &r.ContactEmail, &r.ContactPhone, &r.PostalCode, &r.Type, &r.AvgRating, &r.IsActive, &r.Notes, &r.CreatedAt, &r.UpdatedAt, &r.SubscriptionId, &r.TenantId)
+		err = rows.Scan(&r.Id, &r.Name, &r.Location, &r.Description, &r.ContactEmail, &r.ContactPhone, &r.PostalCode, &r.Type, &r.AvgRating, &r.IsActive, &r.Notes, &r.CreatedAt, &r.UpdatedAt, &r.SubPackageId, &r.TenantId)
 		if err != nil {
 			return nil, err
 		}
-		var rImgs *[]model.RestaurantImage
-		rImgs, err = GetRestaurantImages(r.Id, db)
-		if err != nil {
-			return nil, err
-		}
-		r.Images = *rImgs
 		restaurants = append(restaurants, r)
 	}
 	if len(restaurants) == 0 {
@@ -78,7 +65,7 @@ func GetRestaurantByName(name string, db *sql.DB) (*model.Restaurant, error) {
 	return &restaurants[0], nil
 }
 
-func GetRestaurantImages(rId int64, db *sql.DB) (*[]model.RestaurantImage, error) {
+func GetRestaurantImages(rId int64, db *sql.DB) ([]model.RestaurantImage, error) {
 	var err error
 	var rows *sql.Rows
 	rows, err = db.Query("SELECT * FROM restaurant_images WHERE restaurant_id = $1", rId)
@@ -97,7 +84,7 @@ func GetRestaurantImages(rId int64, db *sql.DB) (*[]model.RestaurantImage, error
 	if len(images) == 0 {
 		return nil, appErr.NotFoundError("No image found.")
 	}
-	return &images, nil
+	return images, nil
 }
 
 func IsRestaurantNameExist(name string, db *sql.DB) bool {
@@ -134,16 +121,10 @@ func GetRestaurantById(rId int64, db *sql.DB) (*model.Restaurant, error) {
 	var restaurants []model.Restaurant
 	for rows.Next() {
 		var r model.Restaurant
-		err = rows.Scan(&r.Id, &r.Name, &r.Location, &r.Description, &r.ContactEmail, &r.ContactPhone, &r.PostalCode, &r.Type, &r.AvgRating, &r.IsActive, &r.Notes, &r.CreatedAt, &r.UpdatedAt, &r.SubscriptionId, &r.TenantId)
+		err = rows.Scan(&r.Id, &r.Name, &r.Location, &r.Description, &r.ContactEmail, &r.ContactPhone, &r.PostalCode, &r.Type, &r.AvgRating, &r.IsActive, &r.Notes, &r.CreatedAt, &r.UpdatedAt, &r.SubPackageId, &r.TenantId)
 		if err != nil {
 			return nil, err
 		}
-		var rImgs *[]model.RestaurantImage
-		rImgs, err = GetRestaurantImages(r.Id, db)
-		if err != nil {
-			return nil, err
-		}
-		r.Images = *rImgs
 		restaurants = append(restaurants, r)
 	}
 	if len(restaurants) == 0 {
@@ -162,16 +143,10 @@ func GetRestaurantsByTenantId(tId int64, db *sql.DB) ([]model.Restaurant, error)
 	var restaurants []model.Restaurant
 	for rows.Next() {
 		var r model.Restaurant
-		err = rows.Scan(&r.Id, &r.Name, &r.Location, &r.Description, &r.ContactEmail, &r.ContactPhone, &r.PostalCode, &r.Type, &r.AvgRating, &r.IsActive, &r.Notes, &r.CreatedAt, &r.UpdatedAt, &r.SubscriptionId, &r.TenantId)
+		err = rows.Scan(&r.Id, &r.Name, &r.Location, &r.Description, &r.ContactEmail, &r.ContactPhone, &r.PostalCode, &r.Type, &r.AvgRating, &r.IsActive, &r.Notes, &r.CreatedAt, &r.UpdatedAt, &r.SubPackageId, &r.TenantId)
 		if err != nil {
 			return nil, err
 		}
-		var rImgs *[]model.RestaurantImage
-		rImgs, err = GetRestaurantImages(r.Id, db)
-		if err != nil {
-			return nil, err
-		}
-		r.Images = *rImgs
 		restaurants = append(restaurants, r)
 	}
 	if len(restaurants) == 0 {
@@ -179,3 +154,4 @@ func GetRestaurantsByTenantId(tId int64, db *sql.DB) ([]model.Restaurant, error)
 	}
 	return restaurants, nil
 }
+

@@ -28,15 +28,15 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Create subscription API",
+                "summary": "Create subscription package API",
                 "parameters": [
                     {
-                        "description": "CreateSubscription body",
+                        "description": "CreateSubPackage body",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/client.CreateSubscriptionRequest"
+                            "$ref": "#/definitions/client.CreateSubPackageRequest"
                         }
                     }
                 ],
@@ -44,7 +44,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/client.SubscriptionResponse"
+                            "$ref": "#/definitions/client.SubPackageResponse"
                         }
                     },
                     "400": {
@@ -244,7 +244,7 @@ const docTemplate = `{
                 }
             }
         },
-        "client.CreateSubscriptionRequest": {
+        "client.CreateSubPackageRequest": {
             "type": "object",
             "required": [
                 "name",
@@ -342,7 +342,7 @@ const docTemplate = `{
                 "postalCode": {
                     "type": "string"
                 },
-                "subscriptionId": {
+                "subPackageId": {
                     "type": "integer"
                 },
                 "tenantId": {
@@ -382,7 +382,7 @@ const docTemplate = `{
                 }
             }
         },
-        "client.SubscriptionResponse": {
+        "client.SubPackageResponse": {
             "type": "object",
             "properties": {
                 "description": {

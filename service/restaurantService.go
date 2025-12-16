@@ -37,7 +37,7 @@ func (rs *RestaurantService) HandleCreateRestaurant(createRestaurantReq *client.
 
 	var err error
 	var exist bool
-	exist, err = repository.AnySubscriptionExists(rs.Db)
+	exist, err = repository.AnySubPackageExists(rs.Db)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,9 @@ func (rs *RestaurantService) HandleCreateRestaurant(createRestaurantReq *client.
 	if err != nil {
 		return nil, err
 	}
-	return helper.MapToRestaurantResponse(r), nil
+	var rImgs []model.RestaurantImage
+	rImgs, err = repository.GetRestaurantImages(r.Id, rs.Db)
+	return helper.MapToRestaurantResponse(r, rImgs), nil
 }
 
 

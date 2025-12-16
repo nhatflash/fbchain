@@ -22,15 +22,15 @@
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Create subscription API",
+                "summary": "Create subscription package API",
                 "parameters": [
                     {
-                        "description": "CreateSubscription body",
+                        "description": "CreateSubPackage body",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/client.CreateSubscriptionRequest"
+                            "$ref": "#/definitions/client.CreateSubPackageRequest"
                         }
                     }
                 ],
@@ -38,7 +38,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/client.SubscriptionResponse"
+                            "$ref": "#/definitions/client.SubPackageResponse"
                         }
                     },
                     "400": {
@@ -238,7 +238,7 @@
                 }
             }
         },
-        "client.CreateSubscriptionRequest": {
+        "client.CreateSubPackageRequest": {
             "type": "object",
             "required": [
                 "name",
@@ -336,7 +336,7 @@
                 "postalCode": {
                     "type": "string"
                 },
-                "subscriptionId": {
+                "subPackageId": {
                     "type": "integer"
                 },
                 "tenantId": {
@@ -376,7 +376,7 @@
                 }
             }
         },
-        "client.SubscriptionResponse": {
+        "client.SubPackageResponse": {
             "type": "object",
             "properties": {
                 "description": {

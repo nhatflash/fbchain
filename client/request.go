@@ -46,7 +46,7 @@ type TenantSignUpRequest struct {
 	Type            *enum.TenantType `json:"type" binding:"required"`
 }
 
-type CreateSubscriptionRequest struct {
+type CreateSubPackageRequest struct {
 	Name          string `json:"name" binding:"required"`
 	Description   string `json:"description"`
 	DurationMonth int    `json:"durationMonth" binding:"number"`

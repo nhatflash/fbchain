@@ -48,14 +48,14 @@ type SignInResponse struct {
 	LastLogin    time.Time `json:"lastLogin"`
 }
 
-type SubscriptionResponse struct {
+type SubPackageResponse struct {
 	Id            int64           `json:"id"`
 	Name          string          `json:"name"`
-	Description   *string          `json:"description"`
+	Description   *string         `json:"description"`
 	DurationMonth int             `json:"durationMonth"`
 	Price         decimal.Decimal `json:"price"`
 	IsActive      bool            `json:"isActive"`
-	Image         *string          `json:"image"`
+	Image         *string         `json:"image"`
 }
 
 type RestaurantResponse struct {
@@ -70,7 +70,7 @@ type RestaurantResponse struct {
 	Type           enum.RestaurantType `json:"type"`
 	AvgRating      decimal.Decimal      `json:"avgRating"`
 	Notes          *string               `json:"notes"`
-	SubscriptionId int64                `json:"subscriptionId"`
+	SubPackageId   int64                `json:"subPackageId"`
 	Images         []string             `json:"images"`
 }
 
