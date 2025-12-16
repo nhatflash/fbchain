@@ -1,9 +1,8 @@
 package service
 
 import (
+	"context"
 	"database/sql"
-
-	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/enum"
 	appError "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/model"
@@ -12,7 +11,7 @@ import (
 )
 
 type IUserService interface {
-	GetCurrentUser(c *gin.Context) (*model.User, error)
+	GetCurrentUser(ctx context.Context) (*model.User, error)
 	IsUserRoleTenant(u *model.User) bool
 	GetListUser() ([]model.User, error)
 	GetUserById(id int64) (*model.User, error)
@@ -29,10 +28,10 @@ func NewUserService(db *sql.DB) IUserService {
 	}
 }
 
-func (u *UserService) GetCurrentUser(c *gin.Context) (*model.User, error) {
+func (u *UserService) GetCurrentUser(ctx context.Context) (*model.User, error) {
 	var err error
 	var claims *security.JwtAccessClaims
-	claims, err = security.GetCurrentClaims(c)
+	claims, err = GetCurrentClaims(ctx)
 	if err != nil {
 		return nil, err
 	}

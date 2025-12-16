@@ -5,11 +5,9 @@ import (
 	"os"
 	"strconv"
 	"time"
-	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/nhatflash/fbchain/enum"
 	"github.com/nhatflash/fbchain/model"
-	appErr "github.com/nhatflash/fbchain/error"
 )
 
 type JwtAccessClaims struct {
@@ -92,13 +90,6 @@ func ValidateJwtAccessToken(accessTokenStr string) (*JwtAccessClaims, error) {
 	return claims, nil
 }
 
-func GetCurrentClaims(c *gin.Context) (*JwtAccessClaims, error) {
-	defaultClaims, exists := c.Get("user")
-	if !exists {
-		return nil, appErr.UnauthorizedError("User is not authenticated")
-	}
-	return defaultClaims.(*JwtAccessClaims), nil
-}
 
 func buildClaims(u *model.User, expiration int) jwt.RegisteredClaims {
 	return jwt.RegisteredClaims{

@@ -40,7 +40,8 @@ func JwtRestHandler() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		c.Set("user", claims)
+		ctx := context.WithValue(c.Request.Context(), UserKey{}, claims)
+		c.Request = c.Request.WithContext(ctx)
 		c.Next()
 	}
 }
