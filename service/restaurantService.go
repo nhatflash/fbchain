@@ -9,8 +9,22 @@ import (
 	"github.com/nhatflash/fbchain/repository"
 )
 
+type IRestaurantService interface {
+	HandleCreateRestaurant(createRestaurantReq *client.CreateRestaurantRequest, tenantId int64, db *sql.DB) (*client.RestaurantResponse, error)
+}
 
-func HandleCreateRestaurant(createRestaurantReq *client.CreateRestaurantRequest, tenantId int64, db *sql.DB) (*client.RestaurantResponse, error) {
+type RestaurantService struct {
+	Db 				*sql.DB
+}
+
+func NewRestaurantService(db *sql.DB) IRestaurantService {
+	return &RestaurantService{
+		Db: db,
+	}
+}
+
+
+func (*RestaurantService) HandleCreateRestaurant(createRestaurantReq *client.CreateRestaurantRequest, tenantId int64, db *sql.DB) (*client.RestaurantResponse, error) {
 	name := createRestaurantReq.Name
 	location := createRestaurantReq.Location
 	description := createRestaurantReq.Description

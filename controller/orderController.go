@@ -34,14 +34,16 @@ func (oc OrderController) PaySubscription(c *gin.Context) {
 	}
 
 	var currTenant *model.Tenant
-	currTenant, err = service.GetCurrentTenant(c, oc.Db)
+	tenantService := service.NewTenantService(oc.Db)
+	currTenant, err = tenantService.GetCurrentTenant(c)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
 	var res *client.OrderResponse
-	res, err = service.HandlePaySubscription(&paySubscriptionReq, currTenant.Id, oc.Db)
+	orderService := service.NewOrderService(oc.Db)
+	res, err = orderService.HandlePaySubscription(&paySubscriptionReq, currTenant.Id, oc.Db)
 	if err != nil {
 		c.Error(err)
 		return

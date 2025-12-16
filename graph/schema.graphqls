@@ -2,6 +2,8 @@
 #
 # https://gqlgen.com/getting-started/
 
+scalar Date
+
 type Todo {
   id: ID!
   text: String!
@@ -11,11 +13,21 @@ type Todo {
 
 type User {
   id: ID!
-  name: String!
+  email: String!
+  phone: String
+  identity: String
+  firstName: String
+  lastName: String
+  gender: String
+  birthdate: Date
+  postalCode: String
+  address: String
+  profileImage: String
 }
 
 type Query {
-  todos: [Todo!]!
+  users: [User!]!
+  user(id: ID!): User
 }
 
 input NewTodo {

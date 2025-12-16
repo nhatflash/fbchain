@@ -5,14 +5,15 @@ schema:
 # Where should the generated server code go?
 exec:
   package: graph
-  layout: single-file # Only other option is "follow-schema," ie multi-file.
+  dir: graph
+  layout: follow-schema # Only other option is "follow-schema," ie multi-file.
 
   # Only for single-file layout:
-  filename: graph/generated.go
+  # filename: graph/generated.go
 
   # Only for follow-schema layout:
   # dir: graph
-  # filename_template: "{name}.generated.go"
+  filename_template: "{name}.generated.go"
 
   # Optional: Maximum number of goroutines in concurrency to use per child resolvers(default: unlimited)
   # worker_limit: 1000
@@ -157,3 +158,7 @@ models:
     model:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
+  Date:
+    model: github.com/nhatflash/fbchain/scalar.CustomDate
+  DateTime:
+    model: github.com/99designs/gqlgen/graphql.Time

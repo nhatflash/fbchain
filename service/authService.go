@@ -2,24 +2,35 @@ package service
 
 import (
 	"database/sql"
-	"github.com/nhatflash/fbchain/client"
-	"github.com/nhatflash/fbchain/repository"
-	"github.com/nhatflash/fbchain/helper"
-	appError "github.com/nhatflash/fbchain/error"
-	"github.com/nhatflash/fbchain/security"
-	"time"
 	"strings"
+	"time"
+	"fmt"
+	"github.com/nhatflash/fbchain/client"
+	appError "github.com/nhatflash/fbchain/error"
+	"github.com/nhatflash/fbchain/helper"
 	"github.com/nhatflash/fbchain/model"
+	"github.com/nhatflash/fbchain/repository"
+	"github.com/nhatflash/fbchain/security"
 )
 
-type AuthService interface {
+type IAuthService interface {
 	HandleSignIn(signInReq *client.SignInRequest, db *sql.DB) (*client.SignInResponse, error)
 	HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpRequest, db *sql.DB) (*client.TenantResponse, error)
 }
 
+type AuthService struct {
+	Db  	*sql.DB
+}
+
+func NewAuthService(db *sql.DB) IAuthService {
+	return &AuthService{
+		Db: db,
+	}
+}
+
 
 // Sign in method
-func HandleSignIn(signInReq *client.SignInRequest, db *sql.DB) (*client.SignInResponse, error) {
+func (*AuthService) HandleSignIn(signInReq *client.SignInRequest, db *sql.DB) (*client.SignInResponse, error) {
 	login := signInReq.Login
 
 	var loggedUser *model.User
@@ -58,7 +69,7 @@ func HandleSignIn(signInReq *client.SignInRequest, db *sql.DB) (*client.SignInRe
 }
 
 // tenant sign up method
-func HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpRequest, db *sql.DB) (*client.TenantResponse, error) {
+func (a *AuthService) HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpRequest, db *sql.DB) (*client.TenantResponse, error) {
 	firstName := tenantSignUpReq.FirstName
 	lastName := tenantSignUpReq.LastName
 	email := tenantSignUpReq.Email
@@ -93,7 +104,7 @@ func HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpRequest, db *sql.DB)
 	if userErr != nil {
 		return nil, userErr
 	}
-	code := GenerateTenantCode()
+	code := generateTenantCode()
 	tenant, tenantErr := repository.CreateTenantInformation(code, description, tenantType, userTenant.Id, db)
 
 	if tenantErr != nil {
@@ -102,6 +113,11 @@ func HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpRequest, db *sql.DB)
 	return helper.MapToTenantResponse(userTenant, tenant), nil
 }
 
+func generateTenantCode() string {
+	now := time.Now()
+	unixMilli := now.UnixMilli()
+	return fmt.Sprintf("TENANT-%d", unixMilli)
+}
 
 func validateSignUpRequest(email string, phone string, identity string, password string, confirmPassword string, db *sql.DB) error {
 	if repository.CheckUserEmailExists(email, db) {
@@ -118,3 +134,4 @@ func validateSignUpRequest(email string, phone string, identity string, password
 	}
 	return nil
 }
+

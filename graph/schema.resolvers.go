@@ -8,18 +8,80 @@ package graph
 import (
 	"context"
 	"fmt"
+	"strconv"
 
-	"github.com/nhatflash/fbchain/graph/model"
+	appErr "github.com/nhatflash/fbchain/error"
+	gqlModel "github.com/nhatflash/fbchain/graph/model"
+	"github.com/nhatflash/fbchain/middleware"
+	"github.com/nhatflash/fbchain/model"
+	"github.com/nhatflash/fbchain/scalar"
+	"github.com/nhatflash/fbchain/security"
 )
 
 // CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
+func (r *mutationResolver) CreateTodo(ctx context.Context, input gqlModel.NewTodo) (*gqlModel.Todo, error) {
 	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
 }
 
-// Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: Todos - todos"))
+// Users is the resolver for the users field.
+func (r *queryResolver) Users(ctx context.Context) ([]*gqlModel.User, error) {
+	var err error
+	user, ok := ctx.Value(middleware.UserKey{}).(*security.JwtAccessClaims)
+	if !ok || user == nil {
+		return nil, appErr.UnauthorizedError("Authentication is required.")
+	}
+
+	var users []model.User
+	users, err = r.UserService.GetListUser()
+	if err != nil {
+		return nil, err
+	}
+	var gqlUsers []*gqlModel.User
+	for _, u := range users {
+		var gqlU = gqlModel.User{
+			ID:           strconv.FormatInt(u.Id, 10),
+			Email:        u.Email,
+			Phone:        &u.Phone.String,
+			Identity:     &u.Identity.String,
+			FirstName:    &u.FirstName,
+			LastName:     &u.LastName,
+			Gender:       (*string)(u.Gender),
+			Birthdate:    (*scalar.CustomDate)(&u.Birthdate),
+			PostalCode:   &u.PostalCode.String,
+			Address:      &u.Address.String,
+			ProfileImage: &u.ProfileImage.String,
+		}
+		gqlUsers = append(gqlUsers, &gqlU)
+	}
+	return gqlUsers, nil
+}
+
+// User is the resolver for the user field.
+func (r *queryResolver) User(ctx context.Context, id string) (*gqlModel.User, error) {
+	var err error
+	var idNum int64
+	idNum, err = strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var u *model.User
+	u, err = r.UserService.GetUserById(idNum)
+	if err != nil {
+		return nil, err
+	}
+	return &gqlModel.User{
+		ID: strconv.FormatInt(u.Id, 10),
+		Email: u.Email,
+		Phone: &u.Phone.String,
+		Identity: &u.Identity.String,
+		FirstName: &u.FirstName,
+		LastName: &u.LastName,
+		Gender: (*string)(u.Gender),
+		Birthdate: (*scalar.CustomDate)(&u.Birthdate),
+		PostalCode: &u.PostalCode.String,
+		Address: &u.Address.String,
+		ProfileImage: &u.ProfileImage.String,
+	}, nil
 }
 
 // Mutation returns MutationResolver implementation.

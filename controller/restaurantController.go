@@ -32,13 +32,15 @@ func (rc RestaurantController) CreateRestaurant(c *gin.Context) {
 		return
 	}
 	var currUser *model.User
-	currUser, err = service.GetCurrentUser(c, rc.Db)
+	userService := service.NewUserService(rc.Db)
+	currUser, err = userService.GetCurrentUser(c)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 	var res *client.RestaurantResponse
-	res, err = service.HandleCreateRestaurant(&createRestaurantReq, currUser.Id, rc.Db)
+	restaurantService := service.NewRestaurantService(rc.Db)
+	res, err = restaurantService.HandleCreateRestaurant(&createRestaurantReq, currUser.Id, rc.Db)
 	if err != nil {
 		c.Error(err)
 		return

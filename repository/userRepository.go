@@ -121,3 +121,49 @@ func CheckIfAdminUserAlreadyExists(db *sql.DB) (bool, error) {
 	}
 	return false, nil
 }
+
+
+func ListAllUsers(db *sql.DB) ([]model.User, error) {
+	var rows *sql.Rows
+	var err error
+	rows, err = db.Query("SELECT * FROM users ORDER BY id DESC")
+	if err != nil {
+		return nil, err
+	}
+	var users []model.User
+	for rows.Next() {
+		var u model.User
+		err = rows.Scan(&u.Id, &u.Email, &u.Password, &u.Role, &u.Phone, &u.Identity, &u.FirstName, &u.LastName, &u.Gender, &u.Birthdate, &u.PostalCode, &u.Address, &u.ProfileImage, &u.Status, &u.CreatedAt, &u.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, u)
+	}
+	if len(users) == 0 {
+		return nil, appError.NotFoundError("No user found.")
+	}
+	return users, nil
+}
+
+
+func GetUserById(db *sql.DB, id int64) (*model.User, error) {
+	var rows *sql.Rows
+	var err error
+	rows, err = db.Query("SELECT * FROM users WHERE id = $1 LIMIT 1", id)
+	if err != nil {
+		return nil, err
+	}
+	var users []model.User
+	for rows.Next() {
+		var u model.User
+		err = rows.Scan(&u.Id, &u.Email, &u.Password, &u.Role, &u.Phone, &u.Identity, &u.FirstName, &u.LastName, &u.Gender, &u.Birthdate, &u.PostalCode, &u.Address, &u.ProfileImage, &u.Status, &u.CreatedAt, &u.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, u)
+	}
+	if len(users) == 0 {
+		return nil, appError.NotFoundError("No user found.")
+	}
+	return &users[0], nil
+}

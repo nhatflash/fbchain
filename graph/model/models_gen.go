@@ -2,6 +2,10 @@
 
 package model
 
+import (
+	"github.com/nhatflash/fbchain/scalar"
+)
+
 type Mutation struct {
 }
 
@@ -21,6 +25,15 @@ type Todo struct {
 }
 
 type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID           string             `json:"id"`
+	Email        string             `json:"email"`
+	Phone        *string            `json:"phone,omitempty"`
+	Identity     *string            `json:"identity,omitempty"`
+	FirstName    *string            `json:"firstName,omitempty"`
+	LastName     *string            `json:"lastName,omitempty"`
+	Gender       *string            `json:"gender,omitempty"`
+	Birthdate    *scalar.CustomDate `json:"birthdate,omitempty"`
+	PostalCode   *string            `json:"postalCode,omitempty"`
+	Address      *string            `json:"address,omitempty"`
+	ProfileImage *string            `json:"profileImage,omitempty"`
 }

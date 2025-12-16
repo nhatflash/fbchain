@@ -11,31 +11,61 @@ import (
 	"github.com/nhatflash/fbchain/security"
 )
 
-type UserService interface {
-	GetCurrentUser(c *gin.Context, db *sql.DB) (*model.User, error)
+type IUserService interface {
+	GetCurrentUser(c *gin.Context) (*model.User, error)
 	IsUserRoleTenant(u *model.User) bool
-	GetListUser(db *sql.DB) (*[]model.User, error)
+	GetListUser() ([]model.User, error)
+	GetUserById(id int64) (*model.User, error)
 }
 
-func GetCurrentUser(c *gin.Context, db *sql.DB) (*model.User, error) {
-	defaultClaims, exists := c.Get("user")
-	if !exists {
-		return nil, appError.UnauthorizedError("User is not authenticated")
+type UserService struct {
+	Db *sql.DB
+}
+
+
+func NewUserService(db *sql.DB) IUserService {
+	return &UserService{
+		Db: db,
 	}
-	claims := defaultClaims.(*security.JwtAccessClaims)
+}
+
+func (u *UserService) GetCurrentUser(c *gin.Context) (*model.User, error) {
+	var err error
+	var claims *security.JwtAccessClaims
+	claims, err = security.GetCurrentClaims(c)
+	if err != nil {
+		return nil, err
+	}
 	email := claims.Email
-	user, err := repository.GetUserByEmail(email, db)
+	var user *model.User
+	user, err = repository.GetUserByEmail(email, u.Db)
 	if err != nil {
 		return nil, appError.NotFoundError("User not found")
 	}
 	return user, nil
 }
 
-func IsUserRoleTenant(u *model.User) bool {
+func (*UserService) IsUserRoleTenant(u *model.User) bool {
 	return *u.Role == enum.ROLE_TENANT
 }
 
-
-func GetListUser(db *sql.DB) (*[]model.User, error) {
-	return nil, nil
+func (u *UserService) GetListUser() ([]model.User, error) {
+	users, err := repository.ListAllUsers(u.Db)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }
+
+
+func (u *UserService) GetUserById(id int64) (*model.User, error) {
+	var err error
+	var user *model.User
+	user, err = repository.GetUserById(u.Db, id)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+

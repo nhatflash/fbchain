@@ -2,30 +2,37 @@ package service
 
 import (
 	"database/sql"
-	"fmt"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/repository"
 )
 
-func GenerateTenantCode() string {
-	now := time.Now()
-	unixMilli := now.UnixMilli()
-	return fmt.Sprintf("TENANT-%d", unixMilli)
+type ITenantService interface {
+	GetCurrentTenant(c *gin.Context) (*model.Tenant, error)
 }
 
-func GetCurrentTenant(c *gin.Context, db *sql.DB) (*model.Tenant, error) {
+type TenantService struct {
+	Db 		*sql.DB
+}
+
+func NewTenantService(db *sql.DB) ITenantService {
+	return &TenantService{
+		Db: db,
+	}
+}
+
+
+func (t *TenantService) GetCurrentTenant(c *gin.Context) (*model.Tenant, error) {
 	var err error
 	var currUser *model.User
 
-	currUser, err = GetCurrentUser(c, db)
+	userService := NewUserService(t.Db)
+	currUser, err = userService.GetCurrentUser(c)
 	if err != nil {
 		return nil, err
 	}
 	var currTenant *model.Tenant
-	currTenant, err = repository.GetTenantByUserId(currUser.Id, db)
+	currTenant, err = repository.GetTenantByUserId(currUser.Id, t.Db)
 	if err != nil {
 		return nil, err
 	}

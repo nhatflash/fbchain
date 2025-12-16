@@ -30,7 +30,8 @@ func (authController AuthController) SignIn(c *gin.Context) {
 		return
 	}
 	var res *client.SignInResponse
-	res, err = service.HandleSignIn(&signInRequest, authController.Db)
+	authService := service.NewAuthService(authController.Db)
+	res, err = authService.HandleSignIn(&signInRequest, authController.Db)
 	if err != nil {
 		c.Error(err)
 		return
@@ -53,7 +54,8 @@ func (authController AuthController) TenantSignUp(c *gin.Context) {
 		return
 	}
 	var res *client.TenantResponse
-	res, err = service.HandleTenantSignUp(&tenantSignUpReq, authController.Db)
+	authService := service.NewAuthService(authController.Db)
+	res, err = authService.HandleTenantSignUp(&tenantSignUpReq, authController.Db)
 	if err != nil {
 		c.Error(err)
 		return

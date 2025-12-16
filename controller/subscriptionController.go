@@ -32,7 +32,8 @@ func (sc SubscriptionController) CreateSubscription(c *gin.Context) {
 		return
 	}
 	var res *client.SubscriptionResponse
-	res, err = service.HandleCreateSubscription(&createSubscriptionReq, sc.Db)
+	subscriptionService := service.NewSubscriptionService(sc.Db)
+	res, err = subscriptionService.HandleCreateSubscription(&createSubscriptionReq, sc.Db)
 	if err != nil {
 		c.Error(err)
 		return

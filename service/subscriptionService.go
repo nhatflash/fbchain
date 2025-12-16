@@ -11,7 +11,21 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func HandleCreateSubscription(createSubScriptionReq *client.CreateSubscriptionRequest, db *sql.DB) (*client.SubscriptionResponse, error) {
+type ISubscriptionService interface {
+	HandleCreateSubscription(createSubScriptionReq *client.CreateSubscriptionRequest, db *sql.DB) (*client.SubscriptionResponse, error)
+}
+
+type SubscriptionService struct {
+	Db 			*sql.DB
+}
+
+func NewSubscriptionService(db *sql.DB) ISubscriptionService {
+	return &SubscriptionService{
+		Db: db,
+	}
+}
+
+func (*SubscriptionService) HandleCreateSubscription(createSubScriptionReq *client.CreateSubscriptionRequest, db *sql.DB) (*client.SubscriptionResponse, error) {
 	name := createSubScriptionReq.Name
 	description := createSubScriptionReq.Description
 	durationMonth := createSubScriptionReq.DurationMonth

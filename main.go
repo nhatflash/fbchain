@@ -1,9 +1,15 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -11,19 +17,16 @@ import (
 	_ "github.com/lib/pq"
 	pg "github.com/nhatflash/fbchain/database"
 	_ "github.com/nhatflash/fbchain/docs"
+	"github.com/nhatflash/fbchain/graph"
 	"github.com/nhatflash/fbchain/helper"
+	"github.com/nhatflash/fbchain/initializer"
 	"github.com/nhatflash/fbchain/middleware"
 	"github.com/nhatflash/fbchain/routes"
+	"github.com/nhatflash/fbchain/service"
 	swgFiles "github.com/swaggo/files"
 	ginSwg "github.com/swaggo/gin-swagger"
-	"github.com/nhatflash/fbchain/initializer"
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/lru"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/nhatflash/fbchain/graph"
 	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // @title FB Chain Management API
@@ -42,11 +45,21 @@ func main() {
 	}
 	r := gin.Default()
 
-	graphqlHandler := handler.New(
+	db, dbErr := pg.ConnectToDatabase()
+	if dbErr != nil {
+		log.Fatalln("Connect to PostgreSQL failed", dbErr.Error())
+		return
+	}
+
+	defer db.Close()
+
+	userService := service.NewUserService(db)
+
+	gqlHandler := handler.New(
 		graph.NewExecutableSchema(
 			graph.Config{
 				Resolvers: &graph.Resolver{
-
+					UserService: userService,
 				},
 			},
 		),
@@ -56,14 +69,17 @@ func main() {
 	r.Use(middleware.ErrorHandler())
 	r.Use(middleware.FilterConfigurer("http://localhost:5173"))
 
-	graphqlHandler.AddTransport(transport.Options{})
-	graphqlHandler.AddTransport(transport.GET{})
-	graphqlHandler.AddTransport(transport.POST{})
+	gqlHandler.AddTransport(transport.Options{})
+	gqlHandler.AddTransport(transport.GET{})
+	gqlHandler.AddTransport(transport.POST{})
 
-	graphqlHandler.SetQueryCache(lru.New[*ast.QueryDocument](1000))
-	graphqlHandler.Use(extension.Introspection{})
-	graphqlHandler.Use(extension.AutomaticPersistedQuery{
+	gqlHandler.SetQueryCache(lru.New[*ast.QueryDocument](1000))
+	gqlHandler.Use(extension.Introspection{})
+	gqlHandler.Use(extension.AutomaticPersistedQuery{
 		Cache: lru.New[string](100),
+	})
+	gqlHandler.SetErrorPresenter(func (ctx context.Context, err error) *gqlerror.Error {
+		return gqlerror.Errorf(err.Error(), "Error code: 404")
 	})
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
@@ -80,14 +96,6 @@ func main() {
 		port = ":8080"
 	}
 
-	db, dbErr := pg.HandleConnection()
-	if dbErr != nil {
-		log.Fatalln("Connect to PostgreSQL failed", dbErr.Error())
-		return
-	}
-
-	defer db.Close()
-
 	initErr := initializer.CreateAdminUserIfNotExists(db)
 	if initErr != nil {
 		log.Fatalln("Error when perform initialize admin account.")
@@ -100,8 +108,8 @@ func main() {
 		playground.Handler("GraphQL", "/graphql")(c.Writer, c.Request)
 	})
 
-	r.POST("/graphql", middleware.JwtAccessHandler(), func(c *gin.Context) {
-		graphqlHandler.ServeHTTP(c.Writer, c.Request)
+	r.POST("/graphql", middleware.JwtGraphQLHandler(), func(c *gin.Context) {
+		gqlHandler.ServeHTTP(c.Writer, c.Request)
 	})
 
 	r.Run(port)

@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func HandleConnection() (*sql.DB, error) {
+func ConnectToDatabase() (*sql.DB, error) {
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
 	dbSslMode := os.Getenv("DB_SSLMODE")

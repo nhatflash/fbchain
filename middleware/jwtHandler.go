@@ -1,35 +1,73 @@
 package middleware
 
 import (
-	"slices"
+	"context"
 	"errors"
+	"slices"
 	"strings"
+
 	"github.com/gin-gonic/gin"
 	appError "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/security"
 )
 
-func JwtAccessHandler() gin.HandlerFunc {
+const AUTH_HEADER = "Authorization"
+
+type UserKey struct {
+
+}
+
+func JwtRestHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
+		authHeader := c.GetHeader(AUTH_HEADER)
 		if authHeader == "" {
 			c.Error(appError.UnauthorizedError("Missing authorization header."))
 			c.Abort()
 			return
 		}
-		token, tokenErr := getTokenFromHeader(authHeader)
-		if tokenErr != nil {
-			c.Error(appError.UnauthorizedError(tokenErr.Error()))
+		var err error
+		var token string
+		token, err = getTokenFromHeader(authHeader)
+		if err != nil {
+			c.Error(appError.UnauthorizedError(err.Error()))
 			c.Abort()
 			return
 		}
-		claims, claimsErr := security.ValidateJwtAccessToken(token)
-		if claimsErr != nil {
-			c.Error(appError.UnauthorizedError(claimsErr.Error()))
+		var claims *security.JwtAccessClaims
+		claims, err = security.ValidateJwtAccessToken(token)
+		if err != nil {
+			c.Error(appError.UnauthorizedError(err.Error()))
 			c.Abort()
 			return
 		}
 		c.Set("user", claims)
+		c.Next()
+	}
+}
+
+
+func JwtGraphQLHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader(AUTH_HEADER)
+		if authHeader == "" {
+			c.Next()
+			return
+		}
+		var err error
+		var token string
+		token, err = getTokenFromHeader(authHeader)
+		if err != nil {
+			c.Next()
+			return
+		}
+		var claims *security.JwtAccessClaims
+		claims, err = security.ValidateJwtAccessToken(token)
+		if err != nil {
+			c.Next()
+			return
+		}
+		ctx := context.WithValue(c.Request.Context(), UserKey{}, claims)
+		c.Request = c.Request.WithContext(ctx)
 		c.Next()
 	}
 }

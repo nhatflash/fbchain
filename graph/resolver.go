@@ -4,5 +4,10 @@ package graph
 //
 // It serves as dependency injection for your app, add any dependencies you require
 // here.
+import (
+	"github.com/nhatflash/fbchain/service"
+)
 
-type Resolver struct{}
+type Resolver struct{
+	UserService		service.IUserService
+}

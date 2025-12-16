@@ -10,7 +10,21 @@ import (
 	"github.com/nhatflash/fbchain/repository"
 )
 
-func HandlePaySubscription(paySubscriptionReq *client.PaySubscriptionRequest, tenantId int64, db *sql.DB) (*client.OrderResponse, error) {
+type IOrderService interface {
+	HandlePaySubscription(paySubscriptionReq *client.PaySubscriptionRequest, tenantId int64, db *sql.DB) (*client.OrderResponse, error)
+}
+
+type OrderService struct {
+	Db 			*sql.DB
+}
+
+func NewOrderService(db *sql.DB) IOrderService {
+	return &OrderService{
+		Db: db,
+	}
+}
+
+func (*OrderService) HandlePaySubscription(paySubscriptionReq *client.PaySubscriptionRequest, tenantId int64, db *sql.DB) (*client.OrderResponse, error) {
 	restaurantId := paySubscriptionReq.RestaurantId
 	subscriptionId := paySubscriptionReq.SubscriptionId
 
