@@ -125,10 +125,19 @@ func GetCurrentClaims(ctx context.Context) (*security.JwtAccessClaims, error) {
 	return claims, nil
 }
 
+
+
 func generateTenantCode() string {
 	now := time.Now()
 	unixMilli := now.UnixMilli()
 	return fmt.Sprintf("TENANT-%d", unixMilli)
+}
+
+
+func generateStaffCode() string {
+	now := time.Now()
+	unixMilli := now.UnixMilli()
+	return fmt.Sprintf("STAFF-%d", unixMilli)
 }
 
 func validateSignUpRequest(email string, phone string, identity string, password string, confirmPassword string, db *sql.DB) error {
