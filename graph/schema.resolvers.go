@@ -10,11 +10,8 @@ import (
 	"fmt"
 	"strconv"
 
-	appErr "github.com/nhatflash/fbchain/error"
 	gqlModel "github.com/nhatflash/fbchain/graph/model"
-	"github.com/nhatflash/fbchain/middleware"
 	"github.com/nhatflash/fbchain/model"
-	"github.com/nhatflash/fbchain/security"
 )
 
 // CreateTodo is the resolver for the createTodo field.
@@ -25,10 +22,10 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input gqlModel.NewTod
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*gqlModel.User, error) {
 	var err error
-	user, ok := ctx.Value(middleware.UserKey{}).(*security.JwtAccessClaims)
-	if !ok || user == nil {
-		return nil, appErr.UnauthorizedError("Authentication is required.")
-	}
+	// user, ok := ctx.Value(middleware.UserKey{}).(*security.JwtAccessClaims)
+	// if !ok || user == nil {
+	// 	return nil, appErr.UnauthorizedError("Authentication is required.")
+	// }
 
 	var users []model.User
 	users, err = r.UserService.GetListUser()
@@ -61,17 +58,42 @@ func (r *queryResolver) User(ctx context.Context, id string) (*gqlModel.User, er
 
 // Tenants is the resolver for the tenants field.
 func (r *queryResolver) Tenants(ctx context.Context) ([]*model.Tenant, error) {
-	panic(fmt.Errorf("not implemented: Tenants - tenants"))
+	t, err := r.TenantService.GetListTenant()
+	if err != nil {
+		return nil, err
+	}
+	var tenants []*model.Tenant
+	for _, tenant := range t {
+		tenants = append(tenants, &tenant)
+	}
+	return tenants, nil
 }
 
 // Tenant is the resolver for the tenant field.
 func (r *queryResolver) Tenant(ctx context.Context, id string) (*model.Tenant, error) {
-	panic(fmt.Errorf("not implemented: Tenant - tenant"))
+	var err error
+	var idNum int64
+	idNum, err = strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var t *model.Tenant
+	t, err = r.TenantService.GetTenantById(idNum)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }
 
 // User is the resolver for the user field.
 func (r *tenantResolver) User(ctx context.Context, obj *model.Tenant) (*gqlModel.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	var err error
+	var u *model.User
+	u, err = r.UserService.GetUserById(obj.UserId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlModelUser(u), nil
 }
 
 // Mutation returns MutationResolver implementation.
@@ -86,21 +108,3 @@ func (r *Resolver) Tenant() TenantResolver { return &tenantResolver{r} }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type tenantResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-/*
-	func (r *tenantResolver) Description(ctx context.Context, obj *model.Tenant) (*string, error) {
-	panic(fmt.Errorf("not implemented: Description - description"))
-}
-func (r *tenantResolver) Type(ctx context.Context, obj *model.Tenant) (*string, error) {
-	panic(fmt.Errorf("not implemented: Type - type"))
-}
-func (r *tenantResolver) Notes(ctx context.Context, obj *model.Tenant) (*string, error) {
-	panic(fmt.Errorf("not implemented: Notes - notes"))
-}
-*/

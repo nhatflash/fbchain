@@ -54,12 +54,14 @@ func main() {
 	defer db.Close()
 
 	userService := service.NewUserService(db)
+	tenantService := service.NewTenantService(db)
 
 	gqlHandler := handler.New(
 		graph.NewExecutableSchema(
 			graph.Config{
 				Resolvers: &graph.Resolver{
 					UserService: userService,
+					TenantService: tenantService,
 				},
 			},
 		),

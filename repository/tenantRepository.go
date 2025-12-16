@@ -90,3 +90,24 @@ func GetTenantByUserId(uId int64, db *sql.DB) (*model.Tenant, error) {
 	}
 	return &tenants[0], nil
 }
+
+
+func ListAllTenants(db *sql.DB) ([]model.Tenant, error) {
+	var rows *sql.Rows
+	var err error
+
+	rows, err = db.Query("SELECT * FROM tenants ORDER BY id ASC")
+	if err != nil {
+		return nil, err
+	}
+	var tenants []model.Tenant
+	for rows.Next() {
+		var t model.Tenant
+		err = rows.Scan(&t.Id, &t.Code, &t.Description, &t.Type, &t.Notes, &t.UserId)
+		if err != nil {
+			return nil, err
+		}
+		tenants = append(tenants, t)
+	}
+	return tenants, nil
+}

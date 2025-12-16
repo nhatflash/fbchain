@@ -167,3 +167,4 @@ func GetUserById(db *sql.DB, id int64) (*model.User, error) {
 	}
 	return &users[0], nil
 }
+

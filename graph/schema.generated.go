@@ -619,9 +619,9 @@ func (ec *executionContext) _Tenant_user(ctx context.Context, field graphql.Coll
 			return ec.resolvers.Tenant().User(ctx, obj)
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐUser,
+		ec.marshalOUser2ᚖgithubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐUser,
 		true,
-		true,
+		false,
 	)
 }
 
@@ -1378,16 +1378,13 @@ func (ec *executionContext) _Tenant(ctx context.Context, sel ast.SelectionSet, o
 		case "user":
 			field := field
 
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Tenant_user(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
 				return res
 			}
 
@@ -1625,10 +1622,6 @@ func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋnhatflashᚋfbchain�
 		return graphql.Null
 	}
 	return ec._Todo(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNUser2githubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
-	return ec._User(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
