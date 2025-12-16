@@ -11,7 +11,9 @@ import (
 	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/nhatflash/fbchain/enum"
 	"github.com/nhatflash/fbchain/graph/model"
+	model1 "github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/scalar"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -24,6 +26,11 @@ type MutationResolver interface {
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*model.User, error)
 	User(ctx context.Context, id string) (*model.User, error)
+	Tenants(ctx context.Context) ([]*model1.Tenant, error)
+	Tenant(ctx context.Context, id string) (*model1.Tenant, error)
+}
+type TenantResolver interface {
+	User(ctx context.Context, obj *model1.Tenant) (*model.User, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -49,6 +56,17 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_tenant_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -240,6 +258,104 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_tenants(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_tenants,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().Tenants(ctx)
+		},
+		nil,
+		ec.marshalNTenant2ᚕᚖgithubᚗcomᚋnhatflashᚋfbchainᚋmodelᚐTenantᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_tenants(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Tenant_id(ctx, field)
+			case "code":
+				return ec.fieldContext_Tenant_code(ctx, field)
+			case "description":
+				return ec.fieldContext_Tenant_description(ctx, field)
+			case "type":
+				return ec.fieldContext_Tenant_type(ctx, field)
+			case "notes":
+				return ec.fieldContext_Tenant_notes(ctx, field)
+			case "user":
+				return ec.fieldContext_Tenant_user(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Tenant", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_tenant(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_tenant,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().Tenant(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		ec.marshalOTenant2ᚖgithubᚗcomᚋnhatflashᚋfbchainᚋmodelᚐTenant,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_tenant(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Tenant_id(ctx, field)
+			case "code":
+				return ec.fieldContext_Tenant_code(ctx, field)
+			case "description":
+				return ec.fieldContext_Tenant_description(ctx, field)
+			case "type":
+				return ec.fieldContext_Tenant_type(ctx, field)
+			case "notes":
+				return ec.fieldContext_Tenant_notes(ctx, field)
+			case "user":
+				return ec.fieldContext_Tenant_user(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Tenant", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_tenant_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -343,6 +459,204 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Tenant_id(ctx context.Context, field graphql.CollectedField, obj *model1.Tenant) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Tenant_id,
+		func(ctx context.Context) (any, error) {
+			return obj.Id, nil
+		},
+		nil,
+		ec.marshalNID2int64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Tenant_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Tenant",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Tenant_code(ctx context.Context, field graphql.CollectedField, obj *model1.Tenant) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Tenant_code,
+		func(ctx context.Context) (any, error) {
+			return obj.Code, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Tenant_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Tenant",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Tenant_description(ctx context.Context, field graphql.CollectedField, obj *model1.Tenant) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Tenant_description,
+		func(ctx context.Context) (any, error) {
+			return obj.Description, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Tenant_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Tenant",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Tenant_type(ctx context.Context, field graphql.CollectedField, obj *model1.Tenant) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Tenant_type,
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
+		nil,
+		ec.marshalOTenantType2githubᚗcomᚋnhatflashᚋfbchainᚋenumᚐTenantType,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Tenant_type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Tenant",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type TenantType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Tenant_notes(ctx context.Context, field graphql.CollectedField, obj *model1.Tenant) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Tenant_notes,
+		func(ctx context.Context) (any, error) {
+			return obj.Notes, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Tenant_notes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Tenant",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Tenant_user(ctx context.Context, field graphql.CollectedField, obj *model1.Tenant) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Tenant_user,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Tenant().User(ctx, obj)
+		},
+		nil,
+		ec.marshalNUser2ᚖgithubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐUser,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Tenant_user(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Tenant",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "phone":
+				return ec.fieldContext_User_phone(ctx, field)
+			case "identity":
+				return ec.fieldContext_User_identity(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "gender":
+				return ec.fieldContext_User_gender(ctx, field)
+			case "birthdate":
+				return ec.fieldContext_User_birthdate(ctx, field)
+			case "postalCode":
+				return ec.fieldContext_User_postalCode(ctx, field)
+			case "address":
+				return ec.fieldContext_User_address(ctx, field)
+			case "profileImage":
+				return ec.fieldContext_User_profileImage(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
 	return fc, nil
@@ -962,6 +1276,47 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "tenants":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_tenants(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "tenant":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_tenant(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -970,6 +1325,92 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var tenantImplementors = []string{"Tenant"}
+
+func (ec *executionContext) _Tenant(ctx context.Context, sel ast.SelectionSet, obj *model1.Tenant) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, tenantImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Tenant")
+		case "id":
+			out.Values[i] = ec._Tenant_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "code":
+			out.Values[i] = ec._Tenant_code(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "description":
+			out.Values[i] = ec._Tenant_description(ctx, field, obj)
+		case "type":
+			out.Values[i] = ec._Tenant_type(ctx, field, obj)
+		case "notes":
+			out.Values[i] = ec._Tenant_notes(ctx, field, obj)
+		case "user":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Tenant_user(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1118,6 +1559,60 @@ func (ec *executionContext) unmarshalNNewTodo2githubᚗcomᚋnhatflashᚋfbchain
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalNTenant2ᚕᚖgithubᚗcomᚋnhatflashᚋfbchainᚋmodelᚐTenantᚄ(ctx context.Context, sel ast.SelectionSet, v []*model1.Tenant) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNTenant2ᚖgithubᚗcomᚋnhatflashᚋfbchainᚋmodelᚐTenant(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNTenant2ᚖgithubᚗcomᚋnhatflashᚋfbchainᚋmodelᚐTenant(ctx context.Context, sel ast.SelectionSet, v *model1.Tenant) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Tenant(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNTodo2githubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v model.Todo) graphql.Marshaler {
 	return ec._Todo(ctx, sel, &v)
 }
@@ -1130,6 +1625,10 @@ func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋnhatflashᚋfbchain�
 		return graphql.Null
 	}
 	return ec._Todo(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNUser2githubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
+	return ec._User(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
@@ -1200,6 +1699,26 @@ func (ec *executionContext) marshalODate2ᚖgithubᚗcomᚋnhatflashᚋfbchain�
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) marshalOTenant2ᚖgithubᚗcomᚋnhatflashᚋfbchainᚋmodelᚐTenant(ctx context.Context, sel ast.SelectionSet, v *model1.Tenant) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Tenant(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOTenantType2githubᚗcomᚋnhatflashᚋfbchainᚋenumᚐTenantType(ctx context.Context, v any) (enum.TenantType, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := enum.TenantType(tmp)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOTenantType2githubᚗcomᚋnhatflashᚋfbchainᚋenumᚐTenantType(ctx context.Context, sel ast.SelectionSet, v enum.TenantType) graphql.Marshaler {
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalString(string(v))
+	return res
 }
 
 func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {

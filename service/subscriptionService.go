@@ -12,7 +12,7 @@ import (
 )
 
 type ISubscriptionService interface {
-	HandleCreateSubscription(createSubScriptionReq *client.CreateSubscriptionRequest, db *sql.DB) (*client.SubscriptionResponse, error)
+	HandleCreateSubscription(createSubScriptionReq *client.CreateSubscriptionRequest) (*client.SubscriptionResponse, error)
 }
 
 type SubscriptionService struct {
@@ -25,7 +25,7 @@ func NewSubscriptionService(db *sql.DB) ISubscriptionService {
 	}
 }
 
-func (*SubscriptionService) HandleCreateSubscription(createSubScriptionReq *client.CreateSubscriptionRequest, db *sql.DB) (*client.SubscriptionResponse, error) {
+func (ss *SubscriptionService) HandleCreateSubscription(createSubScriptionReq *client.CreateSubscriptionRequest) (*client.SubscriptionResponse, error) {
 	name := createSubScriptionReq.Name
 	description := createSubScriptionReq.Description
 	durationMonth := createSubScriptionReq.DurationMonth
@@ -35,7 +35,7 @@ func (*SubscriptionService) HandleCreateSubscription(createSubScriptionReq *clie
 	var err error
 	var price decimal.Decimal
 
-	if repository.CheckSubscriptionNameExists(name, db) {
+	if repository.CheckSubscriptionNameExists(name, ss.Db) {
 		return nil, appErr.BadRequestError("Subscription name is already in use.")
 	}
 	price, err = decimal.NewFromString(priceStr)
@@ -44,7 +44,7 @@ func (*SubscriptionService) HandleCreateSubscription(createSubScriptionReq *clie
 	}
 
 	var s *model.Subscription
-	s, err = repository.CreateSubscription(name, description, durationMonth, price, image, db)
+	s, err = repository.CreateSubscription(name, description, durationMonth, price, image, ss.Db)
 	if err != nil {
 		return nil, err
 	}

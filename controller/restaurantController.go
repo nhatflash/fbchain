@@ -40,7 +40,7 @@ func (rc RestaurantController) CreateRestaurant(c *gin.Context) {
 	}
 	var res *client.RestaurantResponse
 	restaurantService := service.NewRestaurantService(rc.Db)
-	res, err = restaurantService.HandleCreateRestaurant(&createRestaurantReq, currUser.Id, rc.Db)
+	res, err = restaurantService.HandleCreateRestaurant(&createRestaurantReq, currUser.Id)
 	if err != nil {
 		c.Error(err)
 		return

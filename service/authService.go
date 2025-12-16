@@ -37,31 +37,33 @@ func (*AuthService) HandleSignIn(signInReq *client.SignInRequest, db *sql.DB) (*
 	login := signInReq.Login
 
 	var loggedUser *model.User
+	var err error
+	var foundUser *model.User
 	if strings.Contains(login, "@") {
-		user, userErr := repository.GetUserByEmail(signInReq.Login, db)
-		if userErr != nil {
+		foundUser, err = repository.GetUserByEmail(signInReq.Login, db)
+		if err != nil {
 			return nil, appErr.UnauthorizedError("Invalid credentials.")
 		}
-		loggedUser = user
 	} else {
-		user, userErr := repository.GetUserByPhone(signInReq.Login, db)
-		if userErr != nil {
+		foundUser, err = repository.GetUserByPhone(signInReq.Login, db)
+		if err != nil {
 			return nil, appErr.UnauthorizedError("Invalid credentials.")
 		}
-		loggedUser = user
 	}
-
+	loggedUser = foundUser
 	if !security.VerifyPassword(signInReq.Password, loggedUser.Password) {
 		return nil, appErr.UnauthorizedError("Invalid credentials.")
 	}
 	
-	accessToken, accessErr := security.GenerateJwtAccessToken(loggedUser)
-	if accessErr != nil {
-		return nil, accessErr
+	var accessToken string
+	accessToken, err = security.GenerateJwtAccessToken(loggedUser)
+	if err != nil {
+		return nil, err
 	}
-	refreshToken, refreshErr := security.GenerateJwtRefreshToken(loggedUser)
-	if refreshErr != nil {
-		return nil, refreshErr
+	var refreshToken string
+	refreshToken, err = security.GenerateJwtRefreshToken(loggedUser)
+	if err != nil {
+		return nil, err
 	}
 	res := &client.SignInResponse{
 		AccessToken: accessToken,
@@ -88,32 +90,35 @@ func (a *AuthService) HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpReq
 	description := tenantSignUpReq.Description
 	tenantType := tenantSignUpReq.Type
 
-	validateErr := validateSignUpRequest(email, phone, identity, password, confirmPassword, db)
+	var err error
+	err = validateSignUpRequest(email, phone, identity, password, confirmPassword, db)
 
-	if validateErr != nil {
-		return nil, validateErr
+	if err != nil {
+		return nil, err
 	}
 
-	birthdate, dateErr := helper.ConvertToDate(birthdateStr)
-	if dateErr != nil {
-		return nil, dateErr
+	var birthdate *time.Time
+	birthdate, err = helper.ConvertToDate(birthdateStr)
+	if err != nil {
+		return nil, err
 	}
-	hashedPassword, hashErr := security.GenerateHashedPassword(password)
-	if hashErr != nil {
-		return nil, appErr.InternalError("An unexpected error when creating hash password")
+	var hashedPassword string
+	hashedPassword, err = security.GenerateHashedPassword(password)
+	if err != nil {
+		return nil, err
 	}
-	
-	userTenant, userErr := repository.CreateTenantUser(firstName, lastName, email, hashedPassword, birthdate, gender, phone, identity, address, postalCode, profileImage, db)
-	if userErr != nil {
-		return nil, userErr
+	var tenantUser *model.User
+	tenantUser, err = repository.CreateTenantUser(firstName, lastName, email, hashedPassword, birthdate, gender, phone, identity, address, postalCode, profileImage, db)
+	if err != nil {
+		return nil, err
 	}
 	code := generateTenantCode()
-	tenant, tenantErr := repository.CreateTenantInformation(code, description, tenantType, userTenant.Id, db)
+	tenant, tenantErr := repository.CreateTenantInformation(code, description, tenantType, tenantUser.Id, db)
 
 	if tenantErr != nil {
 		return nil, tenantErr
 	}
-	return helper.MapToTenantResponse(userTenant, tenant), nil
+	return helper.MapToTenantResponse(tenantUser, tenant), nil
 }
 
 

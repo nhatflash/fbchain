@@ -2,19 +2,20 @@ package service
 
 import (
 	"database/sql"
-
 	"github.com/nhatflash/fbchain/client"
 	appErr "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/helper"
+	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/repository"
 )
 
 type IRestaurantService interface {
-	HandleCreateRestaurant(createRestaurantReq *client.CreateRestaurantRequest, tenantId int64, db *sql.DB) (*client.RestaurantResponse, error)
+	HandleCreateRestaurant(createRestaurantReq *client.CreateRestaurantRequest, tenantId int64) (*client.RestaurantResponse, error)
+	GetRestaurantsByTenantId(tenantId int64) ([]model.Restaurant, error)
 }
 
 type RestaurantService struct {
-	Db 				*sql.DB
+	Db *sql.DB
 }
 
 func NewRestaurantService(db *sql.DB) IRestaurantService {
@@ -23,8 +24,7 @@ func NewRestaurantService(db *sql.DB) IRestaurantService {
 	}
 }
 
-
-func (*RestaurantService) HandleCreateRestaurant(createRestaurantReq *client.CreateRestaurantRequest, tenantId int64, db *sql.DB) (*client.RestaurantResponse, error) {
+func (rs *RestaurantService) HandleCreateRestaurant(createRestaurantReq *client.CreateRestaurantRequest, tenantId int64) (*client.RestaurantResponse, error) {
 	name := createRestaurantReq.Name
 	location := createRestaurantReq.Location
 	description := createRestaurantReq.Description
@@ -35,20 +35,32 @@ func (*RestaurantService) HandleCreateRestaurant(createRestaurantReq *client.Cre
 	notes := createRestaurantReq.Notes
 	images := createRestaurantReq.Images
 
-	sExist, sExistErr := repository.AnySubscriptionExists(db)
-	if sExistErr != nil {
-		return nil, sExistErr
+	var err error
+	var exist bool
+	exist, err = repository.AnySubscriptionExists(rs.Db)
+	if err != nil {
+		return nil, err
 	}
-	if !sExist {
+	if !exist {
 		return nil, appErr.NotFoundError("There is no subscription available in the system.")
 	}
-	if repository.IsRestaurantNameExist(name, db) {
+	if repository.IsRestaurantNameExist(name, rs.Db) {
 		return nil, appErr.BadRequestError("Restaurant with this requested name is already exist.")
 	}
 
-	r, rErr := repository.CreateRestaurant(name, location, description, contactEmail, contactPhone, postalCode, rType, notes, images, tenantId, db)
-	if rErr != nil {
-		return nil, rErr
+	var r *model.Restaurant
+	r, err = repository.CreateRestaurant(name, location, description, contactEmail, contactPhone, postalCode, rType, notes, images, tenantId, rs.Db)
+	if err != nil {
+		return nil, err
 	}
 	return helper.MapToRestaurantResponse(r), nil
+}
+
+
+func (rs *RestaurantService) GetRestaurantsByTenantId(tenantId int64) ([]model.Restaurant, error) {
+	r, err := repository.GetRestaurantsByTenantId(tenantId, rs.Db)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
 }

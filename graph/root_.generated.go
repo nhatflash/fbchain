@@ -37,6 +37,7 @@ type Config struct {
 type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
+	Tenant() TenantResolver
 }
 
 type DirectiveRoot struct {
@@ -48,8 +49,19 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		User  func(childComplexity int, id string) int
-		Users func(childComplexity int) int
+		Tenant  func(childComplexity int, id string) int
+		Tenants func(childComplexity int) int
+		User    func(childComplexity int, id string) int
+		Users   func(childComplexity int) int
+	}
+
+	Tenant struct {
+		Code        func(childComplexity int) int
+		Description func(childComplexity int) int
+		Id          func(childComplexity int) int
+		Notes       func(childComplexity int) int
+		Type        func(childComplexity int) int
+		User        func(childComplexity int) int
 	}
 
 	Todo struct {
@@ -105,6 +117,25 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.CreateTodo(childComplexity, args["input"].(model.NewTodo)), true
 
+	case "Query.tenant":
+		if e.complexity.Query.Tenant == nil {
+			break
+		}
+
+		args, err := ec.field_Query_tenant_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Tenant(childComplexity, args["id"].(string)), true
+
+	case "Query.tenants":
+		if e.complexity.Query.Tenants == nil {
+			break
+		}
+
+		return e.complexity.Query.Tenants(childComplexity), true
+
 	case "Query.user":
 		if e.complexity.Query.User == nil {
 			break
@@ -123,6 +154,48 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Users(childComplexity), true
+
+	case "Tenant.code":
+		if e.complexity.Tenant.Code == nil {
+			break
+		}
+
+		return e.complexity.Tenant.Code(childComplexity), true
+
+	case "Tenant.description":
+		if e.complexity.Tenant.Description == nil {
+			break
+		}
+
+		return e.complexity.Tenant.Description(childComplexity), true
+
+	case "Tenant.id":
+		if e.complexity.Tenant.Id == nil {
+			break
+		}
+
+		return e.complexity.Tenant.Id(childComplexity), true
+
+	case "Tenant.notes":
+		if e.complexity.Tenant.Notes == nil {
+			break
+		}
+
+		return e.complexity.Tenant.Notes(childComplexity), true
+
+	case "Tenant.type":
+		if e.complexity.Tenant.Type == nil {
+			break
+		}
+
+		return e.complexity.Tenant.Type(childComplexity), true
+
+	case "Tenant.user":
+		if e.complexity.Tenant.User == nil {
+			break
+		}
+
+		return e.complexity.Tenant.User(childComplexity), true
 
 	case "Todo.done":
 		if e.complexity.Todo.Done == nil {

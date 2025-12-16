@@ -32,7 +32,7 @@ func GenerateJwtAccessToken(u *model.User) (string, error) {
 	if convErr != nil {
 		return "", errors.New("access expiration string converted fail")
 	}
-	userRole := getUserRole(u.Role)
+	userRole := getUserRole(&u.Role)
 	accessClaims := JwtAccessClaims{
 		UserId:           u.Id,
 		Email:            u.Email,

@@ -162,3 +162,10 @@ models:
     model: github.com/nhatflash/fbchain/scalar.CustomDate
   DateTime:
     model: github.com/99designs/gqlgen/graphql.Time
+  TenantType:
+    model: github.com/nhatflash/fbchain/enum.TenantType
+  Tenant:
+    model: github.com/nhatflash/fbchain/model.Tenant
+    fields:
+      user:
+        resolver: true

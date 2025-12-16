@@ -10,36 +10,36 @@ import (
 type UserResponse struct {
 	Id           int64            `json:"id"`
 	Email        string           `json:"email"`
-	Role         *enum.Role       `json:"role"`
-	Phone        string           `json:"phone"`
-	Identity     string           `json:"identity"`
+	Role         enum.Role       `json:"role"`
+	Phone        *string           `json:"phone"`
+	Identity     *string           `json:"identity"`
 	FirstName    string           `json:"firstName"`
 	LastName     string           `json:"lastName"`
-	Gender       *enum.Gender     `json:"gender"`
+	Gender       enum.Gender     `json:"gender"`
 	Birthdate    time.Time        `json:"birthdate"`
-	PostalCode   string           `json:"postalCode"`
-	Address      string           `json:"address"`
-	ProfileImage string           `json:"profileImage"`
-	Status       *enum.UserStatus `json:"status"`
+	PostalCode   *string           `json:"postalCode"`
+	Address      *string           `json:"address"`
+	ProfileImage *string           `json:"profileImage"`
+	Status       enum.UserStatus `json:"status"`
 }
 
 type TenantResponse struct {
 	UserId       int64            `json:"userId"`
 	Email        string           `json:"email"`
-	Phone        string           `json:"phone"`
-	Identity     string           `json:"identity"`
+	Phone        *string           `json:"phone"`
+	Identity     *string           `json:"identity"`
 	FirstName    string           `json:"firstName"`
 	LastName     string           `json:"lastName"`
-	Gender       *enum.Gender     `json:"gender"`
+	Gender       enum.Gender     `json:"gender"`
 	Birthdate    time.Time        `json:"birthdate"`
-	PostalCode   string           `json:"postalCode"`
-	Address      string           `json:"address"`
-	ProfileImage string           `json:"profileImage"`
+	PostalCode   *string           `json:"postalCode"`
+	Address      *string           `json:"address"`
+	ProfileImage *string           `json:"profileImage"`
 	Code         string           `json:"code"`
-	Description  string           `json:"description"`
-	Type         *enum.TenantType `json:"type"`
-	Notes        string           `json:"notes"`
-	Status       *enum.UserStatus `json:"status"`
+	Description  *string           `json:"description"`
+	Type         enum.TenantType `json:"type"`
+	Notes        *string           `json:"notes"`
+	Status       enum.UserStatus `json:"status"`
 }
 
 type SignInResponse struct {
@@ -51,11 +51,11 @@ type SignInResponse struct {
 type SubscriptionResponse struct {
 	Id            int64           `json:"id"`
 	Name          string          `json:"name"`
-	Description   string          `json:"description"`
+	Description   *string          `json:"description"`
 	DurationMonth int             `json:"durationMonth"`
 	Price         decimal.Decimal `json:"price"`
 	IsActive      bool            `json:"isActive"`
-	Image         string          `json:"image"`
+	Image         *string          `json:"image"`
 }
 
 type RestaurantResponse struct {
@@ -63,13 +63,13 @@ type RestaurantResponse struct {
 	TenantId       int64                `json:"tenantId"`
 	Name           string               `json:"name"`
 	Location       string               `json:"location"`
-	Description    string               `json:"description"`
-	ContactEmail   string               `json:"contactEmail"`
-	ContactPhone   string               `json:"contactPhone"`
+	Description    *string               `json:"description"`
+	ContactEmail   *string               `json:"contactEmail"`
+	ContactPhone   *string               `json:"contactPhone"`
 	PostalCode     string               `json:"postalCode"`
-	Type           *enum.RestaurantType `json:"type"`
+	Type           enum.RestaurantType `json:"type"`
 	AvgRating      decimal.Decimal      `json:"avgRating"`
-	Notes          string               `json:"notes"`
+	Notes          *string               `json:"notes"`
 	SubscriptionId int64                `json:"subscriptionId"`
 	Images         []string             `json:"images"`
 }
@@ -79,6 +79,6 @@ type OrderResponse struct {
 	TenantId     int64             `json:"tenantId"`
 	RestaurantId int64             `json:"restaurantId"`
 	OrderDate    time.Time         `json:"orderDate"`
-	Status       *enum.OrderStatus `json:"status"`
+	Status       enum.OrderStatus `json:"status"`
 	Amount       decimal.Decimal   `json:"amount"`
 }

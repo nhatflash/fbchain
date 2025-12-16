@@ -43,7 +43,7 @@ func (oc OrderController) PaySubscription(c *gin.Context) {
 
 	var res *client.OrderResponse
 	orderService := service.NewOrderService(oc.Db)
-	res, err = orderService.HandlePaySubscription(&paySubscriptionReq, currTenant.Id, oc.Db)
+	res, err = orderService.HandlePaySubscription(&paySubscriptionReq, currTenant.Id)
 	if err != nil {
 		c.Error(err)
 		return

@@ -11,7 +11,7 @@ import (
 )
 
 type IOrderService interface {
-	HandlePaySubscription(paySubscriptionReq *client.PaySubscriptionRequest, tenantId int64, db *sql.DB) (*client.OrderResponse, error)
+	HandlePaySubscription(paySubscriptionReq *client.PaySubscriptionRequest, tenantId int64) (*client.OrderResponse, error)
 }
 
 type OrderService struct {
@@ -24,14 +24,14 @@ func NewOrderService(db *sql.DB) IOrderService {
 	}
 }
 
-func (*OrderService) HandlePaySubscription(paySubscriptionReq *client.PaySubscriptionRequest, tenantId int64, db *sql.DB) (*client.OrderResponse, error) {
+func (os *OrderService) HandlePaySubscription(paySubscriptionReq *client.PaySubscriptionRequest, tenantId int64) (*client.OrderResponse, error) {
 	restaurantId := paySubscriptionReq.RestaurantId
 	subscriptionId := paySubscriptionReq.SubscriptionId
 
 	var err error
 	var r *model.Restaurant
 	var s *model.Subscription
-	r, s, err = checkRestaurantAndSubscriptionExist(restaurantId, subscriptionId, db)
+	r, s, err = checkRestaurantAndSubscriptionExist(restaurantId, subscriptionId, os.Db)
 	if err != nil {
 		return nil, err
 	}
@@ -42,12 +42,12 @@ func (*OrderService) HandlePaySubscription(paySubscriptionReq *client.PaySubscri
 	if isRestaurantSubscriptionMatchTheRequestedPaySubscription(r, s.Id) {
 		return nil, appErr.BadRequestError("The requested subscription is already registered on this restaurant.")
 	}
-	err = repository.CreateInitialOrder(restaurantId, subscriptionId, &s.Price, tenantId, db)
+	err = repository.CreateInitialOrder(restaurantId, subscriptionId, &s.Price, tenantId, os.Db)
 	if err != nil {
 		return nil, err
 	}
 	var order *model.Order
-	order, err = repository.GetLatestTenantOrder(tenantId, db)
+	order, err = repository.GetLatestTenantOrder(tenantId, os.Db)
 	if err != nil {
 		return nil, err
 	}

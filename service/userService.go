@@ -45,7 +45,7 @@ func (u *UserService) GetCurrentUser(ctx context.Context) (*model.User, error) {
 }
 
 func (*UserService) IsUserRoleTenant(u *model.User) bool {
-	return *u.Role == enum.ROLE_TENANT
+	return u.Role == enum.ROLE_TENANT
 }
 
 func (u *UserService) GetListUser() ([]model.User, error) {

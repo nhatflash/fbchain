@@ -9,10 +9,16 @@ import (
 
 type ITenantService interface {
 	GetCurrentTenant(c *gin.Context) (*model.Tenant, error)
+	GetTenantById(tId int64) (*model.Tenant, error)
 }
 
 type TenantService struct {
-	Db 		*sql.DB
+	Db *sql.DB
+}
+
+// GetTenantById implements [ITenantService].
+func (t *TenantService) GetTenantById(tId int64) (*model.Tenant, error) {
+	panic("unimplemented")
 }
 
 func NewTenantService(db *sql.DB) ITenantService {
@@ -20,7 +26,6 @@ func NewTenantService(db *sql.DB) ITenantService {
 		Db: db,
 	}
 }
-
 
 func (t *TenantService) GetCurrentTenant(c *gin.Context) (*model.Tenant, error) {
 	var err error

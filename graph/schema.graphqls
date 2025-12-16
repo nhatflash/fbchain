@@ -4,6 +4,11 @@
 
 scalar Date
 
+enum TenantType {
+  TENANT_PERSONAL
+  TENANT_BUSINESS
+}
+
 type Todo {
   id: ID!
   text: String!
@@ -25,9 +30,47 @@ type User {
   profileImage: String
 }
 
+type Tenant {
+  id: ID!
+  code: String!
+  description: String
+  type: TenantType
+  notes: String
+  user: User!
+}
+
+# type Restaurant {
+#   id: ID!
+#   name: String!
+#   location: String
+#   description: String
+#   contactEmail: String
+#   contactPhone: String
+#   postalCode: String
+#   type: String
+#   avgRating: Float
+#   isActive: Boolean
+#   notes: String
+#   tenant: Tenant
+#   images: [String]
+# }
+
+# type Order {
+#   id: ID!
+#   name: String!
+#   description: String
+#   durationMonth: Int
+#   price: Float
+#   isActive: Boolean
+#   image: String
+# }
+
+
 type Query {
   users: [User!]!
   user(id: ID!): User
+  tenants: [Tenant!]!
+  tenant(id: ID!): Tenant
 }
 
 input NewTodo {

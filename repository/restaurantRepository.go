@@ -151,3 +151,31 @@ func GetRestaurantById(rId int64, db *sql.DB) (*model.Restaurant, error) {
 	}
 	return &restaurants[0], nil
 }
+
+func GetRestaurantsByTenantId(tId int64, db *sql.DB) ([]model.Restaurant, error) {
+	var err error
+	var rows *sql.Rows
+	rows, err = db.Query("SELECT * FROM restaurants WHERE tenant_id = $1", tId)
+	if err != nil {
+		return nil, err
+	}
+	var restaurants []model.Restaurant
+	for rows.Next() {
+		var r model.Restaurant
+		err = rows.Scan(&r.Id, &r.Name, &r.Location, &r.Description, &r.ContactEmail, &r.ContactPhone, &r.PostalCode, &r.Type, &r.AvgRating, &r.IsActive, &r.Notes, &r.CreatedAt, &r.UpdatedAt, &r.SubscriptionId, &r.TenantId)
+		if err != nil {
+			return nil, err
+		}
+		var rImgs *[]model.RestaurantImage
+		rImgs, err = GetRestaurantImages(r.Id, db)
+		if err != nil {
+			return nil, err
+		}
+		r.Images = *rImgs
+		restaurants = append(restaurants, r)
+	}
+	if len(restaurants) == 0 {
+		return nil, appErr.NotFoundError("No restaruant found.")
+	}
+	return restaurants, nil
+}
