@@ -12,6 +12,11 @@ import (
 type IRestaurantService interface {
 	HandleCreateRestaurant(createRestaurantReq *client.CreateRestaurantRequest, tenantId int64) (*client.RestaurantResponse, error)
 	GetRestaurantsByTenantId(tenantId int64) ([]model.Restaurant, error)
+	GetAllRestaurants() ([]model.Restaurant, error)
+	GetRestaurantById(id int64) (*model.Restaurant, error)
+	GetRestaurantImageById(id int64) (*model.RestaurantImage, error)
+	GetRestaurantImages(rId int64) ([]model.RestaurantImage, error)
+	GetAllRestaurantImages() ([]model.RestaurantImage, error)
 }
 
 type RestaurantService struct {
@@ -55,9 +60,11 @@ func (rs *RestaurantService) HandleCreateRestaurant(createRestaurantReq *client.
 	}
 	var rImgs []model.RestaurantImage
 	rImgs, err = repository.GetRestaurantImages(r.Id, rs.Db)
+	if err != nil {
+		return nil, err
+	}
 	return helper.MapToRestaurantResponse(r, rImgs), nil
 }
-
 
 func (rs *RestaurantService) GetRestaurantsByTenantId(tenantId int64) ([]model.Restaurant, error) {
 	r, err := repository.GetRestaurantsByTenantId(tenantId, rs.Db)
@@ -65,4 +72,45 @@ func (rs *RestaurantService) GetRestaurantsByTenantId(tenantId int64) ([]model.R
 		return nil, err
 	}
 	return r, nil
+}
+
+func (rs *RestaurantService) GetAllRestaurants() ([]model.Restaurant, error) {
+	r, err := repository.ListAllRestaurants(rs.Db)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+func (rs *RestaurantService) GetRestaurantById(id int64) (*model.Restaurant, error) {
+	r, err := repository.GetRestaurantById(id, rs.Db)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+func (rs *RestaurantService) GetRestaurantImageById(id int64) (*model.RestaurantImage, error) {
+	img, err := repository.GetRestaurantImageById(id, rs.Db)
+	if err != nil {
+		return nil, err
+	}
+	return img, nil
+}
+
+func (rs *RestaurantService) GetRestaurantImages(rId int64) ([]model.RestaurantImage, error) {
+	imgs, err := repository.GetRestaurantImages(rId, rs.Db)
+	if err != nil {
+		return nil, err
+	}
+	return imgs, nil
+}
+
+
+func (rs *RestaurantService) GetAllRestaurantImages() ([]model.RestaurantImage, error) {
+	imgs, err := repository.ListAllRestaurantImages(rs.Db)
+	if err != nil {
+		return nil, err
+	}
+	return imgs, nil
 }

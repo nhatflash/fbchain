@@ -11,4 +11,5 @@ import (
 type Resolver struct{
 	UserService		service.IUserService
 	TenantService	service.ITenantService
+	RestaurantService	service.IRestaurantService
 }

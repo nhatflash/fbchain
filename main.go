@@ -55,6 +55,7 @@ func main() {
 
 	userService := service.NewUserService(db)
 	tenantService := service.NewTenantService(db)
+	restaurantService := service.NewRestaurantService(db)
 
 	gqlHandler := handler.New(
 		graph.NewExecutableSchema(
@@ -62,6 +63,7 @@ func main() {
 				Resolvers: &graph.Resolver{
 					UserService: userService,
 					TenantService: tenantService,
+					RestaurantService: restaurantService,
 				},
 			},
 		),

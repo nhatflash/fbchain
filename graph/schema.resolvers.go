@@ -88,37 +88,115 @@ func (r *queryResolver) Tenant(ctx context.Context, id string) (*gqlModel.Tenant
 
 // Restaurants is the resolver for the restaurants field.
 func (r *queryResolver) Restaurants(ctx context.Context) ([]*gqlModel.Restaurant, error) {
-	panic(fmt.Errorf("not implemented: Restaurants - restaurants"))
+	restaurants, err := r.RestaurantService.GetAllRestaurants()
+	if err != nil {
+		return nil, err
+	}
+	var gqlRestaurants []*gqlModel.Restaurant
+	for _, res := range restaurants {
+		gqlRes := MapToGqlRestaurant(&res)
+		gqlRestaurants = append(gqlRestaurants, gqlRes)
+	}
+	return gqlRestaurants, nil
 }
 
 // Restaurant is the resolver for the restaurant field.
 func (r *queryResolver) Restaurant(ctx context.Context, id string) (*gqlModel.Restaurant, error) {
-	panic(fmt.Errorf("not implemented: Restaurant - restaurant"))
+	var err error
+	var idNum int64
+	idNum, err = strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var res *model.Restaurant
+	res, err = r.RestaurantService.GetRestaurantById(idNum)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurant(res), nil
 }
 
 // RestaurantImages is the resolver for the restaurantImages field.
 func (r *queryResolver) RestaurantImages(ctx context.Context) ([]*gqlModel.RestaurantImage, error) {
-	panic(fmt.Errorf("not implemented: RestaurantImages - restaurantImages"))
+	imgs, err := r.RestaurantService.GetAllRestaurantImages()
+	if err != nil {
+		return nil, err
+	}
+	var gqlRImgs []*gqlModel.RestaurantImage
+	for _, img := range imgs {
+		gqlRImg := MapToGqlRestaurantImage(&img)
+		gqlRImgs = append(gqlRImgs, gqlRImg)
+	}
+	return gqlRImgs, nil
 }
 
 // RestaurantImage is the resolver for the restaurantImage field.
 func (r *queryResolver) RestaurantImage(ctx context.Context, id string) (*gqlModel.RestaurantImage, error) {
-	panic(fmt.Errorf("not implemented: RestaurantImage - restaurantImage"))
+	var err error
+	var idNum int64
+	idNum, err = strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var img *model.RestaurantImage
+	img, err = r.RestaurantService.GetRestaurantImageById(idNum)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurantImage(img), nil
 }
 
 // Tenant is the resolver for the tenant field.
 func (r *restaurantResolver) Tenant(ctx context.Context, obj *gqlModel.Restaurant) (*gqlModel.Tenant, error) {
-	panic(fmt.Errorf("not implemented: Tenant - tenant"))
+	var idNum int64
+	var err error
+	idNum, err = strconv.ParseInt(*obj.TenantID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var t *model.Tenant
+	t, err = r.TenantService.GetTenantById(idNum)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlModelTenant(t), nil
 }
 
 // Images is the resolver for the images field.
 func (r *restaurantResolver) Images(ctx context.Context, obj *gqlModel.Restaurant) ([]*gqlModel.RestaurantImage, error) {
-	panic(fmt.Errorf("not implemented: Images - images"))
+	var idNum int64
+	var err error
+	idNum, err = strconv.ParseInt(obj.ID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var imgs []model.RestaurantImage
+	imgs, err = r.RestaurantService.GetRestaurantImages(idNum)
+	if err != nil {
+		return nil, err
+	}
+	var gqlRImgs []*gqlModel.RestaurantImage
+	for _, img := range imgs {
+		gqlRImg := MapToGqlRestaurantImage(&img)
+		gqlRImgs = append(gqlRImgs, gqlRImg)
+	}
+	return gqlRImgs, nil
 }
 
 // Restaurant is the resolver for the restaurant field.
 func (r *restaurantImageResolver) Restaurant(ctx context.Context, obj *gqlModel.RestaurantImage) (*gqlModel.Restaurant, error) {
-	panic(fmt.Errorf("not implemented: Restaurant - restaurant"))
+	var idNum int64
+	var err error
+	idNum, err = strconv.ParseInt(*obj.RestaurantID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var res *model.Restaurant
+	res, err = r.RestaurantService.GetRestaurantById(idNum)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurant(res), nil
 }
 
 // User is the resolver for the user field.
@@ -139,7 +217,23 @@ func (r *tenantResolver) User(ctx context.Context, obj *gqlModel.Tenant) (*gqlMo
 
 // Restaurants is the resolver for the restaurants field.
 func (r *tenantResolver) Restaurants(ctx context.Context, obj *gqlModel.Tenant) ([]*gqlModel.Restaurant, error) {
-	panic(fmt.Errorf("not implemented: Restaurants - restaurants"))
+	var err error
+	var idNum int64
+	idNum, err = strconv.ParseInt(obj.ID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var restaurants []model.Restaurant
+	restaurants, err = r.RestaurantService.GetRestaurantsByTenantId(idNum)
+	if err != nil {
+		return nil, err
+	}
+	var gqlRestaurants []*gqlModel.Restaurant
+	for _, rtr := range restaurants {
+		gqlRtr := MapToGqlRestaurant(&rtr)
+		gqlRestaurants = append(gqlRestaurants, gqlRtr)
+	}
+	return gqlRestaurants, nil
 }
 
 // Mutation returns MutationResolver implementation.

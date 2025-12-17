@@ -155,3 +155,71 @@ func GetRestaurantsByTenantId(tId int64, db *sql.DB) ([]model.Restaurant, error)
 	return restaurants, nil
 }
 
+func ListAllRestaurants(db *sql.DB) ([]model.Restaurant, error) {
+	var err error
+	var rows *sql.Rows
+	rows, err = db.Query("SELECT * FROM restaurants ORDER BY id ASC")
+	if err != nil {
+		return nil, err
+	}
+	var restaurants []model.Restaurant
+	for rows.Next() {
+		var r model.Restaurant
+		err = rows.Scan(&r.Id, &r.Name, &r.Location, &r.Description, &r.ContactEmail, &r.ContactPhone, &r.PostalCode, &r.Type, &r.AvgRating, &r.IsActive, &r.Notes, &r.CreatedAt, &r.UpdatedAt, &r.SubPackageId, &r.TenantId)
+		if err != nil {
+			return nil, err
+		}
+		restaurants = append(restaurants, r)
+	}
+	if len(restaurants) == 0 {
+		return nil, appErr.NotFoundError("No restaurant found.")
+	}
+	return restaurants, nil
+}
+
+
+func GetRestaurantImageById(id int64, db *sql.DB) (*model.RestaurantImage, error) {
+	var err error
+	var rows *sql.Rows
+	rows, err = db.Query("SELECT * FROM restaurant_images WHERE id = $1 LIMIT 1", id)
+	if err != nil {
+		return nil, err
+	}
+	var images []model.RestaurantImage
+	for rows.Next() {
+		var i model.RestaurantImage
+		err = rows.Scan(&i.Id, &i.Image, &i.CreatedAt, &i.RestaurantId)
+		if err != nil {
+			return nil, err
+		}
+		images = append(images, i)
+	}
+	if len(images) == 0 {
+		return nil, appErr.NotFoundError("No restaurant image found.")
+	}
+	return &images[0], nil
+}
+
+
+func ListAllRestaurantImages(db *sql.DB) ([]model.RestaurantImage, error) {
+	var err error
+	var rows *sql.Rows
+	rows, err = db.Query("SELECT * FROM restaurant_images ORDER BY id ASC")
+	if err != nil {
+		return nil, err
+	}
+	var images []model.RestaurantImage
+	for rows.Next() {
+		var i model.RestaurantImage
+		err = rows.Scan(&i.Id, &i.Image, &i.CreatedAt, &i.RestaurantId)
+		if err != nil {
+			return nil, err
+		}
+		images = append(images, i)
+	}
+	if len(images) == 0 {
+		return nil, appErr.NotFoundError("No restaurant image found.")
+	}
+	return images, nil
+}
+
