@@ -2,9 +2,7 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"github.com/nhatflash/fbchain/enum"
-	appError "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/repository"
 	"github.com/nhatflash/fbchain/security"
@@ -18,17 +16,17 @@ type IUserService interface {
 }
 
 type UserService struct {
-	Db *sql.DB
+	UserRepo 		*repository.UserRepository
 }
 
 
-func NewUserService(db *sql.DB) IUserService {
+func NewUserService(ur *repository.UserRepository) IUserService {
 	return &UserService{
-		Db: db,
+		UserRepo: ur,
 	}
 }
 
-func (u *UserService) GetCurrentUser(ctx context.Context) (*model.User, error) {
+func (us *UserService) GetCurrentUser(ctx context.Context) (*model.User, error) {
 	var err error
 	var claims *security.JwtAccessClaims
 	claims, err = GetCurrentClaims(ctx)
@@ -37,9 +35,9 @@ func (u *UserService) GetCurrentUser(ctx context.Context) (*model.User, error) {
 	}
 	email := claims.Email
 	var user *model.User
-	user, err = repository.GetUserByEmail(email, u.Db)
+	user, err = us.UserRepo.GetUserByEmail(email)
 	if err != nil {
-		return nil, appError.NotFoundError("User not found")
+		return nil, err
 	}
 	return user, nil
 }
@@ -48,8 +46,8 @@ func (*UserService) IsUserRoleTenant(u *model.User) bool {
 	return u.Role == enum.ROLE_TENANT
 }
 
-func (u *UserService) GetListUser() ([]model.User, error) {
-	users, err := repository.ListAllUsers(u.Db)
+func (us *UserService) GetListUser() ([]model.User, error) {
+	users, err := us.UserRepo.ListAllUsers()
 	if err != nil {
 		return nil, err
 	}
@@ -57,10 +55,10 @@ func (u *UserService) GetListUser() ([]model.User, error) {
 }
 
 
-func (u *UserService) GetUserById(id int64) (*model.User, error) {
+func (us *UserService) GetUserById(id int64) (*model.User, error) {
 	var err error
 	var user *model.User
-	user, err = repository.GetUserById(u.Db, id)
+	user, err = us.UserRepo.GetUserById(id)
 	if err != nil {
 		return nil, err
 	}

@@ -1,7 +1,6 @@
 package service
 
 import (
-	"database/sql"
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/repository"
@@ -14,26 +13,27 @@ type ITenantService interface {
 }
 
 type TenantService struct {
-	Db *sql.DB
+	TenantRepo 			*repository.TenantRepository
+	UserService			IUserService
 }
 
-func NewTenantService(db *sql.DB) ITenantService {
+func NewTenantService(tr *repository.TenantRepository, us IUserService) ITenantService {
 	return &TenantService{
-		Db: db,
+		TenantRepo: tr,
+		UserService: us,
 	}
 }
 
-func (t *TenantService) GetCurrentTenant(c *gin.Context) (*model.Tenant, error) {
+func (ts *TenantService) GetCurrentTenant(c *gin.Context) (*model.Tenant, error) {
 	var err error
 	var currUser *model.User
 
-	userService := NewUserService(t.Db)
-	currUser, err = userService.GetCurrentUser(c)
+	currUser, err = ts.UserService.GetCurrentUser(c)
 	if err != nil {
 		return nil, err
 	}
 	var currTenant *model.Tenant
-	currTenant, err = repository.GetTenantByUserId(currUser.Id, t.Db)
+	currTenant, err = ts.TenantRepo.GetTenantByUserId(currUser.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -41,8 +41,8 @@ func (t *TenantService) GetCurrentTenant(c *gin.Context) (*model.Tenant, error) 
 }
 
 
-func (t *TenantService) GetTenantById(tId int64) (*model.Tenant, error) {
-	tenant, err := repository.GetTenantById(tId, t.Db)
+func (ts *TenantService) GetTenantById(tId int64) (*model.Tenant, error) {
+	tenant, err := ts.TenantRepo.GetTenantById(tId)
 	if err != nil {
 		return nil, err
 	}
@@ -50,8 +50,8 @@ func (t *TenantService) GetTenantById(tId int64) (*model.Tenant, error) {
 }
 
 
-func (t *TenantService) GetListTenant() ([]model.Tenant, error) {
-	tenants, err := repository.ListAllTenants(t.Db)
+func (ts *TenantService) GetListTenant() ([]model.Tenant, error) {
+	tenants, err := ts.TenantRepo.ListAllTenants()
 	if err != nil {
 		return nil, err
 	}

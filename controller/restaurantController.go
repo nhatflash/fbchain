@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"database/sql"
 	"net/http"
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/client"
@@ -12,7 +11,15 @@ import (
 )
 
 type RestaurantController struct {
-	Db 			*sql.DB
+	UserService 		service.IUserService
+	RestaurantService 	service.IRestaurantService
+}
+
+func NewRestaurantController(us service.IUserService, rs service.IRestaurantService) *RestaurantController {
+	return &RestaurantController{
+		UserService: us,
+		RestaurantService: rs,
+	}
 }
 
 
@@ -32,15 +39,13 @@ func (rc RestaurantController) CreateRestaurant(c *gin.Context) {
 		return
 	}
 	var currUser *model.User
-	userService := service.NewUserService(rc.Db)
-	currUser, err = userService.GetCurrentUser(c)
+	currUser, err = rc.UserService.GetCurrentUser(c)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 	var res *client.RestaurantResponse
-	restaurantService := service.NewRestaurantService(rc.Db)
-	res, err = restaurantService.HandleCreateRestaurant(&createRestaurantReq, currUser.Id)
+	res, err = rc.RestaurantService.HandleCreateRestaurant(&createRestaurantReq, currUser.Id)
 	if err != nil {
 		c.Error(err)
 		return

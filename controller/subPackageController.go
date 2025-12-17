@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"database/sql"
 	"net/http"
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/api"
@@ -11,7 +10,13 @@ import (
 )
 
 type SubPackageController struct {
-	Db		*sql.DB
+	SubPackageService 			service.ISubPackageService
+}
+
+func NewSubPackageController(sps service.ISubPackageService) *SubPackageController {
+	return &SubPackageController{
+		SubPackageService: sps,
+	}
 }
 
 
@@ -23,7 +28,7 @@ type SubPackageController struct {
 // @Failure 400 {object} error
 // @Security BearerAuth
 // @Router /admin/subscription [post]
-func (sc SubPackageController) CreateSubPackage(c *gin.Context) {
+func (spc SubPackageController) CreateSubPackage(c *gin.Context) {
 	var createSubPackageReq client.CreateSubPackageRequest
 	var err error
 
@@ -32,8 +37,7 @@ func (sc SubPackageController) CreateSubPackage(c *gin.Context) {
 		return
 	}
 	var res *client.SubPackageResponse
-	subPackageService := service.NewSubPackageService(sc.Db)
-	res, err = subPackageService.HandleCreateSubPackage(&createSubPackageReq)
+	res, err = spc.SubPackageService.HandleCreateSubPackage(&createSubPackageReq)
 	if err != nil {
 		c.Error(err)
 		return

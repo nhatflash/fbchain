@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"database/sql"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +12,16 @@ import (
 )
 
 type OrderController struct {
-	Db *sql.DB
+	OrderService 		service.IOrderService
+	TenantService 		service.ITenantService
+}
+
+
+func NewOrderController(os service.IOrderService, ts service.ITenantService) *OrderController {
+	return &OrderController{
+		OrderService: os,
+		TenantService: ts,
+	}
 }
 
 // @Summary Pay subscription package API
@@ -34,16 +42,14 @@ func (oc OrderController) PaySubPackage(c *gin.Context) {
 	}
 
 	var currTenant *model.Tenant
-	tenantService := service.NewTenantService(oc.Db)
-	currTenant, err = tenantService.GetCurrentTenant(c)
+	currTenant, err = oc.TenantService.GetCurrentTenant(c)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
 	var res *client.OrderResponse
-	orderService := service.NewOrderService(oc.Db)
-	res, err = orderService.HandlePaySubPackage(&paySubPackageReq, currTenant.Id)
+	res, err = oc.OrderService.HandlePaySubPackage(&paySubPackageReq, currTenant.Id)
 	if err != nil {
 		c.Error(err)
 		return

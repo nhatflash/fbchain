@@ -1,7 +1,6 @@
 package service
 
 import (
-	"database/sql"
 	"github.com/nhatflash/fbchain/client"
 	appErr "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/helper"
@@ -20,12 +19,14 @@ type IRestaurantService interface {
 }
 
 type RestaurantService struct {
-	Db *sql.DB
+	RestaurantRepo 			*repository.RestaurantRepository
+	SubPackageRepo 		*repository.SubPackageRepository
 }
 
-func NewRestaurantService(db *sql.DB) IRestaurantService {
+func NewRestaurantService(rr *repository.RestaurantRepository, spr *repository.SubPackageRepository) IRestaurantService {
 	return &RestaurantService{
-		Db: db,
+		RestaurantRepo: rr,
+		SubPackageRepo: spr,
 	}
 }
 
@@ -42,24 +43,24 @@ func (rs *RestaurantService) HandleCreateRestaurant(createRestaurantReq *client.
 
 	var err error
 	var exist bool
-	exist, err = repository.AnySubPackageExists(rs.Db)
+	exist, err = rs.SubPackageRepo.AnySubPackageExists()
 	if err != nil {
 		return nil, err
 	}
 	if !exist {
 		return nil, appErr.NotFoundError("There is no subscription available in the system.")
 	}
-	if repository.IsRestaurantNameExist(name, rs.Db) {
+	if rs.RestaurantRepo.IsRestaurantNameExist(name) {
 		return nil, appErr.BadRequestError("Restaurant with this requested name is already exist.")
 	}
 
 	var r *model.Restaurant
-	r, err = repository.CreateRestaurant(name, location, description, contactEmail, contactPhone, postalCode, rType, notes, images, tenantId, rs.Db)
+	r, err = rs.RestaurantRepo.CreateRestaurant(name, location, description, contactEmail, contactPhone, postalCode, rType, notes, images, tenantId)
 	if err != nil {
 		return nil, err
 	}
 	var rImgs []model.RestaurantImage
-	rImgs, err = repository.GetRestaurantImages(r.Id, rs.Db)
+	rImgs, err = rs.RestaurantRepo.GetRestaurantImages(r.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +68,8 @@ func (rs *RestaurantService) HandleCreateRestaurant(createRestaurantReq *client.
 }
 
 func (rs *RestaurantService) GetRestaurantsByTenantId(tenantId int64) ([]model.Restaurant, error) {
-	r, err := repository.GetRestaurantsByTenantId(tenantId, rs.Db)
+	
+	r, err := rs.RestaurantRepo.GetRestaurantsByTenantId(tenantId)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +77,7 @@ func (rs *RestaurantService) GetRestaurantsByTenantId(tenantId int64) ([]model.R
 }
 
 func (rs *RestaurantService) GetAllRestaurants() ([]model.Restaurant, error) {
-	r, err := repository.ListAllRestaurants(rs.Db)
+	r, err := rs.RestaurantRepo.ListAllRestaurants()
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +85,7 @@ func (rs *RestaurantService) GetAllRestaurants() ([]model.Restaurant, error) {
 }
 
 func (rs *RestaurantService) GetRestaurantById(id int64) (*model.Restaurant, error) {
-	r, err := repository.GetRestaurantById(id, rs.Db)
+	r, err := rs.RestaurantRepo.GetRestaurantById(id)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +93,7 @@ func (rs *RestaurantService) GetRestaurantById(id int64) (*model.Restaurant, err
 }
 
 func (rs *RestaurantService) GetRestaurantImageById(id int64) (*model.RestaurantImage, error) {
-	img, err := repository.GetRestaurantImageById(id, rs.Db)
+	img, err := rs.RestaurantRepo.GetRestaurantImageById(id)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +101,7 @@ func (rs *RestaurantService) GetRestaurantImageById(id int64) (*model.Restaurant
 }
 
 func (rs *RestaurantService) GetRestaurantImages(rId int64) ([]model.RestaurantImage, error) {
-	imgs, err := repository.GetRestaurantImages(rId, rs.Db)
+	imgs, err := rs.RestaurantRepo.GetRestaurantImages(rId)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +110,7 @@ func (rs *RestaurantService) GetRestaurantImages(rId int64) ([]model.RestaurantI
 
 
 func (rs *RestaurantService) GetAllRestaurantImages() ([]model.RestaurantImage, error) {
-	imgs, err := repository.ListAllRestaurantImages(rs.Db)
+	imgs, err := rs.RestaurantRepo.ListAllRestaurantImages()
 	if err != nil {
 		return nil, err
 	}

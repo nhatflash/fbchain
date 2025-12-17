@@ -15,12 +15,14 @@ import (
 	"github.com/go-playground/validator/v10"
 	env "github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/nhatflash/fbchain/controller"
 	pg "github.com/nhatflash/fbchain/database"
 	_ "github.com/nhatflash/fbchain/docs"
 	"github.com/nhatflash/fbchain/graph"
 	"github.com/nhatflash/fbchain/helper"
 	"github.com/nhatflash/fbchain/initializer"
 	"github.com/nhatflash/fbchain/middleware"
+	"github.com/nhatflash/fbchain/repository"
 	"github.com/nhatflash/fbchain/routes"
 	"github.com/nhatflash/fbchain/service"
 	swgFiles "github.com/swaggo/files"
@@ -38,13 +40,22 @@ import (
 // @in header
 // @name Authorization
 func main() {
+
+	// Load .env file
 	envErr := env.Load(".env")
 	if envErr != nil {
 		log.Fatalln("Error loading .env file")
 		return;
 	}
+
 	r := gin.Default()
 
+	// Middleware registration
+	r.SetTrustedProxies(nil)
+	r.Use(middleware.ErrorHandler())
+	r.Use(middleware.FilterConfigurer("http://localhost:5173"))
+
+	// Connect to database
 	db, dbErr := pg.ConnectToDatabase()
 	if dbErr != nil {
 		log.Fatalln("Connect to PostgreSQL failed", dbErr.Error())
@@ -53,10 +64,27 @@ func main() {
 
 	defer db.Close()
 
-	userService := service.NewUserService(db)
-	tenantService := service.NewTenantService(db)
-	restaurantService := service.NewRestaurantService(db)
+	// Dependency injection
+	userRepository := repository.NewUserRepository(db)
+	tenantRepository := repository.NewTenantRepository(db)
+	restaurantRepository := repository.NewRestaurantRepository(db)
+	subPackageRepository := repository.NewSubPackageRepository(db)
+	orderRepository := repository.NewOrderRepository(db)
 
+	authService := service.NewAuthService(userRepository, tenantRepository)
+	userService := service.NewUserService(userRepository)
+	tenantService := service.NewTenantService(tenantRepository, userService)
+	restaurantService := service.NewRestaurantService(restaurantRepository, subPackageRepository)
+	subPackageService := service.NewSubPackageService(subPackageRepository)
+	orderService := service.NewOrderService(restaurantRepository, subPackageRepository, orderRepository)
+
+	authController := controller.NewAuthController(authService)
+	restaurantController := controller.NewRestaurantController(userService, restaurantService)
+	subPackageController := controller.NewSubPackageController(subPackageService)
+	orderController := controller.NewOrderController(orderService, tenantService)
+
+
+	// GraphQL handler
 	gqlHandler := handler.New(
 		graph.NewExecutableSchema(
 			graph.Config{
@@ -68,10 +96,6 @@ func main() {
 			},
 		),
 	)
-
-	r.SetTrustedProxies(nil)
-	r.Use(middleware.ErrorHandler())
-	r.Use(middleware.FilterConfigurer("http://localhost:5173"))
 
 	gqlHandler.AddTransport(transport.Options{})
 	gqlHandler.AddTransport(transport.GET{})
@@ -86,6 +110,8 @@ func main() {
 		return gqlerror.Errorf(err.Error(), "Error code: 404")
 	})
 
+
+	// Validation binding registration
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		_ = v.RegisterValidation("phone", helper.PhoneNumberValidator)
 		_= v.RegisterValidation("identity", helper.IdentityNumberValidator)
@@ -95,27 +121,33 @@ func main() {
 		_ = v.RegisterValidation("price", helper.PriceValidator)
 	}
 
-	port := os.Getenv("PORT")
 	
+	port := os.Getenv("PORT")
 	if port == "" {
 		port = ":8080"
 	}
 
+
+	// Initialize admin if not exist
 	initErr := initializer.CreateAdminUserIfNotExists(db)
 	if initErr != nil {
 		log.Fatalln("Error when perform initialize admin account.")
 		return
 	}
-	routes.MainRoutes(r, db)
+
+	// Define routes for REST API
+	routes.MainRoutes(r, authController, subPackageController, restaurantController, orderController)
 	r.GET("/swagger/*any", ginSwg.WrapHandler(swgFiles.Handler))
 
+
+	// GraphQL routes
 	r.GET("/graphql", func(c *gin.Context) {
 		playground.Handler("GraphQL", "/graphql")(c.Writer, c.Request)
 	})
-
 	r.POST("/graphql", middleware.JwtGraphQLHandler(), func(c *gin.Context) {
 		gqlHandler.ServeHTTP(c.Writer, c.Request)
 	})
+
 
 	r.Run(port)
 }

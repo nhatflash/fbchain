@@ -1,8 +1,6 @@
 package service
 
 import (
-	"database/sql"
-
 	"github.com/nhatflash/fbchain/client"
 	appErr "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/helper"
@@ -15,12 +13,18 @@ type IOrderService interface {
 }
 
 type OrderService struct {
-	Db 			*sql.DB
+	RestaurantRepo 		*repository.RestaurantRepository
+	SubPackageRepo 		*repository.SubPackageRepository
+	OrderRepo 			*repository.OrderRepository
 }
 
-func NewOrderService(db *sql.DB) IOrderService {
+func NewOrderService(rr *repository.RestaurantRepository, 
+					spr *repository.SubPackageRepository, 
+					or *repository.OrderRepository) IOrderService {
 	return &OrderService{
-		Db: db,
+		RestaurantRepo: rr,
+		SubPackageRepo: spr,
+		OrderRepo: or,
 	}
 }
 
@@ -31,7 +35,8 @@ func (os *OrderService) HandlePaySubPackage(paySubPackageReq *client.PaySubPacka
 	var err error
 	var r *model.Restaurant
 	var s *model.SubPackage
-	r, s, err = checkRestaurantAndSubPackageExist(restaurantId, subPackageId, os.Db)
+
+	r, s, err = checkRestaurantAndSubPackageExist(restaurantId, subPackageId, os.RestaurantRepo, os.SubPackageRepo)
 	if err != nil {
 		return nil, err
 	}
@@ -42,28 +47,28 @@ func (os *OrderService) HandlePaySubPackage(paySubPackageReq *client.PaySubPacka
 	if isRestaurantSubPackageMatchTheRequestedPaySubPackage(r, s.Id) {
 		return nil, appErr.BadRequestError("The requested subscription package is already registered on this restaurant.")
 	}
-	err = repository.CreateInitialOrder(restaurantId, subPackageId, &s.Price, tenantId, os.Db)
+	err = os.OrderRepo.CreateInitialOrder(restaurantId, subPackageId, &s.Price, tenantId)
 	if err != nil {
 		return nil, err
 	}
 	var order *model.Order
-	order, err = repository.GetLatestTenantOrder(tenantId, os.Db)
+	order, err = os.OrderRepo.GetLatestTenantOrder(tenantId)
 	if err != nil {
 		return nil, err
 	}
 	return helper.MapToOrderResponse(order), nil
 }
 
-func checkRestaurantAndSubPackageExist(rId int64, sId int64, db *sql.DB) (*model.Restaurant, *model.SubPackage, error) {
+func checkRestaurantAndSubPackageExist(rId int64, sId int64, rr *repository.RestaurantRepository, spr *repository.SubPackageRepository) (*model.Restaurant, *model.SubPackage, error) {
 	var err error
 	var r *model.Restaurant
-	r, err = repository.GetRestaurantById(rId, db)
+	r, err = rr.GetRestaurantById(rId)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	var s *model.SubPackage
-	s, err = repository.GetSubPackageById(sId, db)
+	s, err = spr.GetSubPackageById(sId)
 	if s != nil {
 		return nil, nil, err
 	}

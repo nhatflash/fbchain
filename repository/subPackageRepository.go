@@ -8,8 +8,18 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func CheckSubPackageNameExists(name string, db *sql.DB) bool {
-	rows, rowErr := db.Query("SELECT name FROM sub_packages WHERE name = $1", name)
+type SubPackageRepository struct {
+	Db			*sql.DB
+}
+
+func NewSubPackageRepository(db *sql.DB) *SubPackageRepository {
+	return &SubPackageRepository{
+		Db: db,
+	}
+}
+
+func (spr *SubPackageRepository) CheckSubPackageNameExists(name string) bool {
+	rows, rowErr := spr.Db.Query("SELECT name FROM sub_packages WHERE name = $1", name)
 	if rowErr != nil {
 		return false
 	}
@@ -19,26 +29,26 @@ func CheckSubPackageNameExists(name string, db *sql.DB) bool {
 	return false
 }
 
-func CreateSubPackage(name string, description string, durationMonth int, price decimal.Decimal, image string, db *sql.DB) (*model.SubPackage, error) {
+func (spr *SubPackageRepository) CreateSubPackage(name string, description string, durationMonth int, price decimal.Decimal, image string) (*model.SubPackage, error) {
 	var err error
-	_, err = db.Exec("INSERT INTO sub_packages (name, description, duration_month, price, is_active, image) VALUES ($1, $2, $3, $4, $5, $6)", name, description, durationMonth, price, true, image)
+	_, err = spr.Db.Exec("INSERT INTO sub_packages (name, description, duration_month, price, is_active, image) VALUES ($1, $2, $3, $4, $5, $6)", name, description, durationMonth, price, true, image)
 
 	if err != nil {
 		return nil, err
 	}
 
 	var s *model.SubPackage
-	s, err = GetSubPackageByName(name, db)
+	s, err = spr.GetSubPackageByName(name)
 	if err != nil {
 		return nil, err
 	}
 	return s, nil
 }
 
-func GetSubPackageByName(name string, db *sql.DB) (*model.SubPackage, error) {
+func (spr *SubPackageRepository) GetSubPackageByName(name string) (*model.SubPackage, error) {
 	var err error
 	var rows *sql.Rows
-	rows, err = db.Query("SELECT * FROM sub_packages WHERE name = $1", name)
+	rows, err = spr.Db.Query("SELECT * FROM sub_packages WHERE name = $1", name)
 	if err != nil {
 		return nil, err
 	}
@@ -57,8 +67,8 @@ func GetSubPackageByName(name string, db *sql.DB) (*model.SubPackage, error) {
 	return &subPackages[0], nil
 }
 
-func AnySubPackageExists(db *sql.DB) (bool, error) {
-	rows, rowErr := db.Query("SELECT id FROM sub_packages")
+func (spr *SubPackageRepository) AnySubPackageExists() (bool, error) {
+	rows, rowErr := spr.Db.Query("SELECT id FROM sub_packages")
 	if rowErr != nil {
 		return false, rowErr
 	}
@@ -68,8 +78,8 @@ func AnySubPackageExists(db *sql.DB) (bool, error) {
 	return false, nil
 }
 
-func IsSubPackageExist(sId int64, db *sql.DB) bool {
-	rows, rowErr := db.Query("SELECT id FROM sub_packages WHERE id = $1", sId)
+func (spr *SubPackageRepository) IsSubPackageExist(sId int64) bool {
+	rows, rowErr := spr.Db.Query("SELECT id FROM sub_packages WHERE id = $1", sId)
 	if rowErr != nil {
 		return false
 	}
@@ -79,10 +89,10 @@ func IsSubPackageExist(sId int64, db *sql.DB) bool {
 	return false
 }
 
-func GetSubPackageById(sId int64, db *sql.DB) (*model.SubPackage, error) {
+func (spr *SubPackageRepository) GetSubPackageById(sId int64) (*model.SubPackage, error) {
 	var err error
 	var rows *sql.Rows
-	rows, err = db.Query("SELECT * FROM sub_packages WHERE id = $1", sId)
+	rows, err = spr.Db.Query("SELECT * FROM sub_packages WHERE id = $1", sId)
 	if err != nil {
 		return nil, err
 	}

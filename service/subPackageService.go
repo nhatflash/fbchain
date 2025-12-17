@@ -1,8 +1,6 @@
 package service
 
 import (
-	"database/sql"
-
 	"github.com/nhatflash/fbchain/client"
 	appErr "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/helper"
@@ -16,12 +14,12 @@ type ISubPackageService interface {
 }
 
 type SubPackageService struct {
-	Db 			*sql.DB
+	SubPackageRepo 			*repository.SubPackageRepository
 }
 
-func NewSubPackageService(db *sql.DB) ISubPackageService {
+func NewSubPackageService(spr *repository.SubPackageRepository) ISubPackageService {
 	return &SubPackageService{
-		Db: db,
+		SubPackageRepo: spr,
 	}
 }
 
@@ -35,7 +33,7 @@ func (ss *SubPackageService) HandleCreateSubPackage(createSubPackageReq *client.
 	var err error
 	var price decimal.Decimal
 
-	if repository.CheckSubPackageNameExists(name, ss.Db) {
+	if ss.SubPackageRepo.CheckSubPackageNameExists(name) {
 		return nil, appErr.BadRequestError("Subscription package name is already in use.")
 	}
 	price, err = decimal.NewFromString(priceStr)
@@ -44,7 +42,7 @@ func (ss *SubPackageService) HandleCreateSubPackage(createSubPackageReq *client.
 	}
 
 	var s *model.SubPackage
-	s, err = repository.CreateSubPackage(name, description, durationMonth, price, image, ss.Db)
+	s, err = ss.SubPackageRepo.CreateSubPackage(name, description, durationMonth, price, image)
 	if err != nil {
 		return nil, err
 	}

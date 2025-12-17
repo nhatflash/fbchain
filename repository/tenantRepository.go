@@ -8,25 +8,35 @@ import (
 	"github.com/nhatflash/fbchain/model"
 )
 
-func CreateTenantInformation(code string, description string, tenantType *enum.TenantType, userId int64, db *sql.DB) (*model.Tenant, error) {
+type TenantRepository struct {
+	Db 		*sql.DB
+}
+
+func NewTenantRepository(db *sql.DB) *TenantRepository {
+	return &TenantRepository{
+		Db: db,
+	}
+}
+
+func (tr *TenantRepository) CreateTenantInformation(code string, description string, tenantType *enum.TenantType, userId int64) (*model.Tenant, error) {
 	var err error
-	_, err = db.Exec("INSERT INTO tenants (code, description, type, user_id) VALUES ($1, $2, $3, $4)", code, description, tenantType, userId)
+	_, err = tr.Db.Exec("INSERT INTO tenants (code, description, type, user_id) VALUES ($1, $2, $3, $4)", code, description, tenantType, userId)
 	if err != nil {
 		return nil, err
 	}
 
 	var tenant *model.Tenant
-	tenant, err = GetTenantByCode(code, db)
+	tenant, err = tr.GetTenantByCode(code)
 	if err != nil {
 		return nil, err
 	}
 	return tenant, nil
 }
 
-func GetTenantByCode(code string, db *sql.DB) (*model.Tenant, error) {
+func (tr *TenantRepository) GetTenantByCode(code string) (*model.Tenant, error) {
 	var rows *sql.Rows
 	var err error
-	rows, err = db.Query("SELECT * FROM tenants WHERE code = $1 LIMIT 1", code)
+	rows, err = tr.Db.Query("SELECT * FROM tenants WHERE code = $1 LIMIT 1", code)
 	if err != nil {
 		return nil, err
 	}
@@ -45,11 +55,11 @@ func GetTenantByCode(code string, db *sql.DB) (*model.Tenant, error) {
 	return &tenants[0], nil
 }
 
-func GetTenantById(tId int64, db *sql.DB) (*model.Tenant, error) {
+func (tr *TenantRepository) GetTenantById(tId int64) (*model.Tenant, error) {
 	var rows *sql.Rows
 	var err error
 
-	rows, err = db.Query("SELECT * FROM tenants WHERE id = $1 LIMIT 1", tId)
+	rows, err = tr.Db.Query("SELECT * FROM tenants WHERE id = $1 LIMIT 1", tId)
 	if err != nil {
 		return nil, err
 	}
@@ -68,11 +78,11 @@ func GetTenantById(tId int64, db *sql.DB) (*model.Tenant, error) {
 	return &tenants[0], nil
 }
 
-func GetTenantByUserId(uId int64, db *sql.DB) (*model.Tenant, error) {
+func (tr *TenantRepository) GetTenantByUserId(uId int64) (*model.Tenant, error) {
 	var rows *sql.Rows
 	var err error
 
-	rows, err = db.Query("SELECT * FROM tenants WHERE user_id = $1 LIMIT 1", uId)
+	rows, err = tr.Db.Query("SELECT * FROM tenants WHERE user_id = $1 LIMIT 1", uId)
 	if err != nil {
 		return nil, err
 	}
@@ -92,11 +102,11 @@ func GetTenantByUserId(uId int64, db *sql.DB) (*model.Tenant, error) {
 }
 
 
-func ListAllTenants(db *sql.DB) ([]model.Tenant, error) {
+func (tr *TenantRepository) ListAllTenants() ([]model.Tenant, error) {
 	var rows *sql.Rows
 	var err error
 
-	rows, err = db.Query("SELECT * FROM tenants ORDER BY id ASC")
+	rows, err = tr.Db.Query("SELECT * FROM tenants ORDER BY id ASC")
 	if err != nil {
 		return nil, err
 	}

@@ -3,7 +3,18 @@ package helper
 import (
 	"github.com/nhatflash/fbchain/client"
 	"github.com/nhatflash/fbchain/model"
+	"time"
 )
+
+func MapToSignInResponse(accessToken string, refreshToken string) *client.SignInResponse {
+	signInRes := client.SignInResponse{
+		AccessToken: accessToken,
+		RefreshToken: refreshToken,
+		LastLogin: time.Now(),
+	}
+	return &signInRes
+}
+
 
 func MapToUserResponse(u *model.User) *client.UserResponse {
 	userRes := client.UserResponse{

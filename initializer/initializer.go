@@ -3,21 +3,29 @@ package initializer
 import (
 	"database/sql"
 	"os"
-
+	"fmt"
 	"github.com/nhatflash/fbchain/enum"
 	"github.com/nhatflash/fbchain/helper"
 	"github.com/nhatflash/fbchain/repository"
 	"github.com/nhatflash/fbchain/security"
+	"time"
 )
 
 func CreateAdminUserIfNotExists(db *sql.DB) error {
-	exist, existErr := repository.CheckIfAdminUserAlreadyExists(db)
-	if existErr != nil {
-		return existErr
+	var err error
+	var exist bool
+
+	userRepository := repository.NewUserRepository(db)
+	exist, err = userRepository.CheckIfAdminUserAlreadyExists()
+	if err != nil {
+		return err
 	}
+
 	if exist {
+		fmt.Println("Admin account exists, skip creation!")
 		return nil
 	}
+
 	email := os.Getenv("ADMIN_EMAIL")
 	password := os.Getenv("ADMIN_PASSWORD")
 	phone := os.Getenv("ADMIN_PHONE")
@@ -25,20 +33,24 @@ func CreateAdminUserIfNotExists(db *sql.DB) error {
 	firstName := os.Getenv("ADMIN_FIRSTNAME")
 	lastName := os.Getenv("ADMIN_LASTNAME")
 	gender := enum.GENDER_MALE
-	birthdate, bdErr := helper.ConvertToDate(os.Getenv("ADMIN_BIRTHDATE"))
 	postalCode := os.Getenv("ADMIN_POSTALCODE")
 	address := os.Getenv("ADMIN_ADDRESS")
 	profileImage := os.Getenv("ADMIN_PROFILEIMAGE")
-	if bdErr != nil {
-		return bdErr
+
+	var birthdate *time.Time
+	birthdate, err = helper.ConvertToDate(os.Getenv("ADMIN_BIRTHDATE"))
+	if err != nil {
+		return err
 	}
-	hashedPassword, hashErr := security.GenerateHashedPassword(password)
-	if hashErr != nil {
-		return hashErr
+	var hashedPassword string
+	hashedPassword, err = security.GenerateHashedPassword(password)
+	if err != nil {
+		return err
 	}
-	dbErr := repository.CreateAdminUser(email, hashedPassword, phone, identity, firstName, lastName, &gender, birthdate, postalCode, address, profileImage, db)
-	if dbErr != nil {
-		return dbErr
+
+	err = userRepository.CreateAdminUser(email, hashedPassword, phone, identity, firstName, lastName, &gender, birthdate, postalCode, address, profileImage)
+	if err != nil {
+		return err
 	}
 	return nil
 }

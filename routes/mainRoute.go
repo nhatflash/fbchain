@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"database/sql"
+	"github.com/nhatflash/fbchain/controller"
 	"fmt"
 	"net/http"
 
@@ -10,11 +10,15 @@ import (
 	_ "github.com/nhatflash/fbchain/docs"
 )
 
-func MainRoutes(r *gin.Engine, db *sql.DB) {
+func MainRoutes(r *gin.Engine, 
+				ac *controller.AuthController, 
+				spc *controller.SubPackageController, 
+				rc *controller.RestaurantController, 
+				oc *controller.OrderController) {
 	r.GET("/", Ping)
-	AuthRoutes(r, "/api/auth", db)
-	AdminRoutes(r, "/api/admin", db)
-	TenantRoutes(r, "/api/tenant", db)
+	AuthRoutes(r, "/api/auth", ac)
+	AdminRoutes(r, "/api/admin", spc)
+	TenantRoutes(r, "/api/tenant", rc, oc)
 }
 
 

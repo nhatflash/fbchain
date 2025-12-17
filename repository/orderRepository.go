@@ -10,9 +10,19 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func CreateInitialOrder(rId int64, sId int64, amount *decimal.Decimal, tId int64, db *sql.DB) (err error) {
+type OrderRepository struct {
+	Db 			*sql.DB
+}
+
+func NewOrderRepository(db *sql.DB) *OrderRepository {
+	return &OrderRepository{
+		Db: db,
+	}
+}
+
+func (or *OrderRepository) CreateInitialOrder(rId int64, sId int64, amount *decimal.Decimal, tId int64) (err error) {
 	ctx := context.Background()
-	tx, err := db.BeginTx(ctx, nil)
+	tx, err := or.Db.BeginTx(ctx, nil)
 
 	if err != nil {
 		return err
@@ -37,10 +47,10 @@ func CreateInitialOrder(rId int64, sId int64, amount *decimal.Decimal, tId int64
 	return nil
 }
 
-func GetLatestTenantOrder(tId int64, db *sql.DB) (*model.Order, error) {
+func (or *OrderRepository) GetLatestTenantOrder(tId int64) (*model.Order, error) {
 	var rows *sql.Rows
 	var err error
-	rows, err = db.Query("SELECT * FROM orders WHERE tenant_id = $1 ORDER BY order_date", tId)
+	rows, err = or.Db.Query("SELECT * FROM orders WHERE tenant_id = $1 ORDER BY order_date", tId)
 	if err != nil {
 		return nil, err
 	}

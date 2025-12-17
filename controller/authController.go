@@ -1,9 +1,7 @@
 package controller
 
 import (
-	"database/sql"
 	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/api"
 	"github.com/nhatflash/fbchain/client"
@@ -12,7 +10,13 @@ import (
 )
 
 type AuthController struct {
-	Db *sql.DB
+	AuthService 		service.IAuthService
+}
+
+func NewAuthController(as service.IAuthService) *AuthController {
+	return &AuthController{
+		AuthService: as,
+	}
 }
 
 // @Summary Sign in API
@@ -22,7 +26,7 @@ type AuthController struct {
 // @Success 200 {object} client.SignInResponse
 // @Failure 400 {object} error
 // @Router /auth/signin [post]
-func (authController AuthController) SignIn(c *gin.Context) {
+func (ac *AuthController) SignIn(c *gin.Context) {
 	var err error
 	var signInRequest client.SignInRequest
 	if err = c.ShouldBindJSON(&signInRequest); err != nil {
@@ -30,8 +34,7 @@ func (authController AuthController) SignIn(c *gin.Context) {
 		return
 	}
 	var res *client.SignInResponse
-	authService := service.NewAuthService(authController.Db)
-	res, err = authService.HandleSignIn(&signInRequest, authController.Db)
+	res, err = ac.AuthService.HandleSignIn(&signInRequest)
 	if err != nil {
 		c.Error(err)
 		return
@@ -46,7 +49,7 @@ func (authController AuthController) SignIn(c *gin.Context) {
 // @Success 200 {object} client.TenantResponse
 // @Failure 400 {object} error
 // @Router /auth/signup/tenant [post]
-func (authController AuthController) TenantSignUp(c *gin.Context) {
+func (ac *AuthController) TenantSignUp(c *gin.Context) {
 	var tenantSignUpReq client.TenantSignUpRequest
 	var err error
 	if err = c.ShouldBindJSON(&tenantSignUpReq); err != nil {
@@ -54,8 +57,7 @@ func (authController AuthController) TenantSignUp(c *gin.Context) {
 		return
 	}
 	var res *client.TenantResponse
-	authService := service.NewAuthService(authController.Db)
-	res, err = authService.HandleTenantSignUp(&tenantSignUpReq, authController.Db)
+	res, err = ac.AuthService.HandleTenantSignUp(&tenantSignUpReq)
 	if err != nil {
 		c.Error(err)
 		return
