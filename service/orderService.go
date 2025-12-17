@@ -36,7 +36,7 @@ func (os *OrderService) HandlePaySubPackage(paySubPackageReq *client.PaySubPacka
 	var r *model.Restaurant
 	var s *model.SubPackage
 
-	r, s, err = checkRestaurantAndSubPackageExist(restaurantId, subPackageId, os.RestaurantRepo, os.SubPackageRepo)
+	r, s, err = checkRestaurantAndSubPackageExist(*restaurantId, *subPackageId, os.RestaurantRepo, os.SubPackageRepo)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (os *OrderService) HandlePaySubPackage(paySubPackageReq *client.PaySubPacka
 	if isRestaurantSubPackageMatchTheRequestedPaySubPackage(r, s.Id) {
 		return nil, appErr.BadRequestError("The requested subscription package is already registered on this restaurant.")
 	}
-	err = os.OrderRepo.CreateInitialOrder(restaurantId, subPackageId, &s.Price, tenantId)
+	err = os.OrderRepo.CreateInitialOrder(*restaurantId, *subPackageId, &s.Price, tenantId)
 	if err != nil {
 		return nil, err
 	}

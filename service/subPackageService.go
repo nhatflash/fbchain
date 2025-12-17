@@ -42,7 +42,7 @@ func (ss *SubPackageService) HandleCreateSubPackage(createSubPackageReq *client.
 	}
 
 	var s *model.SubPackage
-	s, err = ss.SubPackageRepo.CreateSubPackage(name, description, durationMonth, price, image)
+	s, err = ss.SubPackageRepo.CreateSubPackage(name, description, *durationMonth, price, image)
 	if err != nil {
 		return nil, err
 	}

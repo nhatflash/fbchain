@@ -19,7 +19,7 @@ func NewRestaurantRepository(db *sql.DB) *RestaurantRepository {
 	}
 }
 
-func (rr *RestaurantRepository) CreateRestaurant(name string, location string, description string, email string, phone string, postalCode string, rType *enum.RestaurantType, notes string, images []string, tenantId int64) (*model.Restaurant, error) {
+func (rr *RestaurantRepository) CreateRestaurant(name string, location string, description *string, email *string, phone *string, postalCode string, rType *enum.RestaurantType, notes string, images []string, tenantId int64) (*model.Restaurant, error) {
 	var ar decimal.Decimal
 	var err error
 

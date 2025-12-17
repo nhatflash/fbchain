@@ -109,12 +109,12 @@ func (as *AuthService) HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpRe
 		return nil, err
 	}
 	var tenantUser *model.User
-	tenantUser, err = as.UserRepo.CreateTenantUser(firstName, lastName, email, hashedPassword, birthdate, gender, phone, identity, address, postalCode, profileImage)
+	tenantUser, err = as.UserRepo.CreateTenantUser(firstName, lastName, email, hashedPassword, birthdate, gender, phone, identity, address, postalCode, *profileImage)
 	if err != nil {
 		return nil, err
 	}
 	code := generateTenantCode()
-	tenant, tenantErr := as.TenantRepo.CreateTenantInformation(code, description, tenantType, tenantUser.Id)
+	tenant, tenantErr := as.TenantRepo.CreateTenantInformation(code, *description, tenantType, tenantUser.Id)
 
 	if tenantErr != nil {
 		return nil, tenantErr

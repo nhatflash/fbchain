@@ -29,7 +29,7 @@ func (spr *SubPackageRepository) CheckSubPackageNameExists(name string) bool {
 	return false
 }
 
-func (spr *SubPackageRepository) CreateSubPackage(name string, description string, durationMonth int, price decimal.Decimal, image string) (*model.SubPackage, error) {
+func (spr *SubPackageRepository) CreateSubPackage(name string, description *string, durationMonth int, price decimal.Decimal, image *string) (*model.SubPackage, error) {
 	var err error
 	_, err = spr.Db.Exec("INSERT INTO sub_packages (name, description, duration_month, price, is_active, image) VALUES ($1, $2, $3, $4, $5, $6)", name, description, durationMonth, price, true, image)
 

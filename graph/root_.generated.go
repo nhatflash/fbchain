@@ -51,6 +51,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		Me               func(childComplexity int) int
 		Restaurant       func(childComplexity int, id string) int
 		RestaurantImage  func(childComplexity int, id string) int
 		RestaurantImages func(childComplexity int) int
@@ -149,6 +150,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.CreateTodo(childComplexity, args["input"].(model.NewTodo)), true
+
+	case "Query.me":
+		if e.complexity.Query.Me == nil {
+			break
+		}
+
+		return e.complexity.Query.Me(childComplexity), true
 
 	case "Query.restaurant":
 		if e.complexity.Query.Restaurant == nil {

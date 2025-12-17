@@ -178,3 +178,18 @@ func (ur *UserRepository) GetUserById(id int64) (*model.User, error) {
 	return &users[0], nil
 }
 
+
+func (ur *UserRepository) UpdateUser(uId int64, firstName *string, lastName *string, birthdate *time.Time, gender *enum.Gender, phone *string, identity *string, address *string, postalCode *string, profileImage *string) (*model.User, error) {
+	var err error
+	_, err = ur.Db.Exec("UPDATE users SET first_name = $1, last_name = $2, birthdate = $3, gender = $4, phone = $5, identity = $6, address = $7, postal_code = $8, profile_image = $9 WHERE id = $10", firstName, lastName, birthdate, gender, phone, identity, address, postalCode, profileImage, uId)
+	if err != nil {
+		return nil, err
+	}
+	var u *model.User
+	u, err = ur.GetUserById(uId)
+	if err != nil {
+		return nil, err
+	}
+	return u, nil
+}
+

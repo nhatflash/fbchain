@@ -9,14 +9,29 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-
+	appErr "github.com/nhatflash/fbchain/error"
 	gqlModel "github.com/nhatflash/fbchain/graph/model"
+	"github.com/nhatflash/fbchain/middleware"
 	"github.com/nhatflash/fbchain/model"
+	"github.com/nhatflash/fbchain/security"
 )
 
 // CreateTodo is the resolver for the createTodo field.
 func (r *mutationResolver) CreateTodo(ctx context.Context, input gqlModel.NewTodo) (*gqlModel.Todo, error) {
 	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
+}
+
+// Me is the resolver for the me field.
+func (r *queryResolver) Me(ctx context.Context) (*gqlModel.User, error) {
+	claims, ok := ctx.Value(middleware.UserKey{}).(*security.JwtAccessClaims)
+	if !ok || claims == nil {
+		return nil, appErr.UnauthorizedError("Authentication is required.")
+	}
+	u, err := r.UserService.GetUserById(claims.UserId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlModelUser(u), nil
 }
 
 // Users is the resolver for the users field.
@@ -256,3 +271,29 @@ type queryResolver struct{ *Resolver }
 type restaurantResolver struct{ *Resolver }
 type restaurantImageResolver struct{ *Resolver }
 type tenantResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+/*
+	func (r *mutationResolver) ChangeProfile(ctx context.Context, input gqlModel.UpdateProfile) (*gqlModel.User, error) {
+	firstName := input.FirstName
+	lastName :=
+}
+
+// Me is the resolver for the me field.
+func (r *queryResolver) Me(ctx context.Context) (*gqlModel.User, error) {
+	claims, ok := ctx.Value(middleware.UserKey{}).(*security.JwtAccessClaims)
+	if !ok || claims == nil {
+		return nil, appErr.UnauthorizedError("Authentication is required.")
+	}
+	u, err := r.UserService.GetUserById(claims.UserId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlModelUser(u), nil
+}
+*/

@@ -90,6 +90,7 @@ type RestaurantImage {
 
 
 type Query {
+  me: User
   users: [User!]!
   user(id: ID!): User
   tenants: [Tenant!]!

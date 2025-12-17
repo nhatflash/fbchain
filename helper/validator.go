@@ -16,77 +16,62 @@ const (
 
 
 var PhoneNumberValidator validator.Func = func(fl validator.FieldLevel) bool {
-	phone, ok := fl.Field().Interface().(string)
-	if ok {
-		match, err := regexp.MatchString(PhonePattern, phone)
-		if err != nil || !match {
-			return false
-		}
+	phone:= fl.Field().String()
+	match, err := regexp.MatchString(PhonePattern, phone)
+	if err != nil || !match {
+		return false
 	}
 	return true
 }
 
 var IdentityNumberValidator validator.Func = func(fl validator.FieldLevel) bool {
-	identity, ok := fl.Field().Interface().(string)
-	if ok {
-		match, err := regexp.MatchString(IdentityPattern, identity)
-		if err != nil || !match {
-			return false
-		}
+	identity := fl.Field().String()
+	match, err := regexp.MatchString(IdentityPattern, identity)
+	if err != nil || !match {
+		return false
 	}
 	return true
 }
 
 var NameValidator validator.Func = func(fl validator.FieldLevel) bool {
-	name, ok := fl.Field().Interface().(string)
-	if ok {
-		match, err := regexp.MatchString(NamePattern, name)
-		if err != nil || !match {
-			return false
-		}
+	name := fl.Field().String()
+	match, err := regexp.MatchString(NamePattern, name)
+	if err != nil || !match {
+		return false
 	}
 	return true
 }
 
 var PostalCodeValidator validator.Func = func(fl validator.FieldLevel) bool {
-	postalCode, ok := fl.Field().Interface().(string)
-	if ok {
-		if len(postalCode) > 10 {
-			return false
-		}
+	postalCode := fl.Field().String()
+	if len(postalCode) > 10 || len(postalCode) < 5 {
+		return false
 	}
 	return true
 }
 
 var PositiveNumberValidator validator.Func = func(fl validator.FieldLevel) bool {
-	positiveNum, ok := fl.Field().Interface().(int)
-	if ok {
-		if positiveNum < 0 {
-			return false
-		}
-	}
-	return true
+	positiveNum := fl.Field().Int()
+	return positiveNum >= 0
 }
 
 
 var PriceValidator validator.Func = func(fl validator.FieldLevel) bool {
-	price, ok := fl.Field().Interface().(string)
-	if ok {
-		if !strings.Contains(price, ".") {
-			return false
-		}
-		parts := strings.Split(price, ".")
-		if len(parts) != 2 || len(parts[1]) != 2 {
-			return false
-		}
-		mValue, vErr := regexp.MatchString(PricePattern, parts[0])
-		mPrecision, pErr := regexp.MatchString(PricePattern, parts[1])
-		if vErr != nil || pErr != nil {
-			return false
-		}
-		if !mValue || !mPrecision {
-			return false
-		}
+	price := fl.Field().String()
+	if !strings.Contains(price, ".") {
+		return false
+	}
+	parts := strings.Split(price, ".")
+	if len(parts) != 2 || len(parts[1]) != 2 {
+		return false
+	}
+	mValue, vErr := regexp.MatchString(PricePattern, parts[0])
+	mPrecision, pErr := regexp.MatchString(PricePattern, parts[1])
+	if vErr != nil || pErr != nil {
+		return false
+	}
+	if !mValue || !mPrecision {
+		return false
 	}
 	return true
 }
