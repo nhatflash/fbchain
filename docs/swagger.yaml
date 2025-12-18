@@ -267,6 +267,13 @@ definitions:
       status:
         $ref: '#/definitions/enum.UserStatus'
     type: object
+  client.VerifyChangePasswordRequest:
+    properties:
+      verifiedCode:
+        type: string
+    required:
+    - verifiedCode
+    type: object
   enum.Gender:
     enum:
     - MALE
@@ -357,6 +364,42 @@ paths:
       security:
       - BearerAuth: []
       summary: Create subscription package API
+  /auth/change-password/verify:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - BearerAuth: []
+      summary: Get change password OTP API
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: VerifyChangePassword body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.VerifyChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - BearerAuth: []
+      summary: Verify change password OTP API
   /auth/signin:
     post:
       consumes:

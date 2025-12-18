@@ -54,6 +54,65 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/change-password/verify": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Get change password OTP API",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Verify change password OTP API",
+                "parameters": [
+                    {
+                        "description": "VerifyChangePassword body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.VerifyChangePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/auth/signin": {
             "post": {
                 "consumes": [
@@ -635,6 +694,17 @@ const docTemplate = `{
                 },
                 "status": {
                     "$ref": "#/definitions/enum.UserStatus"
+                }
+            }
+        },
+        "client.VerifyChangePasswordRequest": {
+            "type": "object",
+            "required": [
+                "verifiedCode"
+            ],
+            "properties": {
+                "verifiedCode": {
+                    "type": "string"
                 }
             }
         },

@@ -2,10 +2,11 @@ package controller
 
 import (
 	"net/http"
-	_ "github.com/nhatflash/fbchain/docs"
+
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/api"
 	"github.com/nhatflash/fbchain/client"
+	_ "github.com/nhatflash/fbchain/docs"
 	"github.com/nhatflash/fbchain/helper"
 	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/service"
@@ -33,19 +34,12 @@ func NewUserController(us service.IUserService) *UserController {
 func (uc *UserController) ChangeProfile(c *gin.Context) {
 	var updtProfileReq client.UpdateProfileRequest
 	var err error
-
 	if err = c.ShouldBindJSON(&updtProfileReq); err != nil {
 		c.Error(err)
 		return 
 	}
-	var currUser *model.User
-	currUser, err = uc.UserService.GetCurrentUser(c.Request.Context())
-	if err != nil {
-		c.Error(err)
-		return
-	}
 	var updatedUser *model.User
-	updatedUser, err = uc.UserService.ChangeProfile(currUser.Id, updtProfileReq.FirstName, updtProfileReq.LastName, updtProfileReq.Birthdate, updtProfileReq.Gender, updtProfileReq.Phone, updtProfileReq.Identity, updtProfileReq.Address, updtProfileReq.PostalCode, updtProfileReq.ProfileImage)
+	updatedUser, err = uc.UserService.ChangeProfile(c.Request.Context(), updtProfileReq.FirstName, updtProfileReq.LastName, updtProfileReq.Birthdate, updtProfileReq.Gender, updtProfileReq.Phone, updtProfileReq.Identity, updtProfileReq.Address, updtProfileReq.PostalCode, updtProfileReq.ProfileImage)
 	if err != nil {
 		c.Error(err)
 		return

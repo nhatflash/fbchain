@@ -63,3 +63,12 @@ type UpdateProfileRequest struct {
 	Address 		*string				`json:"address" binding:"omitempty"`
 	ProfileImage	*string				`json:"profileImage" binding:"omitempty"`
 }
+
+type VerifyChangePasswordRequest struct {
+	VerifiedCode 	string			`json:"verifiedCode" binding:"required"`
+}
+
+type ChangePasswordRequest struct {
+	NewPassword			string				`json:"newPassword" binding:"required"`
+	ConfirmNewPassword	string				`json:"confirmNewPassword" binding:"required"`
+}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"os"
 
@@ -16,7 +17,7 @@ import (
 	env "github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/nhatflash/fbchain/controller"
-	pg "github.com/nhatflash/fbchain/database"
+	"github.com/nhatflash/fbchain/database"
 	_ "github.com/nhatflash/fbchain/docs"
 	"github.com/nhatflash/fbchain/graph"
 	"github.com/nhatflash/fbchain/helper"
@@ -40,10 +41,11 @@ import (
 // @in header
 // @name Authorization
 func main() {
+	var err error
 
 	// Load .env file
-	envErr := env.Load(".env")
-	if envErr != nil {
+	err = env.Load(".env")
+	if err != nil {
 		log.Fatalln("Error loading .env file")
 		return;
 	}
@@ -55,14 +57,19 @@ func main() {
 	r.Use(middleware.ErrorHandler())
 	r.Use(middleware.FilterConfigurer("http://localhost:5173"))
 
-	// Connect to database
-	db, dbErr := pg.ConnectToDatabase()
-	if dbErr != nil {
-		log.Fatalln("Connect to PostgreSQL failed", dbErr.Error())
+	// Connect to Postgres SQL database
+	var db *sql.DB
+	db, err = database.ConnectToPostgreSQL()
+	if err != nil {
+		log.Fatalln("Connect to PostgreSQL failed", err.Error())
 		return
 	}
 
 	defer db.Close()
+
+	// Redis 
+	rdb := database.ConnectToRedisServer()
+
 
 	// Dependency injection
 	userRepository := repository.NewUserRepository(db)
@@ -71,7 +78,7 @@ func main() {
 	subPackageRepository := repository.NewSubPackageRepository(db)
 	orderRepository := repository.NewOrderRepository(db)
 
-	authService := service.NewAuthService(userRepository, tenantRepository)
+	authService := service.NewAuthService(userRepository, tenantRepository, rdb)
 	userService := service.NewUserService(userRepository)
 	tenantService := service.NewTenantService(tenantRepository, userService)
 	restaurantService := service.NewRestaurantService(restaurantRepository, subPackageRepository)
@@ -129,8 +136,8 @@ func main() {
 
 
 	// Initialize admin if not exist
-	initErr := initializer.CreateAdminUserIfNotExists(db)
-	if initErr != nil {
+	err = initializer.CreateAdminUserIfNotExists(db)
+	if err != nil {
 		log.Fatalln("Error when perform initialize admin account.")
 		return
 	}

@@ -16,7 +16,7 @@ type IUserService interface {
 	IsUserRoleTenant(u *model.User) bool
 	GetListUser() ([]model.User, error)
 	GetUserById(id int64) (*model.User, error)
-	ChangeProfile(uId int64, firstName *string, lastName *string, birthdate *string, gender *enum.Gender, phone *string, identity *string, address *string, postalCode *string, profileImage *string) (*model.User, error)
+	ChangeProfile(ctx context.Context, firstName *string, lastName *string, birthdate *string, gender *enum.Gender, phone *string, identity *string, address *string, postalCode *string, profileImage *string) (*model.User, error)
 }
 
 type UserService struct {
@@ -70,10 +70,15 @@ func (us *UserService) GetUserById(id int64) (*model.User, error) {
 }
 
 
-func (us *UserService) ChangeProfile(uId int64, firstName *string, lastName *string, birthdate *string, gender *enum.Gender, phone *string, identity *string, address *string, postalCode *string, profileImage *string) (*model.User, error) {
+func (us *UserService) ChangeProfile(ctx context.Context, firstName *string, lastName *string, birthdate *string, gender *enum.Gender, phone *string, identity *string, address *string, postalCode *string, profileImage *string) (*model.User, error) {
 	var err error
+	var claims *security.JwtAccessClaims
+	claims, err = GetCurrentClaims(ctx)
+	if err != nil {
+		return nil, err
+	}
 	var u *model.User
-	u, err = us.GetUserById(uId)
+	u, err = us.GetUserById(claims.UserId)
 	if err != nil {
 		return nil, err
 	}

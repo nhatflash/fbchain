@@ -63,5 +63,47 @@ func (ac *AuthController) TenantSignUp(c *gin.Context) {
 		return
 	}
 	api.SuccessMessage(http.StatusCreated, "Tenant signed up successfully.", res, c)
+}
 
+
+// @Summary Verify change password OTP API
+// @Accept json
+// @Produce json
+// @Param request body client.VerifyChangePasswordRequest true "VerifyChangePassword body"
+// @Success 200 {object} string 
+// @Failure 400 {object} error
+// @Security BearerAuth
+// @Router /auth/change-password/verify [post]
+func (ac *AuthController) VerifyChangePassword(c *gin.Context) {
+	var verifyChangePasswordReq client.VerifyChangePasswordRequest
+	var err error
+	if err = c.ShouldBindJSON(&verifyChangePasswordReq); err != nil {
+		c.Error(err)
+		return
+	}
+	var res string
+	res, err = ac.AuthService.HandleVerifyChangePassword(&verifyChangePasswordReq, c.Request.Context())
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	if res == "Accepted" {
+		api.SuccessMessage(http.StatusOK, "Verify successfully.", res, c)
+	} else {
+		api.SuccessMessage(http.StatusNotAcceptable, "Verify failed.", res, c)
+	}
+}
+
+// @Summary Get change password OTP API
+// @Success 200 {object} string
+// @Failure 400 {object} error
+// @Security BearerAuth
+// @Router /auth/change-password/verify [get]
+func (ac *AuthController) GetChangePasswordVerifiedOTP(c *gin.Context) {
+	res, err := ac.AuthService.GenerateChangePasswordVerifyOTP(c.Request.Context())
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	api.SuccessMessage(http.StatusOK, "Verify change password OTP sent successfully.", res, c)
 }

@@ -91,6 +91,8 @@ func ValidateJwtAccessToken(accessTokenStr string) (*JwtAccessClaims, error) {
 }
 
 
+
+
 func buildClaims(u *model.User, expiration int) jwt.RegisteredClaims {
 	return jwt.RegisteredClaims{
 		Issuer:    "fbchain",

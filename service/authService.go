@@ -3,8 +3,11 @@ package service
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/nhatflash/fbchain/constant"
 
 	"github.com/nhatflash/fbchain/client"
 	appErr "github.com/nhatflash/fbchain/error"
@@ -13,22 +16,27 @@ import (
 	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/repository"
 	"github.com/nhatflash/fbchain/security"
+	"github.com/redis/go-redis/v9"
 )
 
 type IAuthService interface {
 	HandleSignIn(signInReq *client.SignInRequest) (*client.SignInResponse, error)
 	HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpRequest) (*client.TenantResponse, error)
+	GenerateChangePasswordVerifyOTP(ctx context.Context) (string, error)
+	HandleVerifyChangePassword(req *client.VerifyChangePasswordRequest, ctx context.Context) (string, error)
 }
 
 type AuthService struct {
 	UserRepo 		*repository.UserRepository
 	TenantRepo 		*repository.TenantRepository
+	Rdb 			*redis.Client
 }
 
-func NewAuthService(ur *repository.UserRepository, tr *repository.TenantRepository) IAuthService {
+func NewAuthService(ur *repository.UserRepository, tr *repository.TenantRepository, rdb *redis.Client) IAuthService {
 	return &AuthService{
 		UserRepo: ur,
 		TenantRepo: tr,
+		Rdb: rdb,
 	}
 }
 
@@ -92,12 +100,11 @@ func (as *AuthService) HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpRe
 	tenantType := tenantSignUpReq.Type
 
 	var err error
-	err = validateSignUpRequest(email, phone, identity, password, confirmPassword, as.UserRepo)
+	err = ValidateSignUpRequest(email, phone, identity, password, confirmPassword, as.UserRepo)
 
 	if err != nil {
 		return nil, err
 	}
-
 	var birthdate *time.Time
 	birthdate, err = helper.ConvertToDate(birthdateStr)
 	if err != nil {
@@ -113,21 +120,78 @@ func (as *AuthService) HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpRe
 	if err != nil {
 		return nil, err
 	}
-	code := generateTenantCode()
-	tenant, tenantErr := as.TenantRepo.CreateTenantInformation(code, *description, tenantType, tenantUser.Id)
+	code := GenerateTenantCode()
+	var tenant *model.Tenant
+	tenant, err = as.TenantRepo.CreateTenantInformation(code, *description, tenantType, tenantUser.Id)
 
-	if tenantErr != nil {
-		return nil, tenantErr
+	if err != nil {
+		return nil, err
 	}
 	return helper.MapToTenantResponse(tenantUser, tenant), nil
 }
 
 
+func (as *AuthService) GenerateChangePasswordVerifyOTP(ctx context.Context) (string, error) {
+	var err error
+	var claims *security.JwtAccessClaims
+	claims, err = GetCurrentClaims(ctx)
+	if err != nil {
+		return "", err
+	}
+	userId := strconv.FormatInt(claims.UserId, 10)
+	validTimeKey := constant.USER_CHANGE_PASSWORD_TIME_KEY + userId
+	validTimeKey, _ = as.Rdb.Get(ctx, validTimeKey).Result()
+	if validTimeKey == constant.USER_CHANGE_PASSWORD_TIME_VALUE {
+		return "", appErr.BadRequestError("You are already on an attempt for password changing. Please try again later.")
+	}
+
+	otpLen := 6
+	var otp string
+	otp, err = security.GenerateOTPCode(otpLen)
+	if err != nil {
+		return "", err
+	}
+	duration := time.Duration(constant.VERIFY_PASSWORD_OTP_EXPIRATION_MIN) * time.Minute
+	otpKey := constant.USER_VERIFY_PASSWORD_OTP_KEY + userId
+	err = as.Rdb.Set(ctx, otpKey, otp, duration).Err()
+	if err != nil {
+		return "", err
+	}
+	return otp, nil
+}
+
+
+func (as *AuthService) HandleVerifyChangePassword(req *client.VerifyChangePasswordRequest, ctx context.Context) (string, error) {
+	var err error
+	var claims *security.JwtAccessClaims
+	claims, err = GetCurrentClaims(ctx)
+	if err != nil {
+		return "", err
+	}
+	userId := strconv.FormatInt(claims.UserId, 10)
+	var actualOTP string
+	otpKey := constant.USER_VERIFY_PASSWORD_OTP_KEY + userId
+	actualOTP, err = as.Rdb.Get(ctx, otpKey).Result()
+	if err == redis.Nil {
+		return "", appErr.UnauthorizedError("OTP code expired or not found.")
+	}
+	if security.VerifyOTPCode(req.VerifiedCode, actualOTP) {
+		as.Rdb.Del(ctx, otpKey)
+		validTimeKey := constant.USER_CHANGE_PASSWORD_TIME_KEY + userId
+		duration := time.Duration(constant.CHANGE_PASSWORD_TIME) * time.Minute
+		err = as.Rdb.Set(ctx, validTimeKey, constant.USER_CHANGE_PASSWORD_TIME_VALUE, duration).Err()
+		if err != nil {
+			return "", err
+		}
+		return "Accepted", nil
+	}
+	return "Unaccepted", nil
+}
+
+
+
 func GetCurrentClaims(ctx context.Context) (*security.JwtAccessClaims, error) {
-	fmt.Println("Request context: ", ctx)
 	claims, ok := ctx.Value(middleware.UserKey{}).(*security.JwtAccessClaims)
-	fmt.Println("In this function: GetCurrentClaim()")
-	fmt.Println("Claims:", claims)
 	if !ok || claims == nil {
 		return nil, appErr.UnauthorizedError("Authentication is required.")
 	}
@@ -136,20 +200,20 @@ func GetCurrentClaims(ctx context.Context) (*security.JwtAccessClaims, error) {
 
 
 
-func generateTenantCode() string {
+func GenerateTenantCode() string {
 	now := time.Now()
 	unixMilli := now.UnixMilli()
 	return fmt.Sprintf("TENANT-%d", unixMilli)
 }
 
 
-func generateStaffCode() string {
+func GenerateStaffCode() string {
 	now := time.Now()
 	unixMilli := now.UnixMilli()
 	return fmt.Sprintf("STAFF-%d", unixMilli)
 }
 
-func validateSignUpRequest(email string, phone string, identity string, password string, confirmPassword string, ur *repository.UserRepository) error {
+func ValidateSignUpRequest(email string, phone string, identity string, password string, confirmPassword string, ur *repository.UserRepository) error {
 	if ur.CheckUserEmailExists(email) {
 		return appErr.BadRequestError("User with this email already exists.")
 	}
