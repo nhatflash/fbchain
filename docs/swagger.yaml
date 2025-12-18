@@ -42,6 +42,7 @@ definitions:
       price:
         type: string
     required:
+    - durationMonth
     - name
     - price
     type: object
@@ -216,6 +217,56 @@ definitions:
     - postalCode
     - type
     type: object
+  client.UpdateProfileRequest:
+    properties:
+      address:
+        type: string
+      birthdate:
+        type: string
+      firstName:
+        type: string
+      gender:
+        $ref: '#/definitions/enum.Gender'
+      identity:
+        type: string
+      lastName:
+        type: string
+      phone:
+        type: string
+      postalCode:
+        type: string
+      profileImage:
+        type: string
+    type: object
+  client.UserResponse:
+    properties:
+      address:
+        type: string
+      birthdate:
+        type: string
+      email:
+        type: string
+      firstName:
+        type: string
+      gender:
+        $ref: '#/definitions/enum.Gender'
+      id:
+        type: integer
+      identity:
+        type: string
+      lastName:
+        type: string
+      phone:
+        type: string
+      postalCode:
+        type: string
+      profileImage:
+        type: string
+      role:
+        $ref: '#/definitions/enum.Role'
+      status:
+        $ref: '#/definitions/enum.UserStatus'
+    type: object
   enum.Gender:
     enum:
     - MALE
@@ -234,6 +285,18 @@ definitions:
     - ORDER_PENDING
     - ORDER_COMPLETED
     - ORDER_CANCELED
+  enum.Role:
+    enum:
+    - ADMIN
+    - MANAGER
+    - STAFF
+    - TENANT
+    type: string
+    x-enum-varnames:
+    - ROLE_ADMIN
+    - ROLE_MANAGER
+    - ROLE_STAFF
+    - ROLE_TENANT
   enum.TenantType:
     enum:
     - PERSONAL
@@ -338,6 +401,30 @@ paths:
           description: Bad Request
           schema: {}
       summary: Tenant sign up API
+  /profile:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: UpdateProfile body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/client.UserResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - BearerAuth: []
+      summary: Change Profile API
   /tenant/order:
     post:
       consumes:

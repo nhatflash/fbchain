@@ -82,7 +82,7 @@ func main() {
 	restaurantController := controller.NewRestaurantController(userService, restaurantService)
 	subPackageController := controller.NewSubPackageController(subPackageService)
 	orderController := controller.NewOrderController(orderService, tenantService)
-
+	userController := controller.NewUserController(userService)
 
 	// GraphQL handler
 	gqlHandler := handler.New(
@@ -136,7 +136,7 @@ func main() {
 	}
 
 	// Define routes for REST API
-	routes.MainRoutes(r, authController, subPackageController, restaurantController, orderController)
+	routes.MainRoutes(r, authController, subPackageController, restaurantController, orderController, userController)
 	r.GET("/swagger/*any", ginSwg.WrapHandler(swgFiles.Handler))
 
 

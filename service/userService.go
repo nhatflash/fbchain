@@ -146,10 +146,10 @@ func GetDataForUserUpdate(firstName *string, lastName *string, birthdate *string
 }
 
 func ValidateChangeProfileRequest(phone *string, identity *string, uPhone *string, uIdentity *string, ur *repository.UserRepository) error {
-	if phone != nil && uPhone != nil && *phone != *uPhone || ur.CheckUserPhoneExists(*phone) {
+	if phone != nil && uPhone != nil && *phone != *uPhone && ur.CheckUserPhoneExists(*phone) {
 		return appErr.BadRequestError("This phone is already in use.")
 	}
-	if identity != nil && uIdentity != nil && *identity != *uIdentity || ur.CheckUserIdentityExists(*identity) {
+	if identity != nil && uIdentity != nil && *identity != *uIdentity && ur.CheckUserIdentityExists(*identity) {
 		return appErr.BadRequestError("This identity is already in use.")
 	}
 	return nil

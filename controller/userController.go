@@ -1,22 +1,55 @@
 package controller
 
 import (
-	"github.com/nhatflash/fbchain/repository"
-	"github.com/nhatflash/fbchain/enum"
+	"net/http"
+	_ "github.com/nhatflash/fbchain/docs"
+	"github.com/gin-gonic/gin"
+	"github.com/nhatflash/fbchain/api"
+	"github.com/nhatflash/fbchain/client"
+	"github.com/nhatflash/fbchain/helper"
+	"github.com/nhatflash/fbchain/model"
+	"github.com/nhatflash/fbchain/service"
 )
 
 type UserController struct {
-	UserRepo 		*repository.UserRepository
+	UserService 	service.IUserService	
 }
 
 
-func NewUserController(ur *repository.UserRepository) *UserController {
+func NewUserController(us service.IUserService) *UserController {
 	return &UserController{
-		UserRepo: ur,
+		UserService: us,
 	}
 }
 
+// @Summary Change Profile API
+// @Produce json
+// @Accept json
+// @Param request body client.UpdateProfileRequest true "UpdateProfile body"
+// @Success 200 {object} client.UserResponse
+// @Failure 400 {object} error
+// @Security BearerAuth
+// @Router /profile [patch]
+func (uc *UserController) ChangeProfile(c *gin.Context) {
+	var updtProfileReq client.UpdateProfileRequest
+	var err error
 
-func (uc *UserController) ChangeProfile(firstName *string, lastName *string, birthdate *string, gender *enum.Gender, phone *string, identity *string, address *string, postalCode *string, profileImage *string) {
-	
+	if err = c.ShouldBindJSON(&updtProfileReq); err != nil {
+		c.Error(err)
+		return 
+	}
+	var currUser *model.User
+	currUser, err = uc.UserService.GetCurrentUser(c.Request.Context())
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	var updatedUser *model.User
+	updatedUser, err = uc.UserService.ChangeProfile(currUser.Id, updtProfileReq.FirstName, updtProfileReq.LastName, updtProfileReq.Birthdate, updtProfileReq.Gender, updtProfileReq.Phone, updtProfileReq.Identity, updtProfileReq.Address, updtProfileReq.PostalCode, updtProfileReq.ProfileImage)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	res := helper.MapToUserResponse(updatedUser)
+	api.SuccessMessage(http.StatusOK, "Profile updated successfully.", res, c)
 }

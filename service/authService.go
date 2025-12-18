@@ -124,7 +124,10 @@ func (as *AuthService) HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpRe
 
 
 func GetCurrentClaims(ctx context.Context) (*security.JwtAccessClaims, error) {
+	fmt.Println("Request context: ", ctx)
 	claims, ok := ctx.Value(middleware.UserKey{}).(*security.JwtAccessClaims)
+	fmt.Println("In this function: GetCurrentClaim()")
+	fmt.Println("Claims:", claims)
 	if !ok || claims == nil {
 		return nil, appErr.UnauthorizedError("Authentication is required.")
 	}

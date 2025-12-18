@@ -14,11 +14,13 @@ func MainRoutes(r *gin.Engine,
 				ac *controller.AuthController, 
 				spc *controller.SubPackageController, 
 				rc *controller.RestaurantController, 
-				oc *controller.OrderController) {
+				oc *controller.OrderController, 
+				uc *controller.UserController) {
 	r.GET("/", Ping)
 	AuthRoutes(r, "/api/auth", ac)
 	AdminRoutes(r, "/api/admin", spc)
 	TenantRoutes(r, "/api/tenant", rc, oc)
+	ProfileRoutes(r, "/api/profile", uc)
 }
 
 

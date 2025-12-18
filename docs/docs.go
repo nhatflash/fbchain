@@ -122,6 +122,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/profile": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Change Profile API",
+                "parameters": [
+                    {
+                        "description": "UpdateProfile body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.UpdateProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/client.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/tenant/order": {
             "post": {
                 "security": [
@@ -247,6 +286,7 @@ const docTemplate = `{
         "client.CreateSubPackageRequest": {
             "type": "object",
             "required": [
+                "durationMonth",
                 "name",
                 "price"
             ],
@@ -522,6 +562,82 @@ const docTemplate = `{
                 }
             }
         },
+        "client.UpdateProfileRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "birthdate": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "$ref": "#/definitions/enum.Gender"
+                },
+                "identity": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "postalCode": {
+                    "type": "string"
+                },
+                "profileImage": {
+                    "type": "string"
+                }
+            }
+        },
+        "client.UserResponse": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "birthdate": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "$ref": "#/definitions/enum.Gender"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "identity": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "postalCode": {
+                    "type": "string"
+                },
+                "profileImage": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/enum.Role"
+                },
+                "status": {
+                    "$ref": "#/definitions/enum.UserStatus"
+                }
+            }
+        },
         "enum.Gender": {
             "type": "string",
             "enum": [
@@ -544,6 +660,21 @@ const docTemplate = `{
                 "ORDER_PENDING",
                 "ORDER_COMPLETED",
                 "ORDER_CANCELED"
+            ]
+        },
+        "enum.Role": {
+            "type": "string",
+            "enum": [
+                "ADMIN",
+                "MANAGER",
+                "STAFF",
+                "TENANT"
+            ],
+            "x-enum-varnames": [
+                "ROLE_ADMIN",
+                "ROLE_MANAGER",
+                "ROLE_STAFF",
+                "ROLE_TENANT"
             ]
         },
         "enum.TenantType": {
