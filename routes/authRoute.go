@@ -15,4 +15,5 @@ func AuthRoutes(r *gin.Engine, prefix string, ac *controller.AuthController) {
 	auth.POST("/signup/tenant", ac.TenantSignUp)
 	auth.GET("/change-password/verify", middleware.JwtRestHandler(), ac.GetChangePasswordVerifiedOTP)
 	auth.POST("/change-password/verify", middleware.JwtRestHandler(), ac.VerifyChangePassword)
+	auth.POST("/change-password", middleware.JwtRestHandler(), ac.ChangePassword)
 }

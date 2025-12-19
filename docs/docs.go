@@ -54,6 +54,34 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/change-password": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Change password API",
+                "parameters": [
+                    {
+                        "description": "ChangePassword body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.ChangePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/auth/change-password/verify": {
             "get": {
                 "security": [
@@ -300,6 +328,21 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "client.ChangePasswordRequest": {
+            "type": "object",
+            "required": [
+                "confirmNewPassword",
+                "newPassword"
+            ],
+            "properties": {
+                "confirmNewPassword": {
+                    "type": "string"
+                },
+                "newPassword": {
+                    "type": "string"
+                }
+            }
+        },
         "client.CreateRestaurantRequest": {
             "type": "object",
             "required": [

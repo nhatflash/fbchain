@@ -1,5 +1,15 @@
 basePath: /api
 definitions:
+  client.ChangePasswordRequest:
+    properties:
+      confirmNewPassword:
+        type: string
+      newPassword:
+        type: string
+    required:
+    - confirmNewPassword
+    - newPassword
+    type: object
   client.CreateRestaurantRequest:
     properties:
       contactEmail:
@@ -364,6 +374,23 @@ paths:
       security:
       - BearerAuth: []
       summary: Create subscription package API
+  /auth/change-password:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ChangePassword body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Change password API
   /auth/change-password/verify:
     get:
       responses:

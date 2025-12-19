@@ -107,3 +107,24 @@ func (ac *AuthController) GetChangePasswordVerifiedOTP(c *gin.Context) {
 	}
 	api.SuccessMessage(http.StatusOK, "Verify change password OTP sent successfully.", res, c)
 }
+
+
+// @Summary Change password API
+// @Accept json
+// @Produce json
+// @Param request body client.ChangePasswordRequest true "ChangePassword body"
+// @Security BearerAuth
+// @Router /auth/change-password [post]
+func (ac *AuthController) ChangePassword(c *gin.Context) {
+	var req client.ChangePasswordRequest
+	var err error
+	if err = c.ShouldBindJSON(&req); err != nil {
+		c.Error(err)
+		return
+	}
+	if err = ac.AuthService.HandleChangePassword(&req, c.Request.Context()); err != nil {
+		c.Error(err)
+		return
+	}
+	api.SuccessMessage(http.StatusOK, "Password changed successfully.", nil, c)
+}

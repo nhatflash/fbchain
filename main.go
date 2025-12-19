@@ -70,7 +70,7 @@ func main() {
 	// Redis 
 	rdb := database.ConnectToRedisServer()
 
-
+	
 	// Dependency injection
 	userRepository := repository.NewUserRepository(db)
 	tenantRepository := repository.NewTenantRepository(db)

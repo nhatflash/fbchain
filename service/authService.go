@@ -24,6 +24,7 @@ type IAuthService interface {
 	HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpRequest) (*client.TenantResponse, error)
 	GenerateChangePasswordVerifyOTP(ctx context.Context) (string, error)
 	HandleVerifyChangePassword(req *client.VerifyChangePasswordRequest, ctx context.Context) (string, error)
+	HandleChangePassword(req *client.ChangePasswordRequest, ctx context.Context) (error)
 }
 
 type AuthService struct {
@@ -140,8 +141,9 @@ func (as *AuthService) GenerateChangePasswordVerifyOTP(ctx context.Context) (str
 	}
 	userId := strconv.FormatInt(claims.UserId, 10)
 	validTimeKey := constant.USER_CHANGE_PASSWORD_TIME_KEY + userId
-	validTimeKey, _ = as.Rdb.Get(ctx, validTimeKey).Result()
-	if validTimeKey == constant.USER_CHANGE_PASSWORD_TIME_VALUE {
+	var validTimeValue string
+	validTimeValue, _ = as.Rdb.Get(ctx, validTimeKey).Result()
+	if validTimeValue == constant.USER_CHANGE_PASSWORD_TIME_VALUE {
 		return "", appErr.BadRequestError("You are already on an attempt for password changing. Please try again later.")
 	}
 
@@ -175,6 +177,10 @@ func (as *AuthService) HandleVerifyChangePassword(req *client.VerifyChangePasswo
 	if err == redis.Nil {
 		return "", appErr.UnauthorizedError("OTP code expired or not found.")
 	}
+	if err != nil {
+		return "", err
+	}
+
 	if security.VerifyOTPCode(req.VerifiedCode, actualOTP) {
 		as.Rdb.Del(ctx, otpKey)
 		validTimeKey := constant.USER_CHANGE_PASSWORD_TIME_KEY + userId
@@ -186,6 +192,44 @@ func (as *AuthService) HandleVerifyChangePassword(req *client.VerifyChangePasswo
 		return "Accepted", nil
 	}
 	return "Unaccepted", nil
+}
+
+
+func (as *AuthService) HandleChangePassword(req *client.ChangePasswordRequest, ctx context.Context) (error) {
+	var err error
+	var claims *security.JwtAccessClaims
+	claims, err = GetCurrentClaims(ctx)
+	if err != nil {
+		return err
+	}
+	userId := strconv.FormatInt(claims.UserId, 10)
+	validTimeKey := constant.USER_CHANGE_PASSWORD_TIME_KEY + userId
+	_,	 err = as.Rdb.Get(ctx, validTimeKey).Result()
+	if err == redis.Nil {
+		return appErr.UnauthorizedError("Password change session expired. Please perform another request.")
+	}
+	if err != nil {
+		return err
+	}
+
+	newPassword := req.NewPassword
+	confirmedNewPassword := req.ConfirmNewPassword
+
+	if !IsConfirmedPasswordMatches(newPassword, confirmedNewPassword) {
+		return appErr.BadRequestError("Confirmed password does not match.")
+	}
+	var hashedPassword string
+	hashedPassword, err = security.GenerateHashedPassword(newPassword)
+	if err != nil {
+		return err
+	}
+
+	err = as.UserRepo.ChangeUserPassword(claims.UserId, hashedPassword)
+	if err != nil {
+		return err
+	}
+	as.Rdb.Del(ctx, validTimeKey)
+	return nil
 }
 
 
@@ -223,9 +267,14 @@ func ValidateSignUpRequest(email string, phone string, identity string, password
 	if ur.CheckUserIdentityExists(identity) {
 		return appErr.BadRequestError("User with this identity already exists")
 	}
-	if password != confirmPassword {
+	if !IsConfirmedPasswordMatches(password, confirmPassword) {
 		return appErr.BadRequestError("Confirm password does not match.")
 	}
 	return nil
+}
+
+
+func IsConfirmedPasswordMatches(password string, confirmedPassword string) bool {
+	return password == confirmedPassword
 }
 

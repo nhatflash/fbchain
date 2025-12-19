@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"time"
 
@@ -193,3 +194,19 @@ func (ur *UserRepository) UpdateUser(uId int64, firstName *string, lastName *str
 	return u, nil
 }
 
+func (ur *UserRepository) ChangeUserPassword(uId int64, newPassword string) (error) {
+	var err error
+	ctx := context.Background()
+	var tx *sql.Tx
+	tx, err = ur.Db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	_, err = tx.ExecContext(ctx, "UPDATE users SET password = $1 WHERE id = $2", newPassword, uId)
+	if err != nil {
+		return nil
+	}
+	return tx.Commit()
+}

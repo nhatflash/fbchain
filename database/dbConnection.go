@@ -14,9 +14,9 @@ func ConnectToPostgreSQL() (*sql.DB, error) {
 
 	connStr := "user=" + "postgres" + " dbname=" + dbName + " password=" + dbPassword + " sslmode=" + dbSslMode
 
-	db, dbErr := sql.Open("postgres", connStr)
-	if dbErr != nil {
-		return nil, dbErr
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		return nil, err
 	}
 	return db, nil
 }

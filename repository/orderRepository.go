@@ -20,31 +20,22 @@ func NewOrderRepository(db *sql.DB) *OrderRepository {
 	}
 }
 
-func (or *OrderRepository) CreateInitialOrder(rId int64, sId int64, amount *decimal.Decimal, tId int64) (err error) {
+func (or *OrderRepository) CreateInitialOrder(rId int64, sId int64, amount *decimal.Decimal, tId int64) (error) {
+	var err error
 	ctx := context.Background()
-	tx, err := or.Db.BeginTx(ctx, nil)
-
+	var tx *sql.Tx
+	tx, err = or.Db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-			return
-		}
-	}()
+	defer tx.Rollback()
 
 	_, err = tx.ExecContext(ctx, "INSERT INTO orders (status, amount, tenant_id, restaurant_id, subscription_id) VALUES ($1, $2, $3, $4, $5)", enum.ORDER_PENDING, amount, tId, rId, sId)
 	if err != nil {
 		return err
 	}
-	err = tx.Commit()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Commit()
 }
 
 func (or *OrderRepository) GetLatestTenantOrder(tId int64) (*model.Order, error) {
