@@ -204,7 +204,7 @@ func (as *AuthService) HandleChangePassword(req *client.ChangePasswordRequest, c
 	}
 	userId := strconv.FormatInt(claims.UserId, 10)
 	validTimeKey := constant.USER_CHANGE_PASSWORD_TIME_KEY + userId
-	_,	 err = as.Rdb.Get(ctx, validTimeKey).Result()
+	_, err = as.Rdb.Get(ctx, validTimeKey).Result()
 	if err == redis.Nil {
 		return appErr.UnauthorizedError("Password change session expired. Please perform another request.")
 	}
@@ -224,8 +224,7 @@ func (as *AuthService) HandleChangePassword(req *client.ChangePasswordRequest, c
 		return err
 	}
 
-	err = as.UserRepo.ChangeUserPassword(claims.UserId, hashedPassword)
-	if err != nil {
+	if err = as.UserRepo.ChangeUserPassword(claims.UserId, hashedPassword); err != nil {
 		return err
 	}
 	as.Rdb.Del(ctx, validTimeKey)
@@ -277,4 +276,6 @@ func ValidateSignUpRequest(email string, phone string, identity string, password
 func IsConfirmedPasswordMatches(password string, confirmedPassword string) bool {
 	return password == confirmedPassword
 }
+
+
 
