@@ -209,6 +209,12 @@ const docTemplate = `{
                 }
             }
         },
+        "/payment": {
+            "get": {
+                "summary": "Payment URL API",
+                "responses": {}
+            }
+        },
         "/profile": {
             "patch": {
                 "security": [

@@ -1,9 +1,10 @@
 package routes
 
 import (
-	"github.com/nhatflash/fbchain/controller"
 	"fmt"
 	"net/http"
+
+	"github.com/nhatflash/fbchain/controller"
 
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/api"
@@ -17,6 +18,7 @@ func MainRoutes(r *gin.Engine,
 				oc *controller.OrderController, 
 				uc *controller.UserController) {
 	r.GET("/", Ping)
+	r.GET("/api/payment", controller.GetPaymentUrl)
 	AuthRoutes(r, "/api/auth", ac)
 	AdminRoutes(r, "/api/admin", spc)
 	TenantRoutes(r, "/api/tenant", rc, oc)
