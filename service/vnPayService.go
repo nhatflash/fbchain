@@ -23,6 +23,17 @@ func GetVnPayUrl(price decimal.Decimal) (string, error) {
 	vnpUrl := os.Getenv("VNPAY_URL")
 	vnpBaseUrl := os.Getenv("VNPAY_BASEURL")
 
+	vnpParams := BuildVnpParams(price, vnpTmnCode, vnpBaseUrl)
+	url, err := BuildVnPayUrl(vnpParams, vnpHashSecret, vnpUrl)
+	if err != nil {
+		return "", err
+	}
+	return url, nil
+}
+
+
+func BuildVnpParams(price decimal.Decimal, vnpTmnCode string, vnpBaseUrl string) map[string]string {
+
 	vnpParams := make(map[string]string)
 	vnpParams["vnp_Amount"] = (price.Mul(decimal.NewFromInt(100))).String()
 	vnpParams["vnp_Command"] = "pay"
@@ -38,6 +49,10 @@ func GetVnPayUrl(price decimal.Decimal) (string, error) {
 	vnpParams["vnp_TxnRef"] = fmt.Sprintf("%d", time.Now().UnixMilli())
 	vnpParams["vnp_Version"] = "2.1.0"
 
+	return vnpParams
+}
+
+func BuildVnPayUrl(vnpParams map[string]string, vnpHashSecret string, vnpUrl string) (string, error) {
 	total := len(vnpParams)
 	count := 0
 	var hashedData strings.Builder

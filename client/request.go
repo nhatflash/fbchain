@@ -72,3 +72,9 @@ type ChangePasswordRequest struct {
 	NewPassword			string				`json:"newPassword" binding:"required"`
 	ConfirmNewPassword	string				`json:"confirmNewPassword" binding:"required"`
 }
+
+
+type PayOrderWithCashRequest struct {
+	OrderId 			*int64				`json:"orderId" binding:"required"`
+	Notes 				*string				`json:"notes" binding:"omitempty"`
+}

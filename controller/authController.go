@@ -82,16 +82,11 @@ func (ac *AuthController) VerifyChangePassword(c *gin.Context) {
 		return
 	}
 	var res string
-	res, err = ac.AuthService.HandleVerifyChangePassword(&verifyChangePasswordReq, c.Request.Context())
-	if err != nil {
+	if err = ac.AuthService.HandleVerifyChangePassword(&verifyChangePasswordReq, c.Request.Context()); err != nil {
 		c.Error(err)
 		return
 	}
-	if res == "Accepted" {
-		api.SuccessMessage(http.StatusOK, "Verify successfully.", res, c)
-	} else {
-		api.SuccessMessage(http.StatusNotAcceptable, "Verify failed.", res, c)
-	}
+	api.SuccessMessage(http.StatusOK, "Verify successfully.", res, c)
 }
 
 // @Summary Get change password OTP API

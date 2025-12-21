@@ -11,6 +11,12 @@ type PaymentRepository struct {
 	Db 			*sql.DB
 }
 
+func NewPaymentRepository(db *sql.DB) *PaymentRepository {
+	return &PaymentRepository{
+		Db: db,
+	}
+}
+
 func (pr *PaymentRepository) CreateOnlinePayment(orderId int64, amount decimal.Decimal, method enum.PaymentMethod, status enum.PaymentStatus, bankCode *string, notes *string) error {
 	var err error
 	ctx := context.Background()

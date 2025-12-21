@@ -23,7 +23,7 @@ type IAuthService interface {
 	HandleSignIn(signInReq *client.SignInRequest) (*client.SignInResponse, error)
 	HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpRequest) (*client.TenantResponse, error)
 	GenerateChangePasswordVerifyOTP(ctx context.Context) (string, error)
-	HandleVerifyChangePassword(req *client.VerifyChangePasswordRequest, ctx context.Context) (string, error)
+	HandleVerifyChangePassword(req *client.VerifyChangePasswordRequest, ctx context.Context) error
 	HandleChangePassword(req *client.ChangePasswordRequest, ctx context.Context) (error)
 }
 
@@ -163,35 +163,34 @@ func (as *AuthService) GenerateChangePasswordVerifyOTP(ctx context.Context) (str
 }
 
 
-func (as *AuthService) HandleVerifyChangePassword(req *client.VerifyChangePasswordRequest, ctx context.Context) (string, error) {
+func (as *AuthService) HandleVerifyChangePassword(req *client.VerifyChangePasswordRequest, ctx context.Context) error {
 	var err error
 	var claims *security.JwtAccessClaims
 	claims, err = GetCurrentClaims(ctx)
 	if err != nil {
-		return "", err
+		return err
 	}
 	userId := strconv.FormatInt(claims.UserId, 10)
 	var actualOTP string
 	otpKey := constant.USER_VERIFY_PASSWORD_OTP_KEY + userId
 	actualOTP, err = as.Rdb.Get(ctx, otpKey).Result()
 	if err == redis.Nil {
-		return "", appErr.UnauthorizedError("OTP code expired or not found.")
+		return appErr.UnauthorizedError("OTP code expired or not found.")
 	}
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	if security.VerifyOTPCode(req.VerifiedCode, actualOTP) {
 		as.Rdb.Del(ctx, otpKey)
 		validTimeKey := constant.USER_CHANGE_PASSWORD_TIME_KEY + userId
 		duration := time.Duration(constant.CHANGE_PASSWORD_TIME) * time.Minute
-		err = as.Rdb.Set(ctx, validTimeKey, constant.USER_CHANGE_PASSWORD_TIME_VALUE, duration).Err()
-		if err != nil {
-			return "", err
+		if err = as.Rdb.Set(ctx, validTimeKey, constant.USER_CHANGE_PASSWORD_TIME_VALUE, duration).Err(); err != nil {
+			return err
 		}
-		return "Accepted", nil
+		return nil
 	}
-	return "Unaccepted", nil
+	return appErr.UnauthorizedError("Your otp is not valid or expired.")
 }
 
 
