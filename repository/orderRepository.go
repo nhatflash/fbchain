@@ -48,8 +48,29 @@ func (or *OrderRepository) GetLatestTenantOrder(tId int64) (*model.Order, error)
 	var orders []model.Order
 	for rows.Next() {
 		var o model.Order
-		err = rows.Scan(&o.Id, &o.OrderDate, &o.Status, &o.Amount, &o.UpdatedAt, &o.TenantId, &o.RestaurantId, &o.SubPackageId)
-		if err != nil {
+		if err = rows.Scan(&o.Id, &o.OrderDate, &o.Status, &o.Amount, &o.UpdatedAt, &o.TenantId, &o.RestaurantId, &o.SubPackageId); err != nil {
+			return nil, err
+		}
+		orders = append(orders, o)
+	}
+	if len(orders) == 0 {
+		return nil, appErr.NotFoundError("No order found.")
+	}
+	return &orders[0], nil
+}
+
+
+func (or *OrderRepository) GetOrderById(oId int64) (*model.Order, error) {
+	var rows *sql.Rows
+	var err error
+	rows, err = or.Db.Query("SELECT * FROM orders WHERE id = $1 LIMIT 1", oId)
+	if err != nil {
+		return nil, err
+	}
+	var orders []model.Order
+	for rows.Next() {
+		var o model.Order
+		if err = rows.Scan(&o.Id, &o.OrderDate, &o.Status, &o.Amount, &o.UpdatedAt, &o.TenantId, &o.RestaurantId, &o.SubPackageId); err != nil {
 			return nil, err
 		}
 		orders = append(orders, o)

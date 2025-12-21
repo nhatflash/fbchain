@@ -64,10 +64,10 @@ type Restaurant struct {
 }
 
 type RestaurantImage struct {
-	Id           int64     `json:"id"`
-	RestaurantId int64     `json:"restaurantId"`
-	Image        string    `json:"image"`
-	CreatedAt    time.Time `json:"createdAt"`
+	Id           int64     				`json:"id"`
+	RestaurantId int64     				`json:"restaurantId"`
+	Image        string    				`json:"image"`
+	CreatedAt    time.Time 				`json:"createdAt"`
 }
 
 type Order struct {
@@ -79,4 +79,16 @@ type Order struct {
 	Status         enum.OrderStatus  `json:"status"`
 	Amount         decimal.Decimal   `json:"amount"`
 	UpdatedAt      time.Time         `json:"updatedAt"`
+}
+
+
+type Payment struct {
+	Id 				int64				`json:"id"`
+	OrderId			int64				`json:"orderId"`
+	Amount			decimal.Decimal 	`json:"amount"`
+	Method			enum.PaymentMethod 	`json:"method"`
+	BankCode 		*string				`json:"bankCode"`
+	Status			enum.PaymentStatus	`json:"status"`
+	PaymentDate		time.Time			`json:"paymentDate"`
+	Notes 			*string				`json:"notes"`
 }

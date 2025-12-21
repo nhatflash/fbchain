@@ -49,3 +49,19 @@ const (
 	ORDER_COMPLETED OrderStatus = "COMPLETED"
 	ORDER_CANCELED  OrderStatus = "CANCELED"
 )
+
+
+type PaymentStatus string
+
+const (
+	PAYMENT_SUCCESS PaymentStatus = "SUCCESS"
+	PAYMENT_FAILED PaymentStatus = "FAILED"
+)
+
+
+type PaymentMethod string 
+
+const (
+	PAYMENT_CASH PaymentMethod = "CASH"
+	PAYMENT_VNPAY PaymentMethod = "VNPAY"
+)
