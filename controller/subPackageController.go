@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"github.com/nhatflash/fbchain/constant"
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/api"
 	"github.com/nhatflash/fbchain/client"
@@ -28,19 +29,19 @@ func NewSubPackageController(sps service.ISubPackageService) *SubPackageControll
 // @Failure 400 {object} error
 // @Security BearerAuth
 // @Router /admin/subscription [post]
-func (spc SubPackageController) CreateSubPackage(c *gin.Context) {
-	var createSubPackageReq client.CreateSubPackageRequest
+func (spc *SubPackageController) CreateSubPackage(c *gin.Context) {
+	var req client.CreateSubPackageRequest
 	var err error
 
-	if err = c.ShouldBindJSON(&createSubPackageReq); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		c.Error(err)
 		return
 	}
 	var res *client.SubPackageResponse
-	res, err = spc.SubPackageService.HandleCreateSubPackage(&createSubPackageReq)
+	res, err = spc.SubPackageService.HandleCreateSubPackage(&req)
 	if err != nil {
 		c.Error(err)
 		return
 	}
-	api.SuccessMessage(http.StatusCreated, "Subscription package created successfully.", res, c)
+	api.SuccessMessage(http.StatusCreated, constant.SUBSCRIPTION_CREATED_SUCCESS, res, c)
 }

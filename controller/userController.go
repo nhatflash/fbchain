@@ -2,7 +2,7 @@ package controller
 
 import (
 	"net/http"
-
+	"github.com/nhatflash/fbchain/constant"
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/api"
 	"github.com/nhatflash/fbchain/client"
@@ -32,18 +32,18 @@ func NewUserController(us service.IUserService) *UserController {
 // @Security BearerAuth
 // @Router /profile [patch]
 func (uc *UserController) ChangeProfile(c *gin.Context) {
-	var updtProfileReq client.UpdateProfileRequest
+	var req client.UpdateProfileRequest
 	var err error
-	if err = c.ShouldBindJSON(&updtProfileReq); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		c.Error(err)
 		return 
 	}
 	var updatedUser *model.User
-	updatedUser, err = uc.UserService.ChangeProfile(c.Request.Context(), updtProfileReq.FirstName, updtProfileReq.LastName, updtProfileReq.Birthdate, updtProfileReq.Gender, updtProfileReq.Phone, updtProfileReq.Identity, updtProfileReq.Address, updtProfileReq.PostalCode, updtProfileReq.ProfileImage)
+	updatedUser, err = uc.UserService.ChangeProfile(c.Request.Context(), req.FirstName, req.LastName, req.Birthdate, req.Gender, req.Phone, req.Identity, req.Address, req.PostalCode, req.ProfileImage)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 	res := helper.MapToUserResponse(updatedUser)
-	api.SuccessMessage(http.StatusOK, "Profile updated successfully.", res, c)
+	api.SuccessMessage(http.StatusOK, constant.PROFILE_UPDATED_SUCCESS, res, c)
 }

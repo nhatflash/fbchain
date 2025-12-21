@@ -2,7 +2,7 @@ package controller
 
 import (
 	"net/http"
-
+	"github.com/nhatflash/fbchain/constant"
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/api"
 	"github.com/nhatflash/fbchain/client"
@@ -54,5 +54,5 @@ func (oc OrderController) PaySubPackage(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	api.SuccessMessage(http.StatusCreated, "Order created successfully.", res, c)
+	api.SuccessMessage(http.StatusCreated, constant.ORDER_CREATED_SUCCESS, res, c)
 }

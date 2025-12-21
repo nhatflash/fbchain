@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"github.com/nhatflash/fbchain/constant"
 	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/api"
 	"github.com/nhatflash/fbchain/client"
@@ -28,18 +30,18 @@ func NewAuthController(as service.IAuthService) *AuthController {
 // @Router /auth/signin [post]
 func (ac *AuthController) SignIn(c *gin.Context) {
 	var err error
-	var signInRequest client.SignInRequest
-	if err = c.ShouldBindJSON(&signInRequest); err != nil {
+	var req client.SignInRequest
+	if err = c.ShouldBindJSON(&req); err != nil {
 		c.Error(err)
 		return
 	}
 	var res *client.SignInResponse
-	res, err = ac.AuthService.HandleSignIn(&signInRequest)
+	res, err = ac.AuthService.HandleSignIn(&req)
 	if err != nil {
 		c.Error(err)
 		return
 	}
-	api.SuccessMessage(http.StatusOK, "Login successfully", res, c)
+	api.SuccessMessage(http.StatusOK, constant.LOGIN_SUCCESS_MSG, res, c)
 }
 
 // @Summary Tenant sign up API
@@ -50,19 +52,19 @@ func (ac *AuthController) SignIn(c *gin.Context) {
 // @Failure 400 {object} error
 // @Router /auth/signup/tenant [post]
 func (ac *AuthController) TenantSignUp(c *gin.Context) {
-	var tenantSignUpReq client.TenantSignUpRequest
+	var req client.TenantSignUpRequest
 	var err error
-	if err = c.ShouldBindJSON(&tenantSignUpReq); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		c.Error(err)
 		return
 	}
 	var res *client.TenantResponse
-	res, err = ac.AuthService.HandleTenantSignUp(&tenantSignUpReq)
+	res, err = ac.AuthService.HandleTenantSignUp(&req)
 	if err != nil {
 		c.Error(err)
 		return
 	}
-	api.SuccessMessage(http.StatusCreated, "Tenant signed up successfully.", res, c)
+	api.SuccessMessage(http.StatusCreated, constant.TENANT_SIGNUP_SUCCESS_MSG, res, c)
 }
 
 
@@ -75,18 +77,18 @@ func (ac *AuthController) TenantSignUp(c *gin.Context) {
 // @Security BearerAuth
 // @Router /auth/change-password/verify [post]
 func (ac *AuthController) VerifyChangePassword(c *gin.Context) {
-	var verifyChangePasswordReq client.VerifyChangePasswordRequest
+	var req client.VerifyChangePasswordRequest
 	var err error
-	if err = c.ShouldBindJSON(&verifyChangePasswordReq); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		c.Error(err)
 		return
 	}
 	var res string
-	if err = ac.AuthService.HandleVerifyChangePassword(&verifyChangePasswordReq, c.Request.Context()); err != nil {
+	if err = ac.AuthService.HandleVerifyChangePassword(&req, c.Request.Context()); err != nil {
 		c.Error(err)
 		return
 	}
-	api.SuccessMessage(http.StatusOK, "Verify successfully.", res, c)
+	api.SuccessMessage(http.StatusOK, constant.VERIFY_CHANGE_PASSWORD_SUCCESS_MSG, res, c)
 }
 
 // @Summary Get change password OTP API
@@ -100,7 +102,7 @@ func (ac *AuthController) GetChangePasswordVerifiedOTP(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	api.SuccessMessage(http.StatusOK, "Verify change password OTP sent successfully.", res, c)
+	api.SuccessMessage(http.StatusOK, constant.CHANGE_PASSWORD_OTP_SENT_SUCCESS_MSG, res, c)
 }
 
 
@@ -121,5 +123,5 @@ func (ac *AuthController) ChangePassword(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	api.SuccessMessage(http.StatusOK, "Password changed successfully.", nil, c)
+	api.SuccessMessage(http.StatusOK, constant.PASSWORD_CHANGE_SUCCESS_MSG, nil, c)
 }

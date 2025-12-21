@@ -6,29 +6,35 @@ import (
 )
 
 var dateFormat string = "2006-01-02"
-var dateTimeFormat string = "2006-01-02 15:04:00"
-var timeFormat string = "13:12:05"
+var dateTimeFormat string = "2006-01-02 15:04:05"
+var timeFormat string = "15:04:05"
 var timeZone = "Asia/Bangkok"
 
 func ConvertToDate(dateStr string) (*time.Time, error) {
-	loc, locErr := time.LoadLocation(timeZone);
-	if locErr != nil {
-		return nil, appError.InternalError("Error of location: " + locErr.Error())
+	var err error
+	var loc *time.Location
+	loc, err = time.LoadLocation(timeZone);
+	if err != nil {
+		return nil, err
 	}
-	date, dateErr := time.ParseInLocation(dateFormat, dateStr, loc)
-	if dateErr != nil {
+	var date time.Time
+	date, err = time.ParseInLocation(dateFormat, dateStr, loc)
+	if err != nil {
 		return nil, appError.BadRequestError("Error when parsing date: " + dateStr)
 	}
 	return &date, nil
 }
 
 func ConvertToDateTime(dateTimeStr string) (*time.Time, error) {
-	loc, locErr := time.LoadLocation(timeZone);
-	if locErr != nil {
-		return nil, appError.InternalError("Error of location: " + locErr.Error())
+	var err error
+	var loc *time.Location
+	loc, err = time.LoadLocation(timeZone);
+	if err != nil {
+		return nil, err
 	}
-	dateTime, dateTimeErr := time.ParseInLocation(dateTimeFormat, dateTimeStr, loc)
-	if dateTimeErr != nil {
+	var dateTime time.Time
+	dateTime, err = time.ParseInLocation(dateTimeFormat, dateTimeStr, loc)
+	if err != nil {
 		return nil, appError.BadRequestError("Error when parsing date time: " + dateTimeStr)
 	}
 	return &dateTime, nil
@@ -36,18 +42,26 @@ func ConvertToDateTime(dateTimeStr string) (*time.Time, error) {
 
 
 func ConvertToTime(timeStr string) (*time.Time, error) {
-	loc, locErr := time.LoadLocation(timeZone);
-	if locErr != nil {
-		return nil, appError.InternalError("Error of location: " + locErr.Error())
+	var err error
+	var loc *time.Location
+	loc, err = time.LoadLocation(timeZone);
+	if err != nil {
+		return nil, err
 	}
-	time, timeErr := time.ParseInLocation(timeFormat, timeStr, loc)
-	if timeErr != nil {
+	var timeF time.Time
+	timeF, err = time.ParseInLocation(timeFormat, timeStr, loc)
+	if err != nil {
 		return nil, appError.BadRequestError("Error when parsing time: " + timeStr)
 	}
-	return &time, nil
+	return &timeF, nil
 }
 
 
 func ConvertDateTimeToString(dateTime time.Time) string {
-	return dateTime.Format("2006-01-02 15:04:05")
+	return dateTime.Format(dateTimeFormat)
+}
+
+
+func ConvertDateToString(date time.Time) string {
+	return date.Format(dateFormat)
 }

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"github.com/nhatflash/fbchain/constant"
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/client"
 	"github.com/nhatflash/fbchain/service"
@@ -31,10 +32,10 @@ func NewRestaurantController(us service.IUserService, rs service.IRestaurantServ
 // @Failure 400 {object} error
 // @Security BearerAuth
 // @Router /tenant/restaurant [post]
-func (rc RestaurantController) CreateRestaurant(c *gin.Context) {
-	var createRestaurantReq client.CreateRestaurantRequest
+func (rc *RestaurantController) CreateRestaurant(c *gin.Context) {
+	var req client.CreateRestaurantRequest
 	var err error
-	if err = c.ShouldBindJSON(&createRestaurantReq); err != nil {
+	if err = c.ShouldBindJSON(&req); err != nil {
 		c.Error(err)
 		return
 	}
@@ -45,10 +46,10 @@ func (rc RestaurantController) CreateRestaurant(c *gin.Context) {
 		return
 	}
 	var res *client.RestaurantResponse
-	res, err = rc.RestaurantService.HandleCreateRestaurant(&createRestaurantReq, currUser.Id)
+	res, err = rc.RestaurantService.HandleCreateRestaurant(&req, currUser.Id)
 	if err != nil {
 		c.Error(err)
 		return
 	}
-	api.SuccessMessage(http.StatusCreated, "Restaurant created successfully.", res, c)
+	api.SuccessMessage(http.StatusCreated, constant.RESTAURANT_CREATED_SUCCESS, res, c)
 }
