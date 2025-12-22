@@ -38,15 +38,14 @@ func (os *OrderService) HandlePaySubPackage(ctx context.Context, paySubPackageRe
 	var r *model.Restaurant
 	var s *model.SubPackage
 
-	r, s, err = checkRestaurantAndSubPackageExist(*restaurantId, *subPackageId, os.RestaurantRepo, os.SubPackageRepo)
+	r, s, err = CheckRestaurantAndSubPackageExist(ctx, *restaurantId, *subPackageId, os.RestaurantRepo, os.SubPackageRepo)
 	if err != nil {
 		return nil, err
 	}
-	err = checkIfRequestedRestaurantBelongToTenant(r, tenantId)
-	if err != nil {
+	if err = CheckIfRequestedRestaurantBelongToTenant(r, tenantId); err != nil {
 		return nil, err
 	}
-	if isRestaurantSubPackageMatchTheRequestedPaySubPackage(r, s.Id) {
+	if IsRestaurantSubPackageMatchTheRequestedPaySubPackage(r, s.Id) {
 		return nil, appErr.BadRequestError("The requested subscription package is already registered on this restaurant.")
 	}
 	var newOrder *model.Order
@@ -57,16 +56,16 @@ func (os *OrderService) HandlePaySubPackage(ctx context.Context, paySubPackageRe
 	return helper.MapToOrderResponse(newOrder), nil
 }
 
-func checkRestaurantAndSubPackageExist(rId int64, sId int64, rr *repository.RestaurantRepository, spr *repository.SubPackageRepository) (*model.Restaurant, *model.SubPackage, error) {
+func CheckRestaurantAndSubPackageExist(ctx context.Context, rId int64, sId int64, rr *repository.RestaurantRepository, spr *repository.SubPackageRepository) (*model.Restaurant, *model.SubPackage, error) {
 	var err error
 	var r *model.Restaurant
-	r, err = rr.GetRestaurantById(rId)
+	r, err = rr.GetRestaurantById(ctx, rId)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	var s *model.SubPackage
-	s, err = spr.GetSubPackageById(sId)
+	s, err = spr.GetSubPackageById(ctx, sId)
 	if s != nil {
 		return nil, nil, err
 	}
@@ -74,11 +73,11 @@ func checkRestaurantAndSubPackageExist(rId int64, sId int64, rr *repository.Rest
 	return r, s, nil
 }
 
-func isRestaurantSubPackageMatchTheRequestedPaySubPackage(r *model.Restaurant, sId int64) bool {
+func IsRestaurantSubPackageMatchTheRequestedPaySubPackage(r *model.Restaurant, sId int64) bool {
 	return r.SubPackageId == sId
 }
 
-func checkIfRequestedRestaurantBelongToTenant(r *model.Restaurant, tenantId int64) error {
+func CheckIfRequestedRestaurantBelongToTenant(r *model.Restaurant, tenantId int64) error {
 	if r.TenantId != tenantId {
 		return appErr.BadRequestError("The requested restaurant does not belong to current tenant.")
 	}

@@ -20,11 +20,11 @@ import (
 )
 
 type IAuthService interface {
-	HandleSignIn(signInReq *client.SignInRequest) (*client.SignInResponse, error)
+	HandleSignIn(ctx context.Context, req *client.SignInRequest) (*client.SignInResponse, error)
 	HandleTenantSignUp(ctx context.Context, req *client.TenantSignUpRequest) (*client.TenantResponse, error)
 	GenerateChangePasswordVerifyOTP(ctx context.Context) (string, error)
-	HandleVerifyChangePassword(req *client.VerifyChangePasswordRequest, ctx context.Context) error
-	HandleChangePassword(req *client.ChangePasswordRequest, ctx context.Context) (error)
+	HandleVerifyChangePassword(ctx context.Context, req *client.VerifyChangePasswordRequest) error
+	HandleChangePassword(ctx context.Context, req *client.ChangePasswordRequest) (error)
 }
 
 type AuthService struct {
@@ -43,25 +43,25 @@ func NewAuthService(ur *repository.UserRepository, tr *repository.TenantReposito
 
 
 // Sign in method
-func (as *AuthService) HandleSignIn(signInReq *client.SignInRequest) (*client.SignInResponse, error) {
-	login := signInReq.Login
+func (as *AuthService) HandleSignIn(ctx context.Context, req *client.SignInRequest) (*client.SignInResponse, error) {
+	login := req.Login
 
 	var loggedUser *model.User
 	var err error
 	var foundUser *model.User
 	if strings.Contains(login, "@") {
-		foundUser, err = as.UserRepo.GetUserByEmail(signInReq.Login)
+		foundUser, err = as.UserRepo.GetUserByEmail(ctx, req.Login)
 		if err != nil {
 			return nil, appErr.UnauthorizedError("Invalid credentials.")
 		}
 	} else {
-		foundUser, err = as.UserRepo.GetUserByPhone(signInReq.Login)
+		foundUser, err = as.UserRepo.GetUserByPhone(ctx, req.Login)
 		if err != nil {
 			return nil, appErr.UnauthorizedError("Invalid credentials.")
 		}
 	}
 	loggedUser = foundUser
-	if !security.VerifyPassword(signInReq.Password, loggedUser.Password) {
+	if !security.VerifyPassword(req.Password, loggedUser.Password) {
 		return nil, appErr.UnauthorizedError("Invalid credentials.")
 	}
 	
@@ -101,7 +101,7 @@ func (as *AuthService) HandleTenantSignUp(ctx context.Context, req *client.Tenan
 	tenantType := req.Type
 
 	var err error
-	if err = ValidateSignUpRequest(email, phone, identity, password, confirmPassword, as.UserRepo); err != nil {
+	if err = ValidateSignUpRequest(ctx, email, phone, identity, password, confirmPassword, as.UserRepo); err != nil {
 		return nil, err
 	}
 
@@ -161,7 +161,7 @@ func (as *AuthService) GenerateChangePasswordVerifyOTP(ctx context.Context) (str
 }
 
 
-func (as *AuthService) HandleVerifyChangePassword(req *client.VerifyChangePasswordRequest, ctx context.Context) error {
+func (as *AuthService) HandleVerifyChangePassword(ctx context.Context, req *client.VerifyChangePasswordRequest) error {
 	var err error
 	var claims *security.JwtAccessClaims
 	claims, err = GetCurrentClaims(ctx)
@@ -192,7 +192,7 @@ func (as *AuthService) HandleVerifyChangePassword(req *client.VerifyChangePasswo
 }
 
 
-func (as *AuthService) HandleChangePassword(req *client.ChangePasswordRequest, ctx context.Context) (error) {
+func (as *AuthService) HandleChangePassword(ctx context.Context, req *client.ChangePasswordRequest) (error) {
 	var err error
 	var claims *security.JwtAccessClaims
 	claims, err = GetCurrentClaims(ctx)
@@ -253,14 +253,28 @@ func GenerateStaffCode() string {
 	return fmt.Sprintf("STAFF-%d", unixMilli)
 }
 
-func ValidateSignUpRequest(email string, phone string, identity string, password string, confirmPassword string, ur *repository.UserRepository) error {
-	if ur.CheckUserEmailExists(email) {
+func ValidateSignUpRequest(ctx context.Context, email string, phone string, identity string, password string, confirmPassword string, ur *repository.UserRepository) error {
+	var err error
+	var exist bool
+	exist, err = ur.CheckUserEmailExists(ctx, email)
+	if err != nil {
+		return err
+	}
+	if exist {
 		return appErr.BadRequestError("User with this email already exists.")
 	}
-	if ur.CheckUserPhoneExists(phone) {
+	exist, err = ur.CheckUserPhoneExists(ctx, phone)
+	if err != nil {
+		return err
+	}
+	if exist {
 		return appErr.BadRequestError("User with this phone already exists")
 	}
-	if ur.CheckUserIdentityExists(identity) {
+	exist, err = ur.CheckUserIdentityExists(ctx, identity)
+	if err != nil {
+		return err
+	}
+	if exist {
 		return appErr.BadRequestError("User with this identity already exists")
 	}
 	if !IsConfirmedPasswordMatches(password, confirmPassword) {

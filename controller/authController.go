@@ -36,7 +36,7 @@ func (ac *AuthController) SignIn(c *gin.Context) {
 		return
 	}
 	var res *client.SignInResponse
-	res, err = ac.AuthService.HandleSignIn(&req)
+	res, err = ac.AuthService.HandleSignIn(c.Request.Context(), &req)
 	if err != nil {
 		c.Error(err)
 		return
@@ -84,7 +84,7 @@ func (ac *AuthController) VerifyChangePassword(c *gin.Context) {
 		return
 	}
 	var res string
-	if err = ac.AuthService.HandleVerifyChangePassword(&req, c.Request.Context()); err != nil {
+	if err = ac.AuthService.HandleVerifyChangePassword(c.Request.Context(), &req); err != nil {
 		c.Error(err)
 		return
 	}
@@ -119,7 +119,7 @@ func (ac *AuthController) ChangePassword(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	if err = ac.AuthService.HandleChangePassword(&req, c.Request.Context()); err != nil {
+	if err = ac.AuthService.HandleChangePassword(c.Request.Context(), &req); err != nil {
 		c.Error(err)
 		return
 	}

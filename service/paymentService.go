@@ -28,7 +28,7 @@ func NewPaymentService(pr *repository.PaymentRepository, or *repository.OrderRep
 func (ps *PaymentService) HandleCashPayment(ctx context.Context, orderId int64, notes *string) error {
 	var err error
 	var o *model.Order
-	o, err = ps.OrderRepo.GetOrderById(orderId)
+	o, err = ps.OrderRepo.GetOrderById(ctx, orderId)
 	if err != nil {
 		return err
 	}
@@ -41,7 +41,7 @@ func (ps *PaymentService) HandleCashPayment(ctx context.Context, orderId int64, 
 func (ps *PaymentService) HandleVnPayPayment(ctx context.Context, orderId int64, status enum.PaymentStatus, bankCode *string, notes *string) error {
 	var err error
 	var o *model.Order
-	o, err = ps.OrderRepo.GetOrderById(orderId)
+	o, err = ps.OrderRepo.GetOrderById(ctx, orderId)
 	if err != nil {
 		return err
 	}

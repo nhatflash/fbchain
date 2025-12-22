@@ -34,8 +34,13 @@ func (ss *SubPackageService) HandleCreateSubPackage(ctx context.Context, req *cl
 
 	var err error
 	var price decimal.Decimal
-
-	if ss.SubPackageRepo.CheckSubPackageNameExists(name) {
+	
+	var exist bool
+	exist, err = ss.SubPackageRepo.CheckSubPackageNameExists(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+	if exist {
 		return nil, appErr.BadRequestError("Subscription package name is already in use.")
 	}
 	price, err = decimal.NewFromString(priceStr)

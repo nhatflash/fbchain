@@ -51,45 +51,48 @@ func (or *OrderRepository) CreateInitialOrder(ctx context.Context, restaurantId 
 	return &newOrder, nil
 }
 
-func (or *OrderRepository) GetLatestTenantOrder(tId int64) (*model.Order, error) {
-	var rows *sql.Rows
+func (or *OrderRepository) GetLatestTenantOrder(ctx context.Context, tenantId int64) (*model.Order, error) {
 	var err error
-	rows, err = or.Db.Query("SELECT * FROM orders WHERE tenant_id = $1 ORDER BY order_date", tId)
-	if err != nil {
+
+	query := "SELECT * FROM orders WHERE tenant_id = $1 ORDER BY order_date DESC LIMIT 1"
+	var order model.Order
+	if err = or.Db.QueryRowContext(ctx, query, tenantId).Scan(
+		&order.Id,
+		&order.OrderDate,
+		&order.Status,
+		&order.Amount,
+		&order.UpdatedAt,
+		&order.TenantId,
+		&order.RestaurantId,
+		&order.SubPackageId,
+	); err != nil {
 		return nil, err
 	}
-	var orders []model.Order
-	for rows.Next() {
-		var o model.Order
-		if err = rows.Scan(&o.Id, &o.OrderDate, &o.Status, &o.Amount, &o.UpdatedAt, &o.TenantId, &o.RestaurantId, &o.SubPackageId); err != nil {
-			return nil, err
-		}
-		orders = append(orders, o)
-	}
-	if len(orders) == 0 {
+	if err != nil && err == sql.ErrNoRows {
 		return nil, appErr.NotFoundError("No order found.")
 	}
-	return &orders[0], nil
+	return &order, nil
 }
 
 
-func (or *OrderRepository) GetOrderById(oId int64) (*model.Order, error) {
-	var rows *sql.Rows
+func (or *OrderRepository) GetOrderById(ctx context.Context, id int64) (*model.Order, error) {
 	var err error
-	rows, err = or.Db.Query("SELECT * FROM orders WHERE id = $1 LIMIT 1", oId)
-	if err != nil {
+	var o model.Order
+	query := "SELECT * FROM orders WHERE id = $1 LIMIT 1"
+	if err = or.Db.QueryRowContext(ctx, query, id).Scan(
+		&o.Id,
+		&o.OrderDate,
+		&o.Status,
+		&o.Amount,
+		&o.UpdatedAt,
+		&o.TenantId,
+		&o.RestaurantId,
+		&o.SubPackageId,
+	); err != nil {
 		return nil, err
 	}
-	var orders []model.Order
-	for rows.Next() {
-		var o model.Order
-		if err = rows.Scan(&o.Id, &o.OrderDate, &o.Status, &o.Amount, &o.UpdatedAt, &o.TenantId, &o.RestaurantId, &o.SubPackageId); err != nil {
-			return nil, err
-		}
-		orders = append(orders, o)
-	}
-	if len(orders) == 0 {
+	if err != nil && err == sql.ErrNoRows {
 		return nil, appErr.NotFoundError("No order found.")
 	}
-	return &orders[0], nil
+	return &o, nil
 }

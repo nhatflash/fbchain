@@ -27,7 +27,7 @@ func (r *queryResolver) Me(ctx context.Context) (*gqlModel.User, error) {
 	if !ok || claims == nil {
 		return nil, appErr.UnauthorizedError("Authentication is required.")
 	}
-	u, err := r.UserService.GetUserById(claims.UserId)
+	u, err := r.UserService.GetUserById(ctx, claims.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (r *queryResolver) Users(ctx context.Context) ([]*gqlModel.User, error) {
 	// }
 
 	var users []model.User
-	users, err = r.UserService.GetListUser()
+	users, err = r.UserService.GetListUser(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (r *queryResolver) User(ctx context.Context, id string) (*gqlModel.User, er
 		return nil, err
 	}
 	var u *model.User
-	u, err = r.UserService.GetUserById(idNum)
+	u, err = r.UserService.GetUserById(ctx, idNum)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (r *queryResolver) User(ctx context.Context, id string) (*gqlModel.User, er
 
 // Tenants is the resolver for the tenants field.
 func (r *queryResolver) Tenants(ctx context.Context) ([]*gqlModel.Tenant, error) {
-	t, err := r.TenantService.GetListTenant()
+	t, err := r.TenantService.GetListTenant(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func (r *queryResolver) Tenant(ctx context.Context, id string) (*gqlModel.Tenant
 		return nil, err
 	}
 	var t *model.Tenant
-	t, err = r.TenantService.GetTenantById(idNum)
+	t, err = r.TenantService.GetTenantById(ctx, idNum)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func (r *queryResolver) Tenant(ctx context.Context, id string) (*gqlModel.Tenant
 
 // Restaurants is the resolver for the restaurants field.
 func (r *queryResolver) Restaurants(ctx context.Context) ([]*gqlModel.Restaurant, error) {
-	restaurants, err := r.RestaurantService.GetAllRestaurants()
+	restaurants, err := r.RestaurantService.GetAllRestaurants(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (r *queryResolver) Restaurant(ctx context.Context, id string) (*gqlModel.Re
 		return nil, err
 	}
 	var res *model.Restaurant
-	res, err = r.RestaurantService.GetRestaurantById(idNum)
+	res, err = r.RestaurantService.GetRestaurantById(ctx, idNum)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func (r *queryResolver) Restaurant(ctx context.Context, id string) (*gqlModel.Re
 
 // RestaurantImages is the resolver for the restaurantImages field.
 func (r *queryResolver) RestaurantImages(ctx context.Context) ([]*gqlModel.RestaurantImage, error) {
-	imgs, err := r.RestaurantService.GetAllRestaurantImages()
+	imgs, err := r.RestaurantService.GetAllRestaurantImages(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func (r *queryResolver) RestaurantImage(ctx context.Context, id string) (*gqlMod
 		return nil, err
 	}
 	var img *model.RestaurantImage
-	img, err = r.RestaurantService.GetRestaurantImageById(idNum)
+	img, err = r.RestaurantService.GetRestaurantImageById(ctx, idNum)
 	if err != nil {
 		return nil, err
 	}
@@ -170,7 +170,7 @@ func (r *restaurantResolver) Tenant(ctx context.Context, obj *gqlModel.Restauran
 		return nil, err
 	}
 	var t *model.Tenant
-	t, err = r.TenantService.GetTenantById(idNum)
+	t, err = r.TenantService.GetTenantById(ctx, idNum)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +186,7 @@ func (r *restaurantResolver) Images(ctx context.Context, obj *gqlModel.Restauran
 		return nil, err
 	}
 	var imgs []model.RestaurantImage
-	imgs, err = r.RestaurantService.GetRestaurantImages(idNum)
+	imgs, err = r.RestaurantService.GetRestaurantImages(ctx, idNum)
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +207,7 @@ func (r *restaurantImageResolver) Restaurant(ctx context.Context, obj *gqlModel.
 		return nil, err
 	}
 	var res *model.Restaurant
-	res, err = r.RestaurantService.GetRestaurantById(idNum)
+	res, err = r.RestaurantService.GetRestaurantById(ctx, idNum)
 	if err != nil {
 		return nil, err
 	}
@@ -223,7 +223,7 @@ func (r *tenantResolver) User(ctx context.Context, obj *gqlModel.Tenant) (*gqlMo
 		return nil, err
 	}
 	var u *model.User
-	u, err = r.UserService.GetUserById(idNum)
+	u, err = r.UserService.GetUserById(ctx, idNum)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +239,7 @@ func (r *tenantResolver) Restaurants(ctx context.Context, obj *gqlModel.Tenant) 
 		return nil, err
 	}
 	var restaurants []model.Restaurant
-	restaurants, err = r.RestaurantService.GetRestaurantsByTenantId(idNum)
+	restaurants, err = r.RestaurantService.GetRestaurantsByTenantId(ctx, idNum)
 	if err != nil {
 		return nil, err
 	}

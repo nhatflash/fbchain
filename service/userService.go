@@ -14,8 +14,8 @@ import (
 type IUserService interface {
 	GetCurrentUser(ctx context.Context) (*model.User, error)
 	IsUserRoleTenant(u *model.User) bool
-	GetListUser() ([]model.User, error)
-	GetUserById(id int64) (*model.User, error)
+	GetListUser(ctx context.Context) ([]model.User, error)
+	GetUserById(ctx context.Context, id int64) (*model.User, error)
 	ChangeProfile(ctx context.Context, firstName *string, lastName *string, birthdate *string, gender *enum.Gender, phone *string, identity *string, address *string, postalCode *string, profileImage *string) (*model.User, error)
 }
 
@@ -39,7 +39,7 @@ func (us *UserService) GetCurrentUser(ctx context.Context) (*model.User, error) 
 	}
 	email := claims.Email
 	var user *model.User
-	user, err = us.UserRepo.GetUserByEmail(email)
+	user, err = us.UserRepo.GetUserByEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}
@@ -50,8 +50,8 @@ func (*UserService) IsUserRoleTenant(u *model.User) bool {
 	return u.Role == enum.ROLE_TENANT
 }
 
-func (us *UserService) GetListUser() ([]model.User, error) {
-	users, err := us.UserRepo.ListAllUsers()
+func (us *UserService) GetListUser(ctx context.Context) ([]model.User, error) {
+	users, err := us.UserRepo.ListAllUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -59,10 +59,10 @@ func (us *UserService) GetListUser() ([]model.User, error) {
 }
 
 
-func (us *UserService) GetUserById(id int64) (*model.User, error) {
+func (us *UserService) GetUserById(ctx context.Context, id int64) (*model.User, error) {
 	var err error
 	var user *model.User
-	user, err = us.UserRepo.GetUserById(id)
+	user, err = us.UserRepo.GetUserById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (us *UserService) ChangeProfile(ctx context.Context, firstName *string, las
 		return nil, err
 	}
 	var u *model.User
-	u, err = us.GetUserById(claims.UserId)
+	u, err = us.GetUserById(ctx, claims.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (us *UserService) ChangeProfile(ctx context.Context, firstName *string, las
 		return nil, err
 	}
 
-	err = ValidateChangeProfileRequest(phone, identity, uPhone, uIdentity, us.UserRepo)
+	err = ValidateChangeProfileRequest(ctx, phone, identity, uPhone, uIdentity, us.UserRepo)
 	if err != nil {
 		return nil, err
 	}
@@ -150,12 +150,26 @@ func GetDataForUserUpdate(firstName *string, lastName *string, birthdate *string
 	return firstName, lastName, bd, gender, phone, identity, address, postalCode, profileImage, err
 }
 
-func ValidateChangeProfileRequest(phone *string, identity *string, uPhone *string, uIdentity *string, ur *repository.UserRepository) error {
-	if phone != nil && uPhone != nil && *phone != *uPhone && ur.CheckUserPhoneExists(*phone) {
-		return appErr.BadRequestError("This phone is already in use.")
+func ValidateChangeProfileRequest(ctx context.Context, phone *string, identity *string, uPhone *string, uIdentity *string, ur *repository.UserRepository) error {
+	var exist bool
+	var err error 
+	if phone != nil && uPhone != nil && *phone != *uPhone {
+		exist, err = ur.CheckUserPhoneExists(ctx, *phone)
+		if err != nil {
+			return err
+		}
+		if exist {
+			return appErr.BadRequestError("This phone is already in use.")
+		}
 	}
-	if identity != nil && uIdentity != nil && *identity != *uIdentity && ur.CheckUserIdentityExists(*identity) {
-		return appErr.BadRequestError("This identity is already in use.")
+	if identity != nil && uIdentity != nil && *identity != *uIdentity {
+		exist, err = ur.CheckUserIdentityExists(ctx, *identity)
+		if err != nil {
+			return err
+		}
+		if exist {
+			return appErr.BadRequestError("This identity is already in use.")
+		}
 	}
 	return nil
 }

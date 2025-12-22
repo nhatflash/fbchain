@@ -19,15 +19,17 @@ func NewSubPackageRepository(db *sql.DB) *SubPackageRepository {
 	}
 }
 
-func (spr *SubPackageRepository) CheckSubPackageNameExists(name string) bool {
-	rows, rowErr := spr.Db.Query("SELECT name FROM sub_packages WHERE name = $1", name)
-	if rowErr != nil {
-		return false
+func (spr *SubPackageRepository) CheckSubPackageNameExists(ctx context.Context, name string) (bool, error) {
+	var err error
+	var rows *sql.Rows
+	rows, err = spr.Db.Query("SELECT name FROM sub_packages WHERE name = $1 LIMIT 1", name)
+	if err != nil {
+		return false, err
 	}
 	if rows.Next() {
-		return true
+		return true, nil
 	}
-	return false
+	return false, nil
 }
 
 func (spr *SubPackageRepository) CreateSubPackage(ctx context.Context, name string, description *string, durationMonth int, price decimal.Decimal, image *string) (*model.SubPackage, error) {
@@ -61,32 +63,34 @@ func (spr *SubPackageRepository) CreateSubPackage(ctx context.Context, name stri
 	return &s, nil
 }
 
-func (spr *SubPackageRepository) GetSubPackageByName(name string) (*model.SubPackage, error) {
+func (spr *SubPackageRepository) GetSubPackageByName(ctx context.Context, name string) (*model.SubPackage, error) {
 	var err error
-	var rows *sql.Rows
-	rows, err = spr.Db.Query("SELECT * FROM sub_packages WHERE name = $1", name)
+	var s model.SubPackage
+	query := "SELECT * FROM sub_packages WHERE name = $1 LIMIT 1" 
+	err = spr.Db.QueryRowContext(ctx, query, name).Scan(
+		&s.Id,
+		&s.Name,
+		&s.Description,
+		&s.DurationMonth,
+		&s.Price,
+		&s.IsActive,
+		&s.Image,
+	)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, appErr.NotFoundError("No subscription package found.")
+		}
 		return nil, err
 	}
-	var subPackages []model.SubPackage
-	for rows.Next() {
-		var s model.SubPackage
-		err = rows.Scan(&s.Id, &s.Name, &s.Description, &s.DurationMonth, &s.Price, &s.IsActive, &s.Image)
-		if err != nil {
-			return nil, err
-		}
-		subPackages = append(subPackages, s)
-	}
-	if len(subPackages) == 0 {
-		return nil, appErr.NotFoundError("No subscription package found.")
-	}
-	return &subPackages[0], nil
+	return &s, nil
 }
 
-func (spr *SubPackageRepository) AnySubPackageExists() (bool, error) {
-	rows, rowErr := spr.Db.Query("SELECT id FROM sub_packages")
-	if rowErr != nil {
-		return false, rowErr
+func (spr *SubPackageRepository) AnySubPackageExists(ctx context.Context) (bool, error) {
+	var err error
+	var rows *sql.Rows
+	rows, err = spr.Db.QueryContext(ctx, "SELECT id FROM sub_packages")
+	if err != nil {
+		return false, err
 	}
 	if rows.Next() {
 		return true, nil
@@ -94,35 +98,59 @@ func (spr *SubPackageRepository) AnySubPackageExists() (bool, error) {
 	return false, nil
 }
 
-func (spr *SubPackageRepository) IsSubPackageExist(sId int64) bool {
-	rows, rowErr := spr.Db.Query("SELECT id FROM sub_packages WHERE id = $1", sId)
-	if rowErr != nil {
-		return false
-	}
-	if rows.Next() {
-		return true
-	}
-	return false
-}
-
-func (spr *SubPackageRepository) GetSubPackageById(sId int64) (*model.SubPackage, error) {
+func (spr *SubPackageRepository) IsSubPackageExist(ctx context.Context, sId int64) (bool, error) {
 	var err error
 	var rows *sql.Rows
-	rows, err = spr.Db.Query("SELECT * FROM sub_packages WHERE id = $1", sId)
+	query := "SELECT id FROM sub_packages WHERE id = $1 LIMIT 1"
+	rows, err = spr.Db.QueryContext(ctx, query, sId)
 	if err != nil {
+		return false, err
+	}
+	if rows.Next() {
+		return true, nil
+	}
+	return false, nil
+}
+
+func (spr *SubPackageRepository) GetSubPackageById(ctx context.Context, id int64) (*model.SubPackage, error) {
+	var err error
+	var s model.SubPackage
+	query := "SELECT * FROM sub_packages WHERE id = $1 LIMIT 1"
+	err = spr.Db.QueryRowContext(ctx, query, id).Scan(
+		&s.Id,
+		&s.Name,
+		&s.Description, 
+		&s.DurationMonth,
+		&s.Price, 
+		&s.IsActive,
+		&s.Image,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, appErr.NotFoundError("No subscription package found.")
+		}
 		return nil, err
 	}
-	var subPackages []model.SubPackage
-	for rows.Next() {
-		var s model.SubPackage
-		err = rows.Scan(&s.Id, &s.Name, &s.Description, &s.DurationMonth, &s.Price, &s.IsActive, &s.Image)
-		if err != nil {
-			return nil, err
+	return &s, nil
+}
+
+func (spr *SubPackageRepository) GetFirstSubPackage(ctx context.Context) (*model.SubPackage, error) {
+	var err error
+	var s model.SubPackage
+	query := "SELECT * FROM sub_packages ORDER BY id ASC LIMIT 1"
+	err = spr.Db.QueryRowContext(ctx, query).Scan(
+		&s.Id,
+		&s.Name,
+		&s.Description,
+		&s.DurationMonth,
+		&s.Price,
+		&s.IsActive,
+		&s.Image,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, appErr.NotFoundError("No subscription package found.")
 		}
-		subPackages = append(subPackages, s)
 	}
-	if len(subPackages) == 0 {
-		return nil, appErr.NotFoundError("No subscription found.")
-	}
-	return &subPackages[0], nil
+	return &s, nil
 }

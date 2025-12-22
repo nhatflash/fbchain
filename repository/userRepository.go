@@ -21,81 +21,108 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 	}
 }
 
-func (ur *UserRepository) CheckUserEmailExists(email string) bool {
-	rows, err := ur.Db.Query("SELECT email FROM users WHERE email = $1 LIMIT 1", email)
+func (ur *UserRepository) CheckUserEmailExists(ctx context.Context, email string) (bool, error) {
+	var rows *sql.Rows
+	var err error
+	query := "SELECT email FROM users WHERE email = $1 LIMIT 1"
+	rows, err = ur.Db.QueryContext(ctx, query, email)
 	if err != nil {
-		return false
+		return false, err
 	}
 	if rows.Next() {
-		return true
+		return true, nil
 	}
-	return false
+	return false, nil
 }
 
-func (ur *UserRepository) CheckUserPhoneExists(phone string) bool {
-	rows, dbErr := ur.Db.Query("SELECT phone FROM users WHERE phone = $1 LIMIT 1", phone)
-	if dbErr != nil {
-		return false
+func (ur *UserRepository) CheckUserPhoneExists(ctx context.Context, phone string) (bool, error) {
+	var rows *sql.Rows
+	var err error
+	query := "SELECT phone FROM users WHERE phone = $1 LIMIT 1"
+	rows, err = ur.Db.QueryContext(ctx, query, phone)
+	if err != nil {
+		return false, err
 	}
 	if rows.Next() {
-		return true
+		return true, nil
 	}
-	return false
+	return false, nil
 }
 
-func (ur *UserRepository) CheckUserIdentityExists(identity string) bool {
-	rows, dbErr := ur.Db.Query("SELECT identity FROM users WHERE identity = $1 LIMIT 1", identity)
-	if dbErr != nil {
-		return false
-	}
-	if rows.Next() {
-		return true
-	}
-	return false
-}
-
-func (ur *UserRepository) GetUserByEmail(email string) (*model.User, error) {
+func (ur *UserRepository) CheckUserIdentityExists(ctx context.Context, identity string) (bool, error) {
 	var err error
 	var rows *sql.Rows
-	rows, err = ur.Db.Query("SELECT * FROM users WHERE email = $1 LIMIT 1", email)
+	query := "SELECT identity FROM users WHERE identity = $1 LIMIT 1"
+	rows, err = ur.Db.QueryContext(ctx, query, identity)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
-	var users []model.User
-	for rows.Next() {
-		var u model.User
-		err = rows.Scan(&u.Id, &u.Email, &u.Password, &u.Role, &u.Phone, &u.Identity, &u.FirstName, &u.LastName, &u.Gender, &u.Birthdate, &u.PostalCode, &u.Address, &u.ProfileImage, &u.Status, &u.CreatedAt, &u.UpdatedAt)
-		if err != nil {
-			return nil, err
-		}
-		users = append(users, u)
+	if rows.Next() {
+		return true, nil
 	}
-	if len(users) == 0 {
-		return nil, appErr.NotFoundError("No user found.")
-	}
-	return &users[0], nil
+	return false, nil
 }
 
-func (ur *UserRepository) GetUserByPhone(phone string) (*model.User, error) {
+func (ur *UserRepository) GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
 	var err error
-	var rows *sql.Rows
-	rows, err = ur.Db.Query("SELECT * FROM users WHERE phone = $1 LIMIT 1", phone)
+	var u model.User
+	query := "SELECT * FROM users WHERE email = $1 LIMIT 1"
+	err = ur.Db.QueryRowContext(ctx, query, email).Scan(
+		&u.Id,
+		&u.Email,
+		&u.Password,
+		&u.Role,
+		&u.Phone,
+		&u.Identity,
+		&u.FirstName,
+		&u.LastName,
+		&u.Gender,
+		&u.Birthdate,
+		&u.PostalCode,
+		&u.Address,
+		&u.ProfileImage,
+		&u.Status,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+	)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, appErr.NotFoundError("No user found.")
+		}
 		return nil, err
 	}
-	var users []model.User
-	for rows.Next() {
-		var u model.User
-		err = rows.Scan(&u.Id, &u.Email, &u.Password, &u.Role, &u.Phone, &u.Identity, &u.FirstName, &u.LastName, &u.Gender, &u.Birthdate, &u.PostalCode, &u.Address, &u.ProfileImage, &u.Status, &u.CreatedAt, &u.UpdatedAt)
-		if err != nil {
-			return nil, err
+	return &u, nil
+}
+
+func (ur *UserRepository) GetUserByPhone(ctx context.Context, phone string) (*model.User, error) {
+	var err error
+	var u model.User
+	query := "SELECT * FROM users WHERE phone = $1 LIMIT 1"
+	err = ur.Db.QueryRowContext(ctx, query, phone).Scan(
+		&u.Id,
+		&u.Email,
+		&u.Password,
+		&u.Role,
+		&u.Phone,
+		&u.Identity,
+		&u.FirstName,
+		&u.LastName,
+		&u.Gender,
+		&u.Birthdate,
+		&u.PostalCode,
+		&u.Address, 
+		&u.ProfileImage,
+		&u.Status,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, appErr.NotFoundError("No user found.")
 		}
-		users = append(users, u)
+		return nil, err
 	}
-	if len(users) == 0 {
-		return nil, appErr.NotFoundError("User not found.")
-	}
-	return &users[0], nil
+	return &u, nil
 }
 
 func (ur *UserRepository) CreateTenantUser(ctx context.Context, firstName string, lastName string, email string, password string, birthdate *time.Time, gender *enum.Gender, phone string, identity string, address string, postalCode string, profileImage string) (*model.User, error) {
@@ -138,7 +165,8 @@ func (ur *UserRepository) CreateTenantUser(ctx context.Context, firstName string
 
 func (ur *UserRepository) CreateAdminUser(email string, password string, phone string, identity string, firstName string, lastName string, gender *enum.Gender, birthdate *time.Time, postalCode string, address string, profileImage string) error {
 	var err error
-	_, err = ur.Db.Exec("INSERT INTO users (email, password, role, phone, identity, first_name, last_name, gender, birthdate, postal_code, address, profile_image, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)", email, password, enum.ROLE_ADMIN, phone, identity, firstName, lastName, gender, birthdate, postalCode, address, profileImage, enum.USER_ACTIVE)
+	query := "INSERT INTO users (email, password, role, phone, identity, first_name, last_name, gender, birthdate, postal_code, address, profile_image, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)"
+	_, err = ur.Db.Exec(query, email, password, enum.ROLE_ADMIN, phone, identity, firstName, lastName, gender, birthdate, postalCode, address, profileImage, enum.USER_ACTIVE)
 
 	if err != nil {
 		return err
@@ -147,9 +175,11 @@ func (ur *UserRepository) CreateAdminUser(email string, password string, phone s
 }
 
 func (ur *UserRepository) CheckIfAdminUserAlreadyExists() (bool, error) {
-	rows, rowErr := ur.Db.Query("SELECT id FROM users WHERE role = $1", enum.ROLE_ADMIN)
-	if rowErr != nil {
-		return false, rowErr
+	var err error
+	var rows *sql.Rows
+	rows, err = ur.Db.Query("SELECT id FROM users WHERE role = $1 LIMIT 1", enum.ROLE_ADMIN)
+	if err != nil {
+		return false, err
 	}
 	if rows.Next() {
 		return true, nil
@@ -158,18 +188,35 @@ func (ur *UserRepository) CheckIfAdminUserAlreadyExists() (bool, error) {
 }
 
 
-func (ur *UserRepository) ListAllUsers() ([]model.User, error) {
+func (ur *UserRepository) ListAllUsers(ctx context.Context) ([]model.User, error) {
 	var rows *sql.Rows
 	var err error
-	rows, err = ur.Db.Query("SELECT * FROM users ORDER BY id DESC")
+	query := "SELECT * FROM users ORDER BY id DESC"
+	rows, err = ur.Db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 	var users []model.User
 	for rows.Next() {
 		var u model.User
-		err = rows.Scan(&u.Id, &u.Email, &u.Password, &u.Role, &u.Phone, &u.Identity, &u.FirstName, &u.LastName, &u.Gender, &u.Birthdate, &u.PostalCode, &u.Address, &u.ProfileImage, &u.Status, &u.CreatedAt, &u.UpdatedAt)
-		if err != nil {
+		if err = rows.Scan(
+			&u.Id, 
+			&u.Email, 
+			&u.Password, 
+			&u.Role, 
+			&u.Phone, 
+			&u.Identity, 
+			&u.FirstName, 
+			&u.LastName, 
+			&u.Gender, 
+			&u.Birthdate, 
+			&u.PostalCode, 
+			&u.Address, 
+			&u.ProfileImage, 
+			&u.Status, 
+			&u.CreatedAt, 
+			&u.UpdatedAt,
+		); err != nil {
 			return nil, err
 		}
 		users = append(users, u)
@@ -181,26 +228,35 @@ func (ur *UserRepository) ListAllUsers() ([]model.User, error) {
 }
 
 
-func (ur *UserRepository) GetUserById(id int64) (*model.User, error) {
-	var rows *sql.Rows
+func (ur *UserRepository) GetUserById(ctx context.Context, id int64) (*model.User, error) {
 	var err error
-	rows, err = ur.Db.Query("SELECT * FROM users WHERE id = $1 LIMIT 1", id)
+	var u model.User
+	query := "SELECT * FROM users WHERE id = $1 LIMIT 1"
+	err = ur.Db.QueryRowContext(ctx, query, id).Scan(
+		&u.Id,
+		&u.Email,
+		&u.Password,
+		&u.Role, 
+		&u.Phone,
+		&u.Identity,
+		&u.FirstName,
+		&u.LastName,
+		&u.Gender,
+		&u.Birthdate,
+		&u.PostalCode, 
+		&u.Address,
+		&u.ProfileImage,
+		&u.Status,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+	)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, appErr.NotFoundError("No user found.")
+		}
 		return nil, err
 	}
-	var users []model.User
-	for rows.Next() {
-		var u model.User
-		err = rows.Scan(&u.Id, &u.Email, &u.Password, &u.Role, &u.Phone, &u.Identity, &u.FirstName, &u.LastName, &u.Gender, &u.Birthdate, &u.PostalCode, &u.Address, &u.ProfileImage, &u.Status, &u.CreatedAt, &u.UpdatedAt)
-		if err != nil {
-			return nil, err
-		}
-		users = append(users, u)
-	}
-	if len(users) == 0 {
-		return nil, appErr.NotFoundError("No user found.")
-	}
-	return &users[0], nil
+	return &u, nil
 }
 
 

@@ -9,8 +9,8 @@ import (
 
 type ITenantService interface {
 	GetCurrentTenant(ctx context.Context) (*model.Tenant, error)
-	GetTenantById(tId int64) (*model.Tenant, error)
-	GetListTenant() ([]model.Tenant, error)
+	GetTenantById(ctx context.Context, id int64) (*model.Tenant, error)
+	GetListTenant(ctx context.Context) ([]model.Tenant, error)
 }
 
 type TenantService struct {
@@ -34,7 +34,7 @@ func (ts *TenantService) GetCurrentTenant(ctx context.Context) (*model.Tenant, e
 		return nil, err
 	}
 	var currTenant *model.Tenant
-	currTenant, err = ts.TenantRepo.GetTenantByUserId(currUser.Id)
+	currTenant, err = ts.TenantRepo.GetTenantByUserId(ctx, currUser.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -42,8 +42,8 @@ func (ts *TenantService) GetCurrentTenant(ctx context.Context) (*model.Tenant, e
 }
 
 
-func (ts *TenantService) GetTenantById(tId int64) (*model.Tenant, error) {
-	tenant, err := ts.TenantRepo.GetTenantById(tId)
+func (ts *TenantService) GetTenantById(ctx context.Context, id int64) (*model.Tenant, error) {
+	tenant, err := ts.TenantRepo.GetTenantById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -51,8 +51,8 @@ func (ts *TenantService) GetTenantById(tId int64) (*model.Tenant, error) {
 }
 
 
-func (ts *TenantService) GetListTenant() ([]model.Tenant, error) {
-	tenants, err := ts.TenantRepo.ListAllTenants()
+func (ts *TenantService) GetListTenant(ctx context.Context) ([]model.Tenant, error) {
+	tenants, err := ts.TenantRepo.ListAllTenants(ctx)
 	if err != nil {
 		return nil, err
 	}
