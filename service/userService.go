@@ -103,7 +103,7 @@ func (us *UserService) ChangeProfile(ctx context.Context, firstName *string, las
 	}
 
 	var updatedUser *model.User
-	updatedUser, err = us.UserRepo.UpdateUser(u.Id, uFirstName, uLastName, uBirthdate, uGender, uPhone, uIdentity, uAddress, uPostalCode, uProfileImage)
+	updatedUser, err = us.UserRepo.UpdateUser(ctx, u.Id, uFirstName, uLastName, uBirthdate, uGender, uPhone, uIdentity, uAddress, uPostalCode, uProfileImage)
 	if err != nil {
 		return nil, err
 	}

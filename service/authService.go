@@ -21,7 +21,7 @@ import (
 
 type IAuthService interface {
 	HandleSignIn(signInReq *client.SignInRequest) (*client.SignInResponse, error)
-	HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpRequest) (*client.TenantResponse, error)
+	HandleTenantSignUp(ctx context.Context, req *client.TenantSignUpRequest) (*client.TenantResponse, error)
 	GenerateChangePasswordVerifyOTP(ctx context.Context) (string, error)
 	HandleVerifyChangePassword(req *client.VerifyChangePasswordRequest, ctx context.Context) error
 	HandleChangePassword(req *client.ChangePasswordRequest, ctx context.Context) (error)
@@ -84,28 +84,27 @@ func (as *AuthService) HandleSignIn(signInReq *client.SignInRequest) (*client.Si
 }
 
 // tenant sign up method
-func (as *AuthService) HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpRequest) (*client.TenantResponse, error) {
-	firstName := tenantSignUpReq.FirstName
-	lastName := tenantSignUpReq.LastName
-	email := tenantSignUpReq.Email
-	password := tenantSignUpReq.Password
-	confirmPassword := tenantSignUpReq.Password
-	birthdateStr := tenantSignUpReq.Birthdate
-	gender := tenantSignUpReq.Gender
-	phone := tenantSignUpReq.Phone
-	identity := tenantSignUpReq.Identity
-	address := tenantSignUpReq.Address
-	postalCode := tenantSignUpReq.PostalCode
-	profileImage := tenantSignUpReq.ProfileImage
-	description := tenantSignUpReq.Description
-	tenantType := tenantSignUpReq.Type
+func (as *AuthService) HandleTenantSignUp(ctx context.Context, req *client.TenantSignUpRequest) (*client.TenantResponse, error) {
+	firstName := req.FirstName
+	lastName := req.LastName
+	email := req.Email
+	password := req.Password
+	confirmPassword := req.Password
+	birthdateStr := req.Birthdate
+	gender := req.Gender
+	phone := req.Phone
+	identity := req.Identity
+	address := req.Address
+	postalCode := req.PostalCode
+	profileImage := req.ProfileImage
+	description := req.Description
+	tenantType := req.Type
 
 	var err error
-	err = ValidateSignUpRequest(email, phone, identity, password, confirmPassword, as.UserRepo)
-
-	if err != nil {
+	if err = ValidateSignUpRequest(email, phone, identity, password, confirmPassword, as.UserRepo); err != nil {
 		return nil, err
 	}
+
 	var birthdate *time.Time
 	birthdate, err = helper.ConvertToDate(birthdateStr)
 	if err != nil {
@@ -117,14 +116,13 @@ func (as *AuthService) HandleTenantSignUp(tenantSignUpReq *client.TenantSignUpRe
 		return nil, err
 	}
 	var tenantUser *model.User
-	tenantUser, err = as.UserRepo.CreateTenantUser(firstName, lastName, email, hashedPassword, birthdate, gender, phone, identity, address, postalCode, *profileImage)
+	tenantUser, err = as.UserRepo.CreateTenantUser(ctx, firstName, lastName, email, hashedPassword, birthdate, gender, phone, identity, address, postalCode, *profileImage)
 	if err != nil {
 		return nil, err
 	}
 	code := GenerateTenantCode()
 	var tenant *model.Tenant
-	tenant, err = as.TenantRepo.CreateTenantInformation(code, *description, tenantType, tenantUser.Id)
-
+	tenant, err = as.TenantRepo.CreateTenantInformation(ctx, code, *description, tenantType, tenantUser.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -223,7 +221,7 @@ func (as *AuthService) HandleChangePassword(req *client.ChangePasswordRequest, c
 		return err
 	}
 
-	if err = as.UserRepo.ChangeUserPassword(claims.UserId, hashedPassword); err != nil {
+	if err = as.UserRepo.ChangeUserPassword(ctx, claims.UserId, hashedPassword); err != nil {
 		return err
 	}
 	as.Rdb.Del(ctx, validTimeKey)

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/nhatflash/fbchain/enum"
@@ -19,38 +20,83 @@ func NewRestaurantRepository(db *sql.DB) *RestaurantRepository {
 	}
 }
 
-func (rr *RestaurantRepository) CreateRestaurant(name string, location string, description *string, email *string, phone *string, postalCode string, rType *enum.RestaurantType, notes string, images []string, tenantId int64) (*model.Restaurant, error) {
-	var ar decimal.Decimal
+func (rr *RestaurantRepository) CreateRestaurant(ctx context.Context, name string, location string, description *string, email *string, phone *string, postalCode string, rType *enum.RestaurantType, notes string, images []string, tenantId int64) (*model.Restaurant, error) {
+	var tx *sql.Tx	
 	var err error
+	tx, err = rr.Db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
 
+	defer tx.Rollback()
+
+	var ar decimal.Decimal
 	ar, err = decimal.NewFromString("0.0")
 	if err != nil {
 		return nil, err
 	}
-	_, err = rr.Db.Exec("INSERT INTO restaurants (name, location, description, contact_email, contact_phone, postal_code, type, avg_rating, is_active, notes, subscription_id, tenant_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)", name, location, description, email, phone, postalCode, rType, ar, true, notes, 1, tenantId)
-	if err != nil {
-		return nil, err
-	}
-	r, err := rr.GetRestaurantByName(name)
-	if err != nil {
-		return nil, err
-	}
-	err = rr.CreateRestaurantImages(r.Id, images)
-	if err != nil {
-		return nil, err
-	}
-	return r, nil
-}
 
-func (rr *RestaurantRepository) CreateRestaurantImages(rId int64, images []string) error {
-	var err error
-	for i := range images {
-		_, err = rr.Db.Exec("INSERT INTO restaurant_images (image, restaurant_id) VALUES ($1, $2)", images[i], rId)
-		if err != nil {
-			return err
+	query := "INSERT INTO restaurants (name, location, description, contact_email, contact_phone, postal_code, type, avg_rating, is_active, notes, subscription_id, tenant_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *"
+	var r model.Restaurant
+	if err = tx.QueryRowContext(ctx, query, name, location, description, email, phone, postalCode, rType, ar, true, notes, 1, tenantId).Scan(
+		&r.Id,
+		&r.Name,
+		&r.Location,
+		&r.Description,
+		&r.ContactEmail,
+		&r.ContactPhone,
+		&r.PostalCode,
+		&r.Type,
+		&r.AvgRating,
+		&r.IsActive,
+		&r.Notes,
+		&r.CreatedAt,
+		&r.UpdatedAt,
+		&r.SubPackageId,
+		&r.TenantId,
+	); err != nil {
+		return nil, err
+	}
+	if len(images) > 0 {
+		imgQuery := "INSERT INTO restaurant_images (image, restaurant_id) VALUES ($1, $2)"
+		for i := range images {
+			_, err = tx.ExecContext(ctx, imgQuery, images[i], r.Id)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
-	return nil
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+	return &r, nil
+}
+
+func (rr *RestaurantRepository) CreateRestaurantImages(ctx context.Context, rId int64, images []string) ([]model.RestaurantImage, error) {
+	var err error
+	var tx *sql.Tx
+	tx, err = rr.Db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	defer tx.Rollback()
+	
+	var imgs []model.RestaurantImage
+	query := "INSERT INTO restaurant_images (image, restaurant_id) VALUES ($1, $2) RETURNING *"
+	for i := range images {
+		var img model.RestaurantImage
+		if err = tx.QueryRowContext(ctx, query, images[i], rId).Scan(
+			&img.Id,
+			&img.Image,
+			&img.CreatedAt,
+			&img.RestaurantId,
+		); err != nil {
+			return nil, err
+		}
+		imgs = append(imgs, img)
+	}
+	return imgs, nil
 }
 
 func (rr *RestaurantRepository) GetRestaurantByName(name string) (*model.Restaurant, error) {

@@ -1,14 +1,16 @@
 package service
 
 import (
+	"context"
+
+	"github.com/nhatflash/fbchain/enum"
 	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/repository"
-	"github.com/nhatflash/fbchain/enum"
 )
 
 type IPaymentService interface {
-	HandleCashPayment(orderId int64, notes *string) error
-	HandleVnPayPayment(orderId int64, status enum.PaymentStatus, bankCode *string, notes *string) error
+	HandleCashPayment(ctx context.Context, orderId int64, notes *string) error
+	HandleVnPayPayment(ctx context.Context, orderId int64, status enum.PaymentStatus, bankCode *string, notes *string) error
 }
 
 type PaymentService struct {
@@ -23,27 +25,27 @@ func NewPaymentService(pr *repository.PaymentRepository, or *repository.OrderRep
 	}
 }
 
-func (ps *PaymentService) HandleCashPayment(orderId int64, notes *string) error {
+func (ps *PaymentService) HandleCashPayment(ctx context.Context, orderId int64, notes *string) error {
 	var err error
 	var o *model.Order
 	o, err = ps.OrderRepo.GetOrderById(orderId)
 	if err != nil {
 		return err
 	}
-	if err = ps.PaymentRepo.CreateCashPayment(orderId, o.Amount, notes); err != nil {
+	if err = ps.PaymentRepo.CreateCashPayment(ctx, orderId, o.Amount, notes); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (ps *PaymentService) HandleVnPayPayment(orderId int64, status enum.PaymentStatus, bankCode *string, notes *string) error {
+func (ps *PaymentService) HandleVnPayPayment(ctx context.Context, orderId int64, status enum.PaymentStatus, bankCode *string, notes *string) error {
 	var err error
 	var o *model.Order
 	o, err = ps.OrderRepo.GetOrderById(orderId)
 	if err != nil {
 		return err
 	}
-	if err = ps.PaymentRepo.CreateOnlinePayment(orderId, o.Amount, enum.PAYMENT_VNPAY, status, bankCode, notes); err != nil {
+	if err = ps.PaymentRepo.CreateOnlinePayment(ctx, orderId, o.Amount, enum.PAYMENT_VNPAY, status, bankCode, notes); err != nil {
 		return err
 	}
 	return nil

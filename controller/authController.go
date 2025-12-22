@@ -59,7 +59,7 @@ func (ac *AuthController) TenantSignUp(c *gin.Context) {
 		return
 	}
 	var res *client.TenantResponse
-	res, err = ac.AuthService.HandleTenantSignUp(&req)
+	res, err = ac.AuthService.HandleTenantSignUp(c.Request.Context(), &req)
 	if err != nil {
 		c.Error(err)
 		return

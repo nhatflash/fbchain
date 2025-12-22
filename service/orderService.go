@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+
 	"github.com/nhatflash/fbchain/client"
 	appErr "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/helper"
@@ -9,7 +11,7 @@ import (
 )
 
 type IOrderService interface {
-	HandlePaySubPackage(paySubPackageReq *client.PaySubPackageRequest, tenantId int64) (*client.OrderResponse, error)
+	HandlePaySubPackage(ctx context.Context, paySubPackageReq *client.PaySubPackageRequest, tenantId int64) (*client.OrderResponse, error)
 }
 
 type OrderService struct {
@@ -28,7 +30,7 @@ func NewOrderService(rr *repository.RestaurantRepository,
 	}
 }
 
-func (os *OrderService) HandlePaySubPackage(paySubPackageReq *client.PaySubPackageRequest, tenantId int64) (*client.OrderResponse, error) {
+func (os *OrderService) HandlePaySubPackage(ctx context.Context, paySubPackageReq *client.PaySubPackageRequest, tenantId int64) (*client.OrderResponse, error) {
 	restaurantId := paySubPackageReq.RestaurantId
 	subPackageId := paySubPackageReq.SubPackageId
 
@@ -47,16 +49,12 @@ func (os *OrderService) HandlePaySubPackage(paySubPackageReq *client.PaySubPacka
 	if isRestaurantSubPackageMatchTheRequestedPaySubPackage(r, s.Id) {
 		return nil, appErr.BadRequestError("The requested subscription package is already registered on this restaurant.")
 	}
-	err = os.OrderRepo.CreateInitialOrder(*restaurantId, *subPackageId, &s.Price, tenantId)
+	var newOrder *model.Order
+	newOrder, err = os.OrderRepo.CreateInitialOrder(ctx, *restaurantId, *subPackageId, &s.Price, tenantId)
 	if err != nil {
 		return nil, err
 	}
-	var order *model.Order
-	order, err = os.OrderRepo.GetLatestTenantOrder(tenantId)
-	if err != nil {
-		return nil, err
-	}
-	return helper.MapToOrderResponse(order), nil
+	return helper.MapToOrderResponse(newOrder), nil
 }
 
 func checkRestaurantAndSubPackageExist(rId int64, sId int64, rr *repository.RestaurantRepository, spr *repository.SubPackageRepository) (*model.Restaurant, *model.SubPackage, error) {

@@ -49,7 +49,7 @@ func (oc OrderController) PaySubPackage(c *gin.Context) {
 	}
 
 	var res *client.OrderResponse
-	res, err = oc.OrderService.HandlePaySubPackage(&paySubPackageReq, currTenant.Id)
+	res, err = oc.OrderService.HandlePaySubPackage(c.Request.Context(), &paySubPackageReq, currTenant.Id)
 	if err != nil {
 		c.Error(err)
 		return

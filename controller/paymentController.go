@@ -58,7 +58,7 @@ func (pc *PaymentController) PayOrderWithCash(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	if err = pc.PaymentService.HandleCashPayment(*req.OrderId, req.Notes); err != nil {
+	if err = pc.PaymentService.HandleCashPayment(c.Request.Context(), *req.OrderId, req.Notes); err != nil {
 		c.Error(err)
 		return
 	}

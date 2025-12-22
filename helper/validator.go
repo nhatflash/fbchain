@@ -12,6 +12,7 @@ const (
 	IdentityPattern string = "^0[0-9]{11}$"
 	NamePattern string = "^[a-zA-ZàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ\\s]+$"
 	PricePattern = "^[0-9]+$"
+	PostalCodePattern = "^[0-9]+$"
 )
 
 
@@ -45,6 +46,10 @@ var NameValidator validator.Func = func(fl validator.FieldLevel) bool {
 var PostalCodeValidator validator.Func = func(fl validator.FieldLevel) bool {
 	postalCode := fl.Field().String()
 	if len(postalCode) > 10 || len(postalCode) < 5 {
+		return false
+	}
+	match, err := regexp.MatchString(PostalCodePattern, postalCode)
+	if err != nil || !match {
 		return false
 	}
 	return true

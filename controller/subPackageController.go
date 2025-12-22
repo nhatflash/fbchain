@@ -38,7 +38,7 @@ func (spc *SubPackageController) CreateSubPackage(c *gin.Context) {
 		return
 	}
 	var res *client.SubPackageResponse
-	res, err = spc.SubPackageService.HandleCreateSubPackage(&req)
+	res, err = spc.SubPackageService.HandleCreateSubPackage(c.Request.Context(), &req)
 	if err != nil {
 		c.Error(err)
 		return

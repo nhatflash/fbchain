@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+
 	"github.com/nhatflash/fbchain/client"
 	appErr "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/helper"
@@ -10,7 +12,7 @@ import (
 )
 
 type ISubPackageService interface {
-	HandleCreateSubPackage(createSubPackageReq *client.CreateSubPackageRequest) (*client.SubPackageResponse, error)
+	HandleCreateSubPackage(ctx context.Context, req *client.CreateSubPackageRequest) (*client.SubPackageResponse, error)
 }
 
 type SubPackageService struct {
@@ -23,12 +25,12 @@ func NewSubPackageService(spr *repository.SubPackageRepository) ISubPackageServi
 	}
 }
 
-func (ss *SubPackageService) HandleCreateSubPackage(createSubPackageReq *client.CreateSubPackageRequest) (*client.SubPackageResponse, error) {
-	name := createSubPackageReq.Name
-	description := createSubPackageReq.Description
-	durationMonth := createSubPackageReq.DurationMonth
-	priceStr := createSubPackageReq.Price
-	image := createSubPackageReq.Image
+func (ss *SubPackageService) HandleCreateSubPackage(ctx context.Context, req *client.CreateSubPackageRequest) (*client.SubPackageResponse, error) {
+	name := req.Name
+	description := req.Description
+	durationMonth := req.DurationMonth
+	priceStr := req.Price
+	image := req.Image
 
 	var err error
 	var price decimal.Decimal
@@ -42,7 +44,7 @@ func (ss *SubPackageService) HandleCreateSubPackage(createSubPackageReq *client.
 	}
 
 	var s *model.SubPackage
-	s, err = ss.SubPackageRepo.CreateSubPackage(name, description, *durationMonth, price, image)
+	s, err = ss.SubPackageRepo.CreateSubPackage(ctx, name, description, *durationMonth, price, image)
 	if err != nil {
 		return nil, err
 	}

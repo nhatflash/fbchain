@@ -98,18 +98,42 @@ func (ur *UserRepository) GetUserByPhone(phone string) (*model.User, error) {
 	return &users[0], nil
 }
 
-func (ur *UserRepository) CreateTenantUser(firstName string, lastName string, email string, password string, birthdate *time.Time, gender *enum.Gender, phone string, identity string, address string, postalCode string, profileImage string) (*model.User, error) {
+func (ur *UserRepository) CreateTenantUser(ctx context.Context, firstName string, lastName string, email string, password string, birthdate *time.Time, gender *enum.Gender, phone string, identity string, address string, postalCode string, profileImage string) (*model.User, error) {
 	var err error
+	var tx *sql.Tx
+	tx, err = ur.Db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
 
-	_, err = ur.Db.Exec("INSERT INTO users (email, password, role, phone, identity, first_name, last_name, gender, birthdate, postal_code, address, profile_image, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)", email, password, enum.ROLE_TENANT, phone, identity, firstName, lastName, gender, birthdate, postalCode, address, profileImage, enum.USER_ACTIVE)
-	if err != nil {
+	defer tx.Rollback()
+
+	var user model.User
+	query := "INSERT INTO users (email, password, role, phone, identity, first_name, last_name, gender, birthdate, postal_code, address, profile_image, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *"
+	if err = tx.QueryRowContext(ctx, query , email, password, enum.ROLE_TENANT, phone, identity, firstName, lastName, gender, birthdate, postalCode, address, profileImage, enum.USER_ACTIVE).Scan(
+		&user.Id,
+		&user.Email,
+		&user.Password, 
+		&user.Role,
+		&user.Phone, 
+		&user.Identity,
+		&user.FirstName,
+		&user.LastName,
+		&user.Gender,
+		&user.Birthdate,
+		&user.PostalCode,
+		&user.Address,
+		&user.ProfileImage,
+		&user.Status,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	); err != nil {
 		return nil, err
 	}
-	tUser, err := ur.GetUserByEmail(email)
-	if err != nil {
+	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
-	return tUser, nil
+	return &user, nil
 }
 
 func (ur *UserRepository) CreateAdminUser(email string, password string, phone string, identity string, firstName string, lastName string, gender *enum.Gender, birthdate *time.Time, postalCode string, address string, profileImage string) error {
@@ -180,23 +204,46 @@ func (ur *UserRepository) GetUserById(id int64) (*model.User, error) {
 }
 
 
-func (ur *UserRepository) UpdateUser(uId int64, firstName *string, lastName *string, birthdate *time.Time, gender *enum.Gender, phone *string, identity *string, address *string, postalCode *string, profileImage *string) (*model.User, error) {
+func (ur *UserRepository) UpdateUser(ctx context.Context, userId int64, firstName *string, lastName *string, birthdate *time.Time, gender *enum.Gender, phone *string, identity *string, address *string, postalCode *string, profileImage *string) (*model.User, error) {
 	var err error
-	_, err = ur.Db.Exec("UPDATE users SET first_name = $1, last_name = $2, birthdate = $3, gender = $4, phone = $5, identity = $6, address = $7, postal_code = $8, profile_image = $9 WHERE id = $10", firstName, lastName, birthdate, gender, phone, identity, address, postalCode, profileImage, uId)
+	var tx *sql.Tx
+
+	tx, err = ur.Db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
-	var u *model.User
-	u, err = ur.GetUserById(uId)
-	if err != nil {
+
+	query := "UPDATE users SET first_name = $1, last_name = $2, birthdate = $3, gender = $4, phone = $5, identity = $6, address = $7, postal_code = $8, profile_image = $9 WHERE id = $10"
+
+	var user model.User
+	if err = tx.QueryRowContext(ctx, query, firstName, lastName, birthdate, gender, phone, identity, address, postalCode, profileImage, userId).Scan(
+		&user.Id,
+		&user.Email,
+		&user.Password, 
+		&user.Role,
+		&user.Phone, 
+		&user.Identity,
+		&user.FirstName,
+		&user.LastName,
+		&user.Gender,
+		&user.Birthdate,
+		&user.PostalCode,
+		&user.Address,
+		&user.ProfileImage,
+		&user.Status,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	); err != nil {
 		return nil, err
 	}
-	return u, nil
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
-func (ur *UserRepository) ChangeUserPassword(uId int64, newPassword string) (error) {
+func (ur *UserRepository) ChangeUserPassword(ctx context.Context, userId int64, newPassword string) (error) {
 	var err error
-	ctx := context.Background()
 	var tx *sql.Tx
 	tx, err = ur.Db.BeginTx(ctx, nil)
 	if err != nil {
@@ -204,7 +251,7 @@ func (ur *UserRepository) ChangeUserPassword(uId int64, newPassword string) (err
 	}
 	defer tx.Rollback()
 
-	_, err = tx.ExecContext(ctx, "UPDATE users SET password = $1 WHERE id = $2", newPassword, uId)
+	_, err = tx.ExecContext(ctx, "UPDATE users SET password = $1 WHERE id = $2", newPassword, userId)
 	if err != nil {
 		return nil
 	}

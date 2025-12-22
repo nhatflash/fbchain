@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/nhatflash/fbchain/enum"
@@ -18,19 +19,34 @@ func NewTenantRepository(db *sql.DB) *TenantRepository {
 	}
 }
 
-func (tr *TenantRepository) CreateTenantInformation(code string, description string, tenantType *enum.TenantType, userId int64) (*model.Tenant, error) {
+func (tr *TenantRepository) CreateTenantInformation(ctx context.Context, code string, description string, tenantType *enum.TenantType, userId int64) (*model.Tenant, error) {
 	var err error
-	_, err = tr.Db.Exec("INSERT INTO tenants (code, description, type, user_id) VALUES ($1, $2, $3, $4)", code, description, tenantType, userId)
+	var tx *sql.Tx
+	tx, err = tr.Db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	var tenant *model.Tenant
-	tenant, err = tr.GetTenantByCode(code)
-	if err != nil {
+	defer tx.Rollback()
+
+	var t model.Tenant
+	query := "INSERT INTO tenants (code, description, type, user_id) VALUES ($1, $2, $3, $4) RETURNING *"
+	if err = tx.QueryRowContext(ctx, query, code, description, tenantType, userId).Scan(
+		&t.Id,
+		&t.Code,
+		&t.Description,
+		&t.Type,
+		&t.Notes,
+		&t.UserId,
+	); err != nil {
 		return nil, err
 	}
-	return tenant, nil
+
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return &t, nil
 }
 
 func (tr *TenantRepository) GetTenantByCode(code string) (*model.Tenant, error) {

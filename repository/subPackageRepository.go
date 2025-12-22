@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 
 	appErr "github.com/nhatflash/fbchain/error"
@@ -29,20 +30,35 @@ func (spr *SubPackageRepository) CheckSubPackageNameExists(name string) bool {
 	return false
 }
 
-func (spr *SubPackageRepository) CreateSubPackage(name string, description *string, durationMonth int, price decimal.Decimal, image *string) (*model.SubPackage, error) {
+func (spr *SubPackageRepository) CreateSubPackage(ctx context.Context, name string, description *string, durationMonth int, price decimal.Decimal, image *string) (*model.SubPackage, error) {
 	var err error
-	_, err = spr.Db.Exec("INSERT INTO sub_packages (name, description, duration_month, price, is_active, image) VALUES ($1, $2, $3, $4, $5, $6)", name, description, durationMonth, price, true, image)
+	var tx *sql.Tx
 
+	tx, err = spr.Db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	var s *model.SubPackage
-	s, err = spr.GetSubPackageByName(name)
-	if err != nil {
+	defer tx.Rollback()
+
+	query := "INSERT INTO sub_packages (name, description, duration_month, price, is_active, image) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *"
+	var s model.SubPackage
+	if err = tx.QueryRowContext(ctx, query, name, description, durationMonth, price, true, image).Scan(
+		&s.Id,
+		&s.Name,
+		&s.Description,
+		&s.DurationMonth,
+		&s.Price,
+		&s.IsActive,
+		&s.Image,
+	); err != nil {
 		return nil, err
 	}
-	return s, nil
+
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+	return &s, nil
 }
 
 func (spr *SubPackageRepository) GetSubPackageByName(name string) (*model.SubPackage, error) {

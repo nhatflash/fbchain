@@ -1,13 +1,14 @@
 package service
 
 import (
-	"github.com/gin-gonic/gin"
+	"context"
+
 	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/repository"
 )
 
 type ITenantService interface {
-	GetCurrentTenant(c *gin.Context) (*model.Tenant, error)
+	GetCurrentTenant(ctx context.Context) (*model.Tenant, error)
 	GetTenantById(tId int64) (*model.Tenant, error)
 	GetListTenant() ([]model.Tenant, error)
 }
@@ -24,11 +25,11 @@ func NewTenantService(tr *repository.TenantRepository, us IUserService) ITenantS
 	}
 }
 
-func (ts *TenantService) GetCurrentTenant(c *gin.Context) (*model.Tenant, error) {
+func (ts *TenantService) GetCurrentTenant(ctx context.Context) (*model.Tenant, error) {
 	var err error
 	var currUser *model.User
 
-	currUser, err = ts.UserService.GetCurrentUser(c)
+	currUser, err = ts.UserService.GetCurrentUser(ctx)
 	if err != nil {
 		return nil, err
 	}

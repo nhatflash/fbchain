@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+
 	"github.com/nhatflash/fbchain/client"
 	appErr "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/helper"
@@ -9,7 +11,7 @@ import (
 )
 
 type IRestaurantService interface {
-	HandleCreateRestaurant(createRestaurantReq *client.CreateRestaurantRequest, tenantId int64) (*client.RestaurantResponse, error)
+	HandleCreateRestaurant(ctx context.Context, req *client.CreateRestaurantRequest, tenantId int64) (*client.RestaurantResponse, error)
 	GetRestaurantsByTenantId(tenantId int64) ([]model.Restaurant, error)
 	GetAllRestaurants() ([]model.Restaurant, error)
 	GetRestaurantById(id int64) (*model.Restaurant, error)
@@ -30,16 +32,16 @@ func NewRestaurantService(rr *repository.RestaurantRepository, spr *repository.S
 	}
 }
 
-func (rs *RestaurantService) HandleCreateRestaurant(createRestaurantReq *client.CreateRestaurantRequest, tenantId int64) (*client.RestaurantResponse, error) {
-	name := createRestaurantReq.Name
-	location := createRestaurantReq.Location
-	description := createRestaurantReq.Description
-	contactEmail := createRestaurantReq.ContactEmail
-	contactPhone := createRestaurantReq.ContactPhone
-	postalCode := createRestaurantReq.PostalCode
-	rType := createRestaurantReq.Type
-	notes := createRestaurantReq.Notes
-	images := createRestaurantReq.Images
+func (rs *RestaurantService) HandleCreateRestaurant(ctx context.Context, req *client.CreateRestaurantRequest, tenantId int64) (*client.RestaurantResponse, error) {
+	name := req.Name
+	location := req.Location
+	description := req.Description
+	contactEmail := req.ContactEmail
+	contactPhone := req.ContactPhone
+	postalCode := req.PostalCode
+	rType := req.Type
+	notes := req.Notes
+	images := req.Images
 
 	var err error
 	var exist bool
@@ -55,7 +57,7 @@ func (rs *RestaurantService) HandleCreateRestaurant(createRestaurantReq *client.
 	}
 
 	var r *model.Restaurant
-	r, err = rs.RestaurantRepo.CreateRestaurant(name, location, description, contactEmail, contactPhone, postalCode, rType, notes, images, tenantId)
+	r, err = rs.RestaurantRepo.CreateRestaurant(ctx, name, location, description, contactEmail, contactPhone, postalCode, rType, notes, images, tenantId)
 	if err != nil {
 		return nil, err
 	}
