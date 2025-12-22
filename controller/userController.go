@@ -39,7 +39,7 @@ func (uc *UserController) ChangeProfile(c *gin.Context) {
 		return 
 	}
 	var updatedUser *model.User
-	updatedUser, err = uc.UserService.ChangeProfile(c.Request.Context(), req.FirstName, req.LastName, req.Birthdate, req.Gender, req.Phone, req.Identity, req.Address, req.PostalCode, req.ProfileImage)
+	updatedUser, err = uc.UserService.ChangeProfile(c.Request.Context(), &req)
 	if err != nil {
 		c.Error(err)
 		return

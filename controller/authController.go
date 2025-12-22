@@ -50,7 +50,7 @@ func (ac *AuthController) SignIn(c *gin.Context) {
 // @Param request body client.TenantSignUpRequest true "TenantSignUp body"
 // @Success 200 {object} client.TenantResponse
 // @Failure 400 {object} error
-// @Router /auth/signup/tenant [post]
+// @Router /auth/signup [post]
 func (ac *AuthController) TenantSignUp(c *gin.Context) {
 	var req client.TenantSignUpRequest
 	var err error

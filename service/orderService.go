@@ -11,7 +11,7 @@ import (
 )
 
 type IOrderService interface {
-	HandlePaySubPackage(ctx context.Context, paySubPackageReq *client.PaySubPackageRequest, tenantId int64) (*client.OrderResponse, error)
+	HandlePaySubPackage(ctx context.Context, req *client.PaySubPackageRequest, tenantId int64) (*client.OrderResponse, error)
 }
 
 type OrderService struct {
@@ -30,9 +30,9 @@ func NewOrderService(rr *repository.RestaurantRepository,
 	}
 }
 
-func (os *OrderService) HandlePaySubPackage(ctx context.Context, paySubPackageReq *client.PaySubPackageRequest, tenantId int64) (*client.OrderResponse, error) {
-	restaurantId := paySubPackageReq.RestaurantId
-	subPackageId := paySubPackageReq.SubPackageId
+func (os *OrderService) HandlePaySubPackage(ctx context.Context, req *client.PaySubPackageRequest, tenantId int64) (*client.OrderResponse, error) {
+	restaurantId := req.RestaurantId
+	subPackageId := req.SubPackageId
 
 	var err error
 	var r *model.Restaurant

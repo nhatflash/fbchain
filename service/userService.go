@@ -9,6 +9,7 @@ import (
 	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/repository"
 	"github.com/nhatflash/fbchain/security"
+	"github.com/nhatflash/fbchain/client"
 )
 
 type IUserService interface {
@@ -16,7 +17,7 @@ type IUserService interface {
 	IsUserRoleTenant(u *model.User) bool
 	GetListUser(ctx context.Context) ([]model.User, error)
 	GetUserById(ctx context.Context, id int64) (*model.User, error)
-	ChangeProfile(ctx context.Context, firstName *string, lastName *string, birthdate *string, gender *enum.Gender, phone *string, identity *string, address *string, postalCode *string, profileImage *string) (*model.User, error)
+	ChangeProfile(ctx context.Context, req *client.UpdateProfileRequest) (*model.User, error)
 }
 
 type UserService struct {
@@ -70,7 +71,17 @@ func (us *UserService) GetUserById(ctx context.Context, id int64) (*model.User, 
 }
 
 
-func (us *UserService) ChangeProfile(ctx context.Context, firstName *string, lastName *string, birthdate *string, gender *enum.Gender, phone *string, identity *string, address *string, postalCode *string, profileImage *string) (*model.User, error) {
+func (us *UserService) ChangeProfile(ctx context.Context, req *client.UpdateProfileRequest) (*model.User, error) {
+	firstName := req.FirstName
+	lastName := req.LastName
+	birthdate := req.Birthdate
+	gender := req.Gender
+	phone := req.Phone
+	identity := req.Identity
+	address := req.Address
+	postalCode := req.PostalCode
+	profileImage := req.ProfileImage
+
 	var err error
 	var claims *security.JwtAccessClaims
 	claims, err = GetCurrentClaims(ctx)

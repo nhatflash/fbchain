@@ -58,13 +58,13 @@ func (r *queryResolver) Users(ctx context.Context) ([]*gqlModel.User, error) {
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*gqlModel.User, error) {
 	var err error
-	var idNum int64
-	idNum, err = strconv.ParseInt(id, 10, 64)
+	var userId int64
+	userId, err = strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 	var u *model.User
-	u, err = r.UserService.GetUserById(ctx, idNum)
+	u, err = r.UserService.GetUserById(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -88,13 +88,13 @@ func (r *queryResolver) Tenants(ctx context.Context) ([]*gqlModel.Tenant, error)
 // Tenant is the resolver for the tenant field.
 func (r *queryResolver) Tenant(ctx context.Context, id string) (*gqlModel.Tenant, error) {
 	var err error
-	var idNum int64
-	idNum, err = strconv.ParseInt(id, 10, 64)
+	var tenantId int64
+	tenantId, err = strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 	var t *model.Tenant
-	t, err = r.TenantService.GetTenantById(ctx, idNum)
+	t, err = r.TenantService.GetTenantById(ctx, tenantId)
 	if err != nil {
 		return nil, err
 	}
@@ -118,13 +118,13 @@ func (r *queryResolver) Restaurants(ctx context.Context) ([]*gqlModel.Restaurant
 // Restaurant is the resolver for the restaurant field.
 func (r *queryResolver) Restaurant(ctx context.Context, id string) (*gqlModel.Restaurant, error) {
 	var err error
-	var idNum int64
-	idNum, err = strconv.ParseInt(id, 10, 64)
+	var restaurantId int64
+	restaurantId, err = strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 	var res *model.Restaurant
-	res, err = r.RestaurantService.GetRestaurantById(ctx, idNum)
+	res, err = r.RestaurantService.GetRestaurantById(ctx, restaurantId)
 	if err != nil {
 		return nil, err
 	}
@@ -148,13 +148,13 @@ func (r *queryResolver) RestaurantImages(ctx context.Context) ([]*gqlModel.Resta
 // RestaurantImage is the resolver for the restaurantImage field.
 func (r *queryResolver) RestaurantImage(ctx context.Context, id string) (*gqlModel.RestaurantImage, error) {
 	var err error
-	var idNum int64
-	idNum, err = strconv.ParseInt(id, 10, 64)
+	var imgId int64
+	imgId, err = strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 	var img *model.RestaurantImage
-	img, err = r.RestaurantService.GetRestaurantImageById(ctx, idNum)
+	img, err = r.RestaurantService.GetRestaurantImageById(ctx, imgId)
 	if err != nil {
 		return nil, err
 	}
@@ -163,14 +163,14 @@ func (r *queryResolver) RestaurantImage(ctx context.Context, id string) (*gqlMod
 
 // Tenant is the resolver for the tenant field.
 func (r *restaurantResolver) Tenant(ctx context.Context, obj *gqlModel.Restaurant) (*gqlModel.Tenant, error) {
-	var idNum int64
+	var tenantId int64
 	var err error
-	idNum, err = strconv.ParseInt(*obj.TenantID, 10, 64)
+	tenantId, err = strconv.ParseInt(*obj.TenantID, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 	var t *model.Tenant
-	t, err = r.TenantService.GetTenantById(ctx, idNum)
+	t, err = r.TenantService.GetTenantById(ctx, tenantId)
 	if err != nil {
 		return nil, err
 	}
@@ -179,14 +179,14 @@ func (r *restaurantResolver) Tenant(ctx context.Context, obj *gqlModel.Restauran
 
 // Images is the resolver for the images field.
 func (r *restaurantResolver) Images(ctx context.Context, obj *gqlModel.Restaurant) ([]*gqlModel.RestaurantImage, error) {
-	var idNum int64
+	var restaurantId int64
 	var err error
-	idNum, err = strconv.ParseInt(obj.ID, 10, 64)
+	restaurantId, err = strconv.ParseInt(obj.ID, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 	var imgs []model.RestaurantImage
-	imgs, err = r.RestaurantService.GetRestaurantImages(ctx, idNum)
+	imgs, err = r.RestaurantService.GetRestaurantImages(ctx, restaurantId)
 	if err != nil {
 		return nil, err
 	}
@@ -200,14 +200,14 @@ func (r *restaurantResolver) Images(ctx context.Context, obj *gqlModel.Restauran
 
 // Restaurant is the resolver for the restaurant field.
 func (r *restaurantImageResolver) Restaurant(ctx context.Context, obj *gqlModel.RestaurantImage) (*gqlModel.Restaurant, error) {
-	var idNum int64
+	var restaurantId int64
 	var err error
-	idNum, err = strconv.ParseInt(*obj.RestaurantID, 10, 64)
+	restaurantId, err = strconv.ParseInt(*obj.RestaurantID, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 	var res *model.Restaurant
-	res, err = r.RestaurantService.GetRestaurantById(ctx, idNum)
+	res, err = r.RestaurantService.GetRestaurantById(ctx, restaurantId)
 	if err != nil {
 		return nil, err
 	}
@@ -217,13 +217,13 @@ func (r *restaurantImageResolver) Restaurant(ctx context.Context, obj *gqlModel.
 // User is the resolver for the user field.
 func (r *tenantResolver) User(ctx context.Context, obj *gqlModel.Tenant) (*gqlModel.User, error) {
 	var err error
-	var idNum int64
-	idNum, err = strconv.ParseInt(*obj.UserID, 10, 64)
+	var userId int64
+	userId, err = strconv.ParseInt(*obj.UserID, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 	var u *model.User
-	u, err = r.UserService.GetUserById(ctx, idNum)
+	u, err = r.UserService.GetUserById(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -233,13 +233,13 @@ func (r *tenantResolver) User(ctx context.Context, obj *gqlModel.Tenant) (*gqlMo
 // Restaurants is the resolver for the restaurants field.
 func (r *tenantResolver) Restaurants(ctx context.Context, obj *gqlModel.Tenant) ([]*gqlModel.Restaurant, error) {
 	var err error
-	var idNum int64
-	idNum, err = strconv.ParseInt(obj.ID, 10, 64)
+	var tenantId int64
+	tenantId, err = strconv.ParseInt(obj.ID, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 	var restaurants []model.Restaurant
-	restaurants, err = r.RestaurantService.GetRestaurantsByTenantId(ctx, idNum)
+	restaurants, err = r.RestaurantService.GetRestaurantsByTenantId(ctx, tenantId)
 	if err != nil {
 		return nil, err
 	}

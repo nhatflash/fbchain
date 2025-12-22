@@ -56,7 +56,7 @@ func (or *OrderRepository) GetLatestTenantOrder(ctx context.Context, tenantId in
 
 	query := "SELECT * FROM orders WHERE tenant_id = $1 ORDER BY order_date DESC LIMIT 1"
 	var order model.Order
-	if err = or.Db.QueryRowContext(ctx, query, tenantId).Scan(
+	err = or.Db.QueryRowContext(ctx, query, tenantId).Scan(
 		&order.Id,
 		&order.OrderDate,
 		&order.Status,
@@ -65,11 +65,12 @@ func (or *OrderRepository) GetLatestTenantOrder(ctx context.Context, tenantId in
 		&order.TenantId,
 		&order.RestaurantId,
 		&order.SubPackageId,
-	); err != nil {
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, appErr.NotFoundError("No order found.")
+		}
 		return nil, err
-	}
-	if err != nil && err == sql.ErrNoRows {
-		return nil, appErr.NotFoundError("No order found.")
 	}
 	return &order, nil
 }
@@ -79,7 +80,7 @@ func (or *OrderRepository) GetOrderById(ctx context.Context, id int64) (*model.O
 	var err error
 	var o model.Order
 	query := "SELECT * FROM orders WHERE id = $1 LIMIT 1"
-	if err = or.Db.QueryRowContext(ctx, query, id).Scan(
+	err = or.Db.QueryRowContext(ctx, query, id).Scan(
 		&o.Id,
 		&o.OrderDate,
 		&o.Status,
@@ -88,11 +89,12 @@ func (or *OrderRepository) GetOrderById(ctx context.Context, id int64) (*model.O
 		&o.TenantId,
 		&o.RestaurantId,
 		&o.SubPackageId,
-	); err != nil {
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, appErr.NotFoundError("No order found.")
+		}
 		return nil, err
-	}
-	if err != nil && err == sql.ErrNoRows {
-		return nil, appErr.NotFoundError("No order found.")
 	}
 	return &o, nil
 }
