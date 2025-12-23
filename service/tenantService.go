@@ -10,40 +10,22 @@ import (
 )
 
 type ITenantService interface {
-	GetCurrentTenant(ctx context.Context) (*model.Tenant, error)
 	GetTenantById(ctx context.Context, id int64) (*model.Tenant, error)
 	GetListTenant(ctx context.Context) ([]model.Tenant, error)
-	HandleCompleteTenantInfo(ctx context.Context, req *client.TenantInfoRequest) (*client.TenantResponse, error)
+	HandleCompleteTenantInfo(ctx context.Context, userId int64, req *client.TenantInfoRequest) (*client.TenantResponse, error)
+	GetTenantByUserId(ctx context.Context, userId int64) (*model.Tenant, error)
 }
 
 type TenantService struct {
 	TenantRepo 			*repository.TenantRepository
-	UserService			IUserService
 	UserRepo 			*repository.UserRepository
 }
 
-func NewTenantService(tr *repository.TenantRepository, us IUserService, ur *repository.UserRepository) ITenantService {
+func NewTenantService(tr *repository.TenantRepository, ur *repository.UserRepository) ITenantService {
 	return &TenantService{
 		TenantRepo: tr,
-		UserService: us,
 		UserRepo: ur,
 	}
-}
-
-func (ts *TenantService) GetCurrentTenant(ctx context.Context) (*model.Tenant, error) {
-	var err error
-	var currUser *model.User
-
-	currUser, err = ts.UserService.GetCurrentUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var currTenant *model.Tenant
-	currTenant, err = ts.TenantRepo.GetTenantByUserId(ctx, currUser.Id)
-	if err != nil {
-		return nil, err
-	}
-	return currTenant, nil
 }
 
 
@@ -65,7 +47,7 @@ func (ts *TenantService) GetListTenant(ctx context.Context) ([]model.Tenant, err
 }
 
 
-func (ts *TenantService) HandleCompleteTenantInfo(ctx context.Context, req *client.TenantInfoRequest) (*client.TenantResponse, error) {
+func (ts *TenantService) HandleCompleteTenantInfo(ctx context.Context, userId int64, req *client.TenantInfoRequest) (*client.TenantResponse, error) {
 	phone := req.Phone
 	identity := req.Identity
 	address := req.Address
@@ -75,30 +57,31 @@ func (ts *TenantService) HandleCompleteTenantInfo(ctx context.Context, req *clie
 	profileImage := req.ProfileImage
 
 	var err error
-	var currUser *model.User
-	currUser, err = ts.UserService.GetCurrentUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if err = ValidateCompleteTenantInfoRequest(ctx, phone, identity, currUser, ts.UserRepo); err != nil {
+	if err = validateCompleteTenantInfoRequest(ctx, phone, identity, ts.UserRepo); err != nil {
 		return nil, err
 	} 
 	
 	code := GenerateTenantCode()
-	var tenant *model.Tenant
-	userId := currUser.Id
-	currUser, tenant, err = ts.TenantRepo.CompleteTenantInformation(ctx, phone, identity, address, postalCode, profileImage, code, description, tenantType, userId)
+	var u *model.User
+	var t *model.Tenant
+	u, t, err = ts.TenantRepo.CompleteTenantInformation(ctx, phone, identity, address, postalCode, profileImage, code, description, tenantType, userId)
 	if err != nil {
 		return nil, err
 	}
-	return helper.MapToTenantResponse(currUser, tenant), nil
+	return helper.MapToTenantResponse(u, t), nil
 }
 
 
-func ValidateCompleteTenantInfoRequest(ctx context.Context, phone string, identity string, u *model.User, ur *repository.UserRepository) error {
-	if u.IsVerified {
-		return appErr.BadRequestError("This tenant is already verified.")
+func (ts *TenantService) GetTenantByUserId(ctx context.Context, userId int64) (*model.Tenant, error) {
+	t, err := ts.TenantRepo.GetTenantByUserId(ctx, userId)
+	if err != nil {
+		return nil, err
 	}
+	return t, nil
+}
+
+
+func validateCompleteTenantInfoRequest(ctx context.Context, phone string, identity string, ur *repository.UserRepository) error {
 	var err error
 	var exist bool
 	exist, err = ur.CheckUserPhoneExists(ctx, phone)

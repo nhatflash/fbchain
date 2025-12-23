@@ -19,7 +19,7 @@ type IRestaurantService interface {
 	GetRestaurantImageById(ctx context.Context, id int64) (*model.RestaurantImage, error)
 	GetRestaurantImages(ctx context.Context, restaurantId int64) ([]model.RestaurantImage, error)
 	GetAllRestaurantImages(ctx context.Context) ([]model.RestaurantImage, error)
-	HandleAddNewRestaurantItem(ctx context.Context, restaurantId int64, req *client.AddRestaurantItemRequest) (*client.RestaurantItemResponse, error)
+	HandleAddNewRestaurantItem(ctx context.Context, restaurantId int64, tenantId int64, req *client.AddRestaurantItemRequest) (*client.RestaurantItemResponse, error)
 	GetItemsByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantItem, error)
 	GetAllRestaurantItems(ctx context.Context) ([]model.RestaurantItem, error)
 	GetRestaurantItemById(ctx context.Context, id int64) (*model.RestaurantItem, error)
@@ -28,16 +28,13 @@ type IRestaurantService interface {
 type RestaurantService struct {
 	RestaurantRepo 		*repository.RestaurantRepository
 	SubPackageRepo 		*repository.SubPackageRepository
-	UserService 		IUserService
-	TenantService 		ITenantService
 }
 
-func NewRestaurantService(rr *repository.RestaurantRepository, spr *repository.SubPackageRepository, us IUserService, ts ITenantService) IRestaurantService {
+func NewRestaurantService(rr *repository.RestaurantRepository, spr *repository.SubPackageRepository) IRestaurantService {
 	return &RestaurantService{
 		RestaurantRepo: rr,
 		SubPackageRepo: spr,
-		UserService: us,
-		TenantService: ts,
+
 	}
 }
 
@@ -53,14 +50,6 @@ func (rs *RestaurantService) HandleCreateRestaurant(ctx context.Context, req *cl
 	images := req.Images
 
 	var err error
-	var u *model.User
-	u, err = rs.UserService.GetCurrentUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if !u.IsVerified {
-		return nil, appErr.UnauthorizedError("Please verify your account before doing this action.")
-	}
 	
 	if err = validateCreateRestaurantRequest(ctx, name, rs.SubPackageRepo, rs.RestaurantRepo); err != nil {
 		return nil, err
@@ -147,22 +136,16 @@ func (rs *RestaurantService) GetAllRestaurantImages(ctx context.Context) ([]mode
 
 
 
-func (rs *RestaurantService) HandleAddNewRestaurantItem(ctx context.Context, restaurantId int64, req *client.AddRestaurantItemRequest) (*client.RestaurantItemResponse, error) {
+func (rs *RestaurantService) HandleAddNewRestaurantItem(ctx context.Context, restaurantId int64, tenantId int64, req *client.AddRestaurantItemRequest) (*client.RestaurantItemResponse, error) {
 	var err error 
-
-	var t *model.Tenant
-	t, err = rs.TenantService.GetCurrentTenant(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	var r *model.Restaurant
+	
 	r, err = rs.RestaurantRepo.GetRestaurantById(ctx, restaurantId)
 	if err != nil {
 		return nil, err
 	}
 
-	if r.TenantId != t.Id {
+	if r.TenantId != tenantId {
 		return nil, appErr.UnauthorizedError("You are not allowed to add new item on this restaurant.")
 	}
 

@@ -16,12 +16,14 @@ import (
 type RestaurantController struct {
 	UserService 		service.IUserService
 	RestaurantService 	service.IRestaurantService
+	TenantService 		service.ITenantService
 }
 
-func NewRestaurantController(us service.IUserService, rs service.IRestaurantService) *RestaurantController {
+func NewRestaurantController(us service.IUserService, rs service.IRestaurantService, ts service.ITenantService) *RestaurantController {
 	return &RestaurantController{
 		UserService: us,
 		RestaurantService: rs,
+		TenantService: ts,
 	}
 }
 
@@ -34,19 +36,31 @@ func NewRestaurantController(us service.IUserService, rs service.IRestaurantServ
 // @Router /restaurant [post]
 func (rc *RestaurantController) CreateRestaurant(c *gin.Context) {
 	var req client.CreateRestaurantRequest
+	ctx := c.Request.Context()
 	var err error
 	if err = c.ShouldBindJSON(&req); err != nil {
 		c.Error(err)
 		return
 	}
-	var currUser *model.User
-	currUser, err = rc.UserService.GetCurrentUser(c)
+	var u *model.User
+	u, err = rc.UserService.GetCurrentUser(ctx)
 	if err != nil {
 		c.Error(err)
 		return
 	}
+	if !u.IsVerified {
+		c.Error(appErr.UnauthorizedError("Please verify your account before doing this action."))
+		return
+	}
+	var t *model.Tenant
+	t, err = rc.TenantService.GetTenantByUserId(ctx, u.Id)
+	if err != nil {
+		c.Error(err)
+		return
+	} 
+
 	var res *client.RestaurantResponse
-	res, err = rc.RestaurantService.HandleCreateRestaurant(c.Request.Context(), &req, currUser.Id)
+	res, err = rc.RestaurantService.HandleCreateRestaurant(ctx, &req, t.Id)
 	if err != nil {
 		c.Error(err)
 		return
@@ -65,10 +79,12 @@ func (rc *RestaurantController) CreateRestaurant(c *gin.Context) {
 func (rc *RestaurantController) AddNewRestaurantItem(c *gin.Context) {
 	var req client.AddRestaurantItemRequest
 	var err error
+	ctx := c.Request.Context()
 	if err = c.ShouldBindJSON(&req); err != nil {
 		c.Error(err)
 		return
 	}
+
 	restaurantIdStr := c.Param("restaurantId")
 	var restaurantId int64
 	restaurantId, err = strconv.ParseInt(restaurantIdStr, 10, 64)
@@ -76,8 +92,21 @@ func (rc *RestaurantController) AddNewRestaurantItem(c *gin.Context) {
 		c.Error(appErr.BadRequestError("Invalid restaurant id."))
 		return
 	}
+	var u *model.User
+	u, err = rc.UserService.GetCurrentUser(ctx)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	var t *model.Tenant
+	t, err = rc.TenantService.GetTenantByUserId(ctx, u.Id)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
 	var res *client.RestaurantItemResponse
-	res, err = rc.RestaurantService.HandleAddNewRestaurantItem(c.Request.Context(), restaurantId, &req)
+	res, err = rc.RestaurantService.HandleAddNewRestaurantItem(ctx, restaurantId, t.Id, &req)
 	if err != nil {
 		c.Error(err)
 		return
