@@ -43,6 +43,8 @@ type SubPackage struct {
 	DurationMonth int             `json:"durationMonth"`
 	Price         decimal.Decimal `json:"price"`
 	IsActive      bool            `json:"isActive"`
+	CreatedAt	  time.Time 	  `json:"createdAt"`
+	UpdatedAt 	  time.Time 	  `json:"updatedAt"`
 	Image         *string  		  `json:"image"`
 }
 

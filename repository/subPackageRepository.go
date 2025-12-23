@@ -52,6 +52,8 @@ func (spr *SubPackageRepository) CreateSubPackage(ctx context.Context, name stri
 		&s.DurationMonth,
 		&s.Price,
 		&s.IsActive,
+		&s.CreatedAt,
+		&s.UpdatedAt,
 		&s.Image,
 	); err != nil {
 		return nil, err
@@ -74,6 +76,8 @@ func (spr *SubPackageRepository) GetSubPackageByName(ctx context.Context, name s
 		&s.DurationMonth,
 		&s.Price,
 		&s.IsActive,
+		&s.CreatedAt,
+		&s.UpdatedAt,
 		&s.Image,
 	)
 	if err != nil {
@@ -123,6 +127,8 @@ func (spr *SubPackageRepository) GetSubPackageById(ctx context.Context, id int64
 		&s.DurationMonth,
 		&s.Price, 
 		&s.IsActive,
+		&s.CreatedAt,
+		&s.UpdatedAt,
 		&s.Image,
 	)
 	if err != nil {
@@ -145,6 +151,8 @@ func (spr *SubPackageRepository) GetFirstSubPackage(ctx context.Context) (*model
 		&s.DurationMonth,
 		&s.Price,
 		&s.IsActive,
+		&s.CreatedAt,
+		&s.UpdatedAt,
 		&s.Image,
 	)
 	if err != nil {

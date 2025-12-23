@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/nhatflash/fbchain/enum"
 	appErr "github.com/nhatflash/fbchain/error"
@@ -30,8 +31,8 @@ func (tr *TenantRepository) CompleteTenantInformation(ctx context.Context, phone
 	defer tx.Rollback()
 
 	var u model.User
-	userQuery := "UPDATE users SET phone = $1, identity = $2, address = $3, postal_code = $4, profile_image = $5, is_verified = $6 WHERE id = $7 RETURNING *"
-	if err = tx.QueryRowContext(ctx, userQuery, phone, identity, address, postalCode, profileImage, true, userId).Scan(
+	userQuery := "UPDATE users SET phone = $1, identity = $2, address = $3, postal_code = $4, profile_image = $5, is_verified = $6, updated_at = $7 WHERE id = $8 RETURNING *"
+	if err = tx.QueryRowContext(ctx, userQuery, phone, identity, address, postalCode, profileImage, true, time.Now(), userId).Scan(
 		&u.Id,
 		&u.Email,
 		&u.Password,
