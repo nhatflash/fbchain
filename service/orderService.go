@@ -18,15 +18,18 @@ type OrderService struct {
 	RestaurantRepo 		*repository.RestaurantRepository
 	SubPackageRepo 		*repository.SubPackageRepository
 	OrderRepo 			*repository.OrderRepository
+	UserService 		IUserService
 }
 
 func NewOrderService(rr *repository.RestaurantRepository, 
 					spr *repository.SubPackageRepository, 
-					or *repository.OrderRepository) IOrderService {
+					or *repository.OrderRepository, 
+					us IUserService) IOrderService {
 	return &OrderService{
 		RestaurantRepo: rr,
 		SubPackageRepo: spr,
 		OrderRepo: or,
+		UserService: us,
 	}
 }
 
@@ -35,6 +38,15 @@ func (os *OrderService) HandlePaySubPackage(ctx context.Context, req *client.Pay
 	subPackageId := req.SubPackageId
 
 	var err error
+	var u *model.User
+	u, err = os.UserService.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !u.IsVerified {
+		return nil, appErr.UnauthorizedError("Please verify your account before doing this action.")
+	}
+
 	var r *model.Restaurant
 	var s *model.SubPackage
 

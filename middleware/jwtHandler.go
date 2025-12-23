@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	appError "github.com/nhatflash/fbchain/error"
+	appErr "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/security"
 )
 
@@ -21,7 +21,7 @@ func JwtRestHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader(AUTH_HEADER)
 		if authHeader == "" {
-			c.Error(appError.UnauthorizedError("Missing authorization header."))
+			c.Error(appErr.UnauthorizedError("Missing authorization header."))
 			c.Abort()
 			return
 		}
@@ -29,14 +29,14 @@ func JwtRestHandler() gin.HandlerFunc {
 		var token string
 		token, err = getTokenFromHeader(authHeader)
 		if err != nil {
-			c.Error(appError.UnauthorizedError(err.Error()))
+			c.Error(appErr.UnauthorizedError(err.Error()))
 			c.Abort()
 			return
 		}
 		var claims *security.JwtAccessClaims
 		claims, err = security.ValidateJwtAccessToken(token)
 		if err != nil {
-			c.Error(appError.UnauthorizedError(err.Error()))
+			c.Error(appErr.UnauthorizedError(err.Error()))
 			c.Abort()
 			return
 		}
@@ -76,15 +76,17 @@ func JwtGraphQLHandler() gin.HandlerFunc {
 
 func RoleBasedHandler(roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		defaultClaims, exists := c.Get("user")
-		if !exists {
-			c.Error(appError.UnauthorizedError("User is not authenticated"))
+		ctx := c.Request.Context()
+		var claims *security.JwtAccessClaims
+		var ok bool
+		claims, ok = ctx.Value(UserKey{}).(*security.JwtAccessClaims)
+		if !ok || claims == nil {
+			c.Error(appErr.UnauthorizedError("Authentication is required."))
 			c.Abort()
 			return
 		}
-		claims := defaultClaims.(*security.JwtAccessClaims)
 		if !slices.Contains(roles, claims.Role) {
-			c.Error(appError.ForbiddenError("You are not allowed to perform this action."))
+			c.Error(appErr.ForbiddenError("You are not allowed to perform this action."))
 			c.Abort()
 			return
 		}

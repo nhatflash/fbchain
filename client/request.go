@@ -17,13 +17,16 @@ type TenantSignUpRequest struct {
 	ConfirmPassword string           `json:"confirmPassword" binding:"required"`
 	Birthdate       string           `json:"birthdate" binding:"required"`
 	Gender          *enum.Gender     `json:"gender" binding:"required"`
-	Phone           string           `json:"phone" binding:"required,phone"`
-	Identity        string           `json:"identity" binding:"required,identity"`
-	Address         string           `json:"address" binding:"required"`
-	PostalCode      string           `json:"postalCode" binding:"required,postalcode"`
-	ProfileImage    *string           `json:"profileImage" binding:"omitempty"`
-	Description     *string           `json:"description" binding:"omitempty"`
-	Type            *enum.TenantType `json:"type" binding:"required"`
+}
+
+type TenantInfoRequest struct {
+	Phone 			string 				`json:"phone" binding:"required,phone"`
+	Identity 		string 				`json:"identity" binding:"required,identity"`
+	Address 		string 				`json:"address" binding:"required"`
+	PostalCode		string				`json:"postalCode" binding:"required,postalcode"`
+	Description 	*string				`json:"description" binding:"omitempty"`
+	Type            *enum.TenantType 	`json:"type" binding:"required"`
+	ProfileImage 	*string				`json:"profileImage" binding:"omitempty"`
 }
 
 type CreateSubPackageRequest struct {
@@ -78,3 +81,10 @@ type PayOrderWithCashRequest struct {
 	OrderId 			*int64				`json:"orderId" binding:"required"`
 	Notes 				*string				`json:"notes" binding:"omitempty"`
 }
+
+
+type OnlineMethod string
+
+const (
+	VNPAY OnlineMethod = "VNPAY"
+)

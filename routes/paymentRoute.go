@@ -9,5 +9,6 @@ import (
 
 func PaymentRoutes(r *gin.Engine, prefix string, pc *controller.PaymentController) {
 	payment := r.Group(prefix, middleware.JwtRestHandler())
+	payment.POST("/online/:method", pc.PayOrderWithOnlinePayment)
 	payment.POST("/cash", pc.PayOrderWithCash)
 }

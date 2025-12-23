@@ -48,7 +48,7 @@ func (ac *AuthController) SignIn(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body client.TenantSignUpRequest true "TenantSignUp body"
-// @Success 200 {object} client.TenantResponse
+// @Success 200 {object} client.UserResponse
 // @Failure 400 {object} error
 // @Router /auth/signup [post]
 func (ac *AuthController) TenantSignUp(c *gin.Context) {
@@ -58,8 +58,8 @@ func (ac *AuthController) TenantSignUp(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	var res *client.TenantResponse
-	res, err = ac.AuthService.HandleTenantSignUp(c.Request.Context(), &req)
+	var res *client.UserResponse
+	res, err = ac.AuthService.HandleTenantUserSignUp(c.Request.Context(), &req)
 	if err != nil {
 		c.Error(err)
 		return

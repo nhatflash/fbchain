@@ -24,6 +24,7 @@ type User struct {
 	Status       enum.UserStatus  `json:"status"`
 	CreatedAt    time.Time        `json:"createdAt"`
 	UpdatedAt    time.Time        `json:"updatedAt"`
+	IsVerified	 bool 			  `json:"isVerified"`
 }
 
 type Tenant struct {

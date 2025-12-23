@@ -21,7 +21,7 @@ import (
 
 type IAuthService interface {
 	HandleSignIn(ctx context.Context, req *client.SignInRequest) (*client.SignInResponse, error)
-	HandleTenantSignUp(ctx context.Context, req *client.TenantSignUpRequest) (*client.TenantResponse, error)
+	HandleTenantUserSignUp(ctx context.Context, req *client.TenantSignUpRequest) (*client.UserResponse, error)
 	GenerateChangePasswordVerifyOTP(ctx context.Context) (string, error)
 	HandleVerifyChangePassword(ctx context.Context, req *client.VerifyChangePasswordRequest) error
 	HandleChangePassword(ctx context.Context, req *client.ChangePasswordRequest) (error)
@@ -84,7 +84,7 @@ func (as *AuthService) HandleSignIn(ctx context.Context, req *client.SignInReque
 }
 
 // tenant sign up method
-func (as *AuthService) HandleTenantSignUp(ctx context.Context, req *client.TenantSignUpRequest) (*client.TenantResponse, error) {
+func (as *AuthService) HandleTenantUserSignUp(ctx context.Context, req *client.TenantSignUpRequest) (*client.UserResponse, error) {
 	firstName := req.FirstName
 	lastName := req.LastName
 	email := req.Email
@@ -92,16 +92,9 @@ func (as *AuthService) HandleTenantSignUp(ctx context.Context, req *client.Tenan
 	confirmPassword := req.Password
 	birthdateStr := req.Birthdate
 	gender := req.Gender
-	phone := req.Phone
-	identity := req.Identity
-	address := req.Address
-	postalCode := req.PostalCode
-	profileImage := req.ProfileImage
-	description := req.Description
-	tenantType := req.Type
 
 	var err error
-	if err = ValidateSignUpRequest(ctx, email, phone, identity, password, confirmPassword, as.UserRepo); err != nil {
+	if err = ValidateSignUpRequest(ctx, email, password, confirmPassword, as.UserRepo); err != nil {
 		return nil, err
 	}
 
@@ -116,17 +109,11 @@ func (as *AuthService) HandleTenantSignUp(ctx context.Context, req *client.Tenan
 		return nil, err
 	}
 	var tenantUser *model.User
-	tenantUser, err = as.UserRepo.CreateTenantUser(ctx, firstName, lastName, email, hashedPassword, birthdate, gender, phone, identity, address, postalCode, *profileImage)
+	tenantUser, err = as.UserRepo.CreateTenantUser(ctx, firstName, lastName, email, hashedPassword, birthdate, gender)
 	if err != nil {
 		return nil, err
 	}
-	code := GenerateTenantCode()
-	var tenant *model.Tenant
-	tenant, err = as.TenantRepo.CreateTenantInformation(ctx, code, *description, tenantType, tenantUser.Id)
-	if err != nil {
-		return nil, err
-	}
-	return helper.MapToTenantResponse(tenantUser, tenant), nil
+	return helper.MapToUserResponse(tenantUser), nil
 }
 
 
@@ -253,7 +240,7 @@ func GenerateStaffCode() string {
 	return fmt.Sprintf("STAFF-%d", unixMilli)
 }
 
-func ValidateSignUpRequest(ctx context.Context, email string, phone string, identity string, password string, confirmPassword string, ur *repository.UserRepository) error {
+func ValidateSignUpRequest(ctx context.Context, email string, password string, confirmPassword string, ur *repository.UserRepository) error {
 	var err error
 	var exist bool
 	exist, err = ur.CheckUserEmailExists(ctx, email)
@@ -262,20 +249,6 @@ func ValidateSignUpRequest(ctx context.Context, email string, phone string, iden
 	}
 	if exist {
 		return appErr.BadRequestError("User with this email already exists.")
-	}
-	exist, err = ur.CheckUserPhoneExists(ctx, phone)
-	if err != nil {
-		return err
-	}
-	if exist {
-		return appErr.BadRequestError("User with this phone already exists")
-	}
-	exist, err = ur.CheckUserIdentityExists(ctx, identity)
-	if err != nil {
-		return err
-	}
-	if exist {
-		return appErr.BadRequestError("User with this identity already exists")
 	}
 	if !IsConfirmedPasswordMatches(password, confirmPassword) {
 		return appErr.BadRequestError("Confirm password does not match.")

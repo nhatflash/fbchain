@@ -81,18 +81,20 @@ func main() {
 
 	authService := service.NewAuthService(userRepository, tenantRepository, rdb)
 	userService := service.NewUserService(userRepository)
-	tenantService := service.NewTenantService(tenantRepository, userService)
-	restaurantService := service.NewRestaurantService(restaurantRepository, subPackageRepository)
+	tenantService := service.NewTenantService(tenantRepository, userService, userRepository)
+	restaurantService := service.NewRestaurantService(restaurantRepository, subPackageRepository, userService)
 	subPackageService := service.NewSubPackageService(subPackageRepository)
-	orderService := service.NewOrderService(restaurantRepository, subPackageRepository, orderRepository)
+	orderService := service.NewOrderService(restaurantRepository, subPackageRepository, orderRepository, userService)
 	paymentService := service.NewPaymentService(paymentRepository, orderRepository)
+	vnPayService := service.NewVnPayService(orderRepository)
 
 	authController := controller.NewAuthController(authService)
+	tenantController := controller.NewTenantController(tenantService)
 	restaurantController := controller.NewRestaurantController(userService, restaurantService)
 	subPackageController := controller.NewSubPackageController(subPackageService)
 	orderController := controller.NewOrderController(orderService, tenantService)
 	userController := controller.NewUserController(userService)
-	paymentController := controller.NewPaymentController(paymentService)
+	paymentController := controller.NewPaymentController(paymentService, vnPayService)
 
 	// GraphQL handler
 	gqlHandler := handler.New(
@@ -146,7 +148,7 @@ func main() {
 	}
 
 	// Define routes for REST API
-	routes.MainRoutes(r, authController, subPackageController, restaurantController, orderController, userController, paymentController)
+	routes.MainRoutes(r, authController, tenantController, subPackageController, restaurantController, orderController, userController, paymentController)
 	r.GET("/swagger/*any", ginSwg.WrapHandler(swgFiles.Handler))
 
 

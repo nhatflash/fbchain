@@ -83,15 +83,13 @@ func (us *UserService) ChangeProfile(ctx context.Context, req *client.UpdateProf
 	profileImage := req.ProfileImage
 
 	var err error
-	var claims *security.JwtAccessClaims
-	claims, err = GetCurrentClaims(ctx)
+	var u *model.User
+	u, err = us.GetCurrentUser(ctx)
 	if err != nil {
 		return nil, err
 	}
-	var u *model.User
-	u, err = us.GetUserById(ctx, claims.UserId)
-	if err != nil {
-		return nil, err
+	if !u.IsVerified {
+		return nil, appErr.UnauthorizedError("Please verify your account before doing this action.")
 	}
 	var uFirstName *string
 	var uLastName *string
@@ -108,8 +106,7 @@ func (us *UserService) ChangeProfile(ctx context.Context, req *client.UpdateProf
 		return nil, err
 	}
 
-	err = ValidateChangeProfileRequest(ctx, phone, identity, uPhone, uIdentity, us.UserRepo)
-	if err != nil {
+	if err = ValidateChangeProfileRequest(ctx, phone, identity, uPhone, uIdentity, us.UserRepo); err != nil {
 		return nil, err
 	}
 

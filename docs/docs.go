@@ -175,7 +175,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/signup/tenant": {
+        "/auth/signup": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -199,7 +199,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/client.TenantResponse"
+                            "$ref": "#/definitions/client.UserResponse"
                         }
                     },
                     "400": {
@@ -209,9 +209,78 @@ const docTemplate = `{
                 }
             }
         },
-        "/payment": {
-            "get": {
-                "summary": "Payment URL API",
+        "/payment/cash": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Pay order with cash API",
+                "parameters": [
+                    {
+                        "description": "PayOrderWithCash body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.PayOrderWithCashRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/payment/online/{method}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Pay order with online payment API",
+                "parameters": [
+                    {
+                        "enum": [
+                            "VNPAY"
+                        ],
+                        "type": "string",
+                        "description": "Online method",
+                        "name": "method",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "orderId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {}
             }
         },
@@ -331,6 +400,45 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/tenant/verify": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Complete Tenant Info API",
+                "parameters": [
+                    {
+                        "description": "TenantInfo body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.TenantInfoRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/client.TenantResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -435,6 +543,20 @@ const docTemplate = `{
                     "$ref": "#/definitions/enum.OrderStatus"
                 },
                 "tenantId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "client.PayOrderWithCashRequest": {
+            "type": "object",
+            "required": [
+                "orderId"
+            ],
+            "properties": {
+                "notes": {
+                    "type": "string"
+                },
+                "orderId": {
                     "type": "integer"
                 }
             }
@@ -556,6 +678,39 @@ const docTemplate = `{
                 }
             }
         },
+        "client.TenantInfoRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "identity",
+                "phone",
+                "postalCode",
+                "type"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "identity": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "postalCode": {
+                    "type": "string"
+                },
+                "profileImage": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/enum.TenantType"
+                }
+            }
+        },
         "client.TenantResponse": {
             "type": "object",
             "properties": {
@@ -612,30 +767,19 @@ const docTemplate = `{
         "client.TenantSignUpRequest": {
             "type": "object",
             "required": [
-                "address",
                 "birthdate",
                 "confirmPassword",
                 "email",
                 "firstName",
                 "gender",
-                "identity",
                 "lastName",
-                "password",
-                "phone",
-                "postalCode",
-                "type"
+                "password"
             ],
             "properties": {
-                "address": {
-                    "type": "string"
-                },
                 "birthdate": {
                     "type": "string"
                 },
                 "confirmPassword": {
-                    "type": "string"
-                },
-                "description": {
                     "type": "string"
                 },
                 "email": {
@@ -647,26 +791,11 @@ const docTemplate = `{
                 "gender": {
                     "$ref": "#/definitions/enum.Gender"
                 },
-                "identity": {
-                    "type": "string"
-                },
                 "lastName": {
                     "type": "string"
                 },
                 "password": {
                     "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "postalCode": {
-                    "type": "string"
-                },
-                "profileImage": {
-                    "type": "string"
-                },
-                "type": {
-                    "$ref": "#/definitions/enum.TenantType"
                 }
             }
         },

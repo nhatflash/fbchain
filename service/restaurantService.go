@@ -21,14 +21,16 @@ type IRestaurantService interface {
 }
 
 type RestaurantService struct {
-	RestaurantRepo 			*repository.RestaurantRepository
+	RestaurantRepo 		*repository.RestaurantRepository
 	SubPackageRepo 		*repository.SubPackageRepository
+	UserService 		IUserService
 }
 
-func NewRestaurantService(rr *repository.RestaurantRepository, spr *repository.SubPackageRepository) IRestaurantService {
+func NewRestaurantService(rr *repository.RestaurantRepository, spr *repository.SubPackageRepository, us IUserService) IRestaurantService {
 	return &RestaurantService{
 		RestaurantRepo: rr,
 		SubPackageRepo: spr,
+		UserService: us,
 	}
 }
 
@@ -44,6 +46,15 @@ func (rs *RestaurantService) HandleCreateRestaurant(ctx context.Context, req *cl
 	images := req.Images
 
 	var err error
+	var u *model.User
+	u, err = rs.UserService.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !u.IsVerified {
+		return nil, appErr.UnauthorizedError("Please verify your account before doing this action.")
+	}
+	
 	if err = ValidateCreateRestaurantRequest(ctx, name, rs.SubPackageRepo, rs.RestaurantRepo); err != nil {
 		return nil, err
 	}
@@ -65,6 +76,8 @@ func (rs *RestaurantService) HandleCreateRestaurant(ctx context.Context, req *cl
 	return helper.MapToRestaurantResponse(r, rImgs), nil
 }
 
+
+
 func (rs *RestaurantService) GetRestaurantsByTenantId(ctx context.Context, tenantId int64) ([]model.Restaurant, error) {
 	
 	r, err := rs.RestaurantRepo.GetRestaurantsByTenantId(ctx, tenantId)
@@ -74,6 +87,8 @@ func (rs *RestaurantService) GetRestaurantsByTenantId(ctx context.Context, tenan
 	return r, nil
 }
 
+
+
 func (rs *RestaurantService) GetAllRestaurants(ctx context.Context) ([]model.Restaurant, error) {
 	r, err := rs.RestaurantRepo.ListAllRestaurants(ctx)
 	if err != nil {
@@ -81,6 +96,9 @@ func (rs *RestaurantService) GetAllRestaurants(ctx context.Context) ([]model.Res
 	}
 	return r, nil
 }
+
+
+
 
 func (rs *RestaurantService) GetRestaurantById(ctx context.Context, id int64) (*model.Restaurant, error) {
 	r, err := rs.RestaurantRepo.GetRestaurantById(ctx, id)
@@ -90,6 +108,9 @@ func (rs *RestaurantService) GetRestaurantById(ctx context.Context, id int64) (*
 	return r, nil
 }
 
+
+
+
 func (rs *RestaurantService) GetRestaurantImageById(ctx context.Context, id int64) (*model.RestaurantImage, error) {
 	img, err := rs.RestaurantRepo.GetRestaurantImageById(ctx, id)
 	if err != nil {
@@ -97,6 +118,8 @@ func (rs *RestaurantService) GetRestaurantImageById(ctx context.Context, id int6
 	}
 	return img, nil
 }
+
+
 
 func (rs *RestaurantService) GetRestaurantImages(ctx context.Context, restaurantId int64) ([]model.RestaurantImage, error) {
 	imgs, err := rs.RestaurantRepo.GetRestaurantImages(ctx, restaurantId)
@@ -114,6 +137,7 @@ func (rs *RestaurantService) GetAllRestaurantImages(ctx context.Context) ([]mode
 	}
 	return imgs, nil
 }
+
 
 func ValidateCreateRestaurantRequest(ctx context.Context, name string, subPackageRepo *repository.SubPackageRepository, resRepo *repository.RestaurantRepository) error {
 	var err error

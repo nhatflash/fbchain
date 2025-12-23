@@ -19,19 +19,43 @@ func NewTenantRepository(db *sql.DB) *TenantRepository {
 	}
 }
 
-func (tr *TenantRepository) CreateTenantInformation(ctx context.Context, code string, description string, tenantType *enum.TenantType, userId int64) (*model.Tenant, error) {
+func (tr *TenantRepository) CompleteTenantInformation(ctx context.Context, phone string, identity string, address string, postalCode string, profileImage *string, code string, description *string, tenantType *enum.TenantType, userId int64) (*model.User, *model.Tenant, error) {
 	var err error
 	var tx *sql.Tx
 	tx, err = tr.Db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	defer tx.Rollback()
 
+	var u model.User
+	userQuery := "UPDATE users SET phone = $1, identity = $2, address = $3, postal_code = $4, profile_image = $5, is_verified = $6 WHERE id = $7 RETURNING *"
+	if err = tx.QueryRowContext(ctx, userQuery, phone, identity, address, postalCode, profileImage, true, userId).Scan(
+		&u.Id,
+		&u.Email,
+		&u.Password,
+		&u.Role, 
+		&u.Phone,
+		&u.Identity,
+		&u.FirstName,
+		&u.LastName,
+		&u.Gender,
+		&u.Birthdate,
+		&u.PostalCode, 
+		&u.Address,
+		&u.ProfileImage,
+		&u.Status,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+		&u.IsVerified,
+	); err != nil {
+		return nil, nil, err
+	}
+
 	var t model.Tenant
-	query := "INSERT INTO tenants (code, description, type, user_id) VALUES ($1, $2, $3, $4) RETURNING *"
-	if err = tx.QueryRowContext(ctx, query, code, description, tenantType, userId).Scan(
+	tenantQuery := "INSERT INTO tenants (code, description, type, user_id) VALUES ($1, $2, $3, $4) RETURNING *"
+	if err = tx.QueryRowContext(ctx, tenantQuery, code, description, tenantType, userId).Scan(
 		&t.Id,
 		&t.Code,
 		&t.Description,
@@ -39,14 +63,14 @@ func (tr *TenantRepository) CreateTenantInformation(ctx context.Context, code st
 		&t.Notes,
 		&t.UserId,
 	); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if err = tx.Commit(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &t, nil
+	return &u, &t, nil
 }
 
 func (tr *TenantRepository) GetTenantByCode(ctx context.Context, code string) (*model.Tenant, error) {

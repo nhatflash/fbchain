@@ -84,6 +84,7 @@ func (ur *UserRepository) GetUserByEmail(ctx context.Context, email string) (*mo
 		&u.Status,
 		&u.CreatedAt,
 		&u.UpdatedAt,
+		&u.IsVerified,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -115,6 +116,7 @@ func (ur *UserRepository) GetUserByPhone(ctx context.Context, phone string) (*mo
 		&u.Status,
 		&u.CreatedAt,
 		&u.UpdatedAt,
+		&u.IsVerified,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -125,7 +127,7 @@ func (ur *UserRepository) GetUserByPhone(ctx context.Context, phone string) (*mo
 	return &u, nil
 }
 
-func (ur *UserRepository) CreateTenantUser(ctx context.Context, firstName string, lastName string, email string, password string, birthdate *time.Time, gender *enum.Gender, phone string, identity string, address string, postalCode string, profileImage string) (*model.User, error) {
+func (ur *UserRepository) CreateTenantUser(ctx context.Context, firstName string, lastName string, email string, password string, birthdate *time.Time, gender *enum.Gender) (*model.User, error) {
 	var err error
 	var tx *sql.Tx
 	tx, err = ur.Db.BeginTx(ctx, nil)
@@ -136,8 +138,8 @@ func (ur *UserRepository) CreateTenantUser(ctx context.Context, firstName string
 	defer tx.Rollback()
 
 	var user model.User
-	query := "INSERT INTO users (email, password, role, phone, identity, first_name, last_name, gender, birthdate, postal_code, address, profile_image, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *"
-	if err = tx.QueryRowContext(ctx, query , email, password, enum.ROLE_TENANT, phone, identity, firstName, lastName, gender, birthdate, postalCode, address, profileImage, enum.USER_ACTIVE).Scan(
+	query := "INSERT INTO users (email, password, role, first_name, last_name, gender, birthdate, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *"
+	if err = tx.QueryRowContext(ctx, query , email, password, enum.ROLE_TENANT, firstName, lastName, gender, birthdate, enum.USER_ACTIVE).Scan(
 		&user.Id,
 		&user.Email,
 		&user.Password, 
@@ -154,6 +156,7 @@ func (ur *UserRepository) CreateTenantUser(ctx context.Context, firstName string
 		&user.Status,
 		&user.CreatedAt,
 		&user.UpdatedAt,
+		&user.IsVerified,
 	); err != nil {
 		return nil, err
 	}
@@ -165,8 +168,8 @@ func (ur *UserRepository) CreateTenantUser(ctx context.Context, firstName string
 
 func (ur *UserRepository) CreateAdminUser(email string, password string, phone string, identity string, firstName string, lastName string, gender *enum.Gender, birthdate *time.Time, postalCode string, address string, profileImage string) error {
 	var err error
-	query := "INSERT INTO users (email, password, role, phone, identity, first_name, last_name, gender, birthdate, postal_code, address, profile_image, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)"
-	_, err = ur.Db.Exec(query, email, password, enum.ROLE_ADMIN, phone, identity, firstName, lastName, gender, birthdate, postalCode, address, profileImage, enum.USER_ACTIVE)
+	query := "INSERT INTO users (email, password, role, phone, identity, first_name, last_name, gender, birthdate, postal_code, address, profile_image, status, is_verified) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)"
+	_, err = ur.Db.Exec(query, email, password, enum.ROLE_ADMIN, phone, identity, firstName, lastName, gender, birthdate, postalCode, address, profileImage, enum.USER_ACTIVE, true)
 
 	if err != nil {
 		return err
@@ -216,6 +219,7 @@ func (ur *UserRepository) ListAllUsers(ctx context.Context) ([]model.User, error
 			&u.Status, 
 			&u.CreatedAt, 
 			&u.UpdatedAt,
+			&u.IsVerified,
 		); err != nil {
 			return nil, err
 		}
@@ -249,6 +253,7 @@ func (ur *UserRepository) GetUserById(ctx context.Context, id int64) (*model.Use
 		&u.Status,
 		&u.CreatedAt,
 		&u.UpdatedAt,
+		&u.IsVerified,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -269,7 +274,7 @@ func (ur *UserRepository) UpdateUser(ctx context.Context, userId int64, firstNam
 		return nil, err
 	}
 
-	query := "UPDATE users SET first_name = $1, last_name = $2, birthdate = $3, gender = $4, phone = $5, identity = $6, address = $7, postal_code = $8, profile_image = $9 WHERE id = $10"
+	query := "UPDATE users SET first_name = $1, last_name = $2, birthdate = $3, gender = $4, phone = $5, identity = $6, address = $7, postal_code = $8, profile_image = $9 WHERE id = $10 RETURNING *"
 
 	var user model.User
 	if err = tx.QueryRowContext(ctx, query, firstName, lastName, birthdate, gender, phone, identity, address, postalCode, profileImage, userId).Scan(
@@ -289,6 +294,7 @@ func (ur *UserRepository) UpdateUser(ctx context.Context, userId int64, firstNam
 		&user.Status,
 		&user.CreatedAt,
 		&user.UpdatedAt,
+		&user.IsVerified,
 	); err != nil {
 		return nil, err
 	}

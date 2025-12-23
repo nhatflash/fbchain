@@ -71,6 +71,15 @@ definitions:
       tenantId:
         type: integer
     type: object
+  client.PayOrderWithCashRequest:
+    properties:
+      notes:
+        type: string
+      orderId:
+        type: integer
+    required:
+    - orderId
+    type: object
   client.PaySubPackageRequest:
     properties:
       restaurantId:
@@ -148,6 +157,29 @@ definitions:
       price:
         type: number
     type: object
+  client.TenantInfoRequest:
+    properties:
+      address:
+        type: string
+      description:
+        type: string
+      identity:
+        type: string
+      phone:
+        type: string
+      postalCode:
+        type: string
+      profileImage:
+        type: string
+      type:
+        $ref: '#/definitions/enum.TenantType'
+    required:
+    - address
+    - identity
+    - phone
+    - postalCode
+    - type
+    type: object
   client.TenantResponse:
     properties:
       address:
@@ -185,13 +217,9 @@ definitions:
     type: object
   client.TenantSignUpRequest:
     properties:
-      address:
-        type: string
       birthdate:
         type: string
       confirmPassword:
-        type: string
-      description:
         type: string
       email:
         type: string
@@ -199,33 +227,18 @@ definitions:
         type: string
       gender:
         $ref: '#/definitions/enum.Gender'
-      identity:
-        type: string
       lastName:
         type: string
       password:
         type: string
-      phone:
-        type: string
-      postalCode:
-        type: string
-      profileImage:
-        type: string
-      type:
-        $ref: '#/definitions/enum.TenantType'
     required:
-    - address
     - birthdate
     - confirmPassword
     - email
     - firstName
     - gender
-    - identity
     - lastName
     - password
-    - phone
-    - postalCode
-    - type
     type: object
   client.UpdateProfileRequest:
     properties:
@@ -449,7 +462,7 @@ paths:
           description: Bad Request
           schema: {}
       summary: Sign in API
-  /auth/signup/tenant:
+  /auth/signup:
     post:
       consumes:
       - application/json
@@ -466,15 +479,58 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/client.TenantResponse'
+            $ref: '#/definitions/client.UserResponse'
         "400":
           description: Bad Request
           schema: {}
       summary: Tenant sign up API
-  /payment:
-    get:
+  /payment/cash:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: PayOrderWithCash body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.PayOrderWithCashRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - BearerAuth: []
+      summary: Pay order with cash API
+  /payment/online/{method}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Online method
+        enum:
+        - VNPAY
+        in: path
+        name: method
+        required: true
+        type: string
+      - description: Order ID
+        in: query
+        name: orderId
+        required: true
+        type: string
+      produces:
+      - application/json
       responses: {}
-      summary: Payment URL API
+      security:
+      - BearerAuth: []
+      summary: Pay order with online payment API
   /profile:
     patch:
       consumes:
@@ -547,6 +603,30 @@ paths:
       security:
       - BearerAuth: []
       summary: Create restaurant API
+  /tenant/verify:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: TenantInfo body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.TenantInfoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/client.TenantResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - BearerAuth: []
+      summary: Complete Tenant Info API
 securityDefinitions:
   BearerAuth:
     in: header
