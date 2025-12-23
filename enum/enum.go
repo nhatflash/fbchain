@@ -65,3 +65,22 @@ const (
 	PAYMENT_CASH PaymentMethod = "CASH"
 	PAYMENT_VNPAY PaymentMethod = "VNPAY"
 )
+
+
+type ItemType string 
+
+
+const (
+	ITEM_FOOD ItemType = "FOOD"
+	ITEM_BEVERAGE ItemType = "BEVERAGE"
+)
+
+
+type ItemStatus string 
+
+
+const (
+	ITEM_AVAILABLE ItemStatus = "AVAILABLE"
+	ITEM_UNAVAILABLE ItemStatus = "UNAVAILABLE"
+	ITEM_DELETED ItemStatus = "DELETED"
+)

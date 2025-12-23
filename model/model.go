@@ -95,3 +95,19 @@ type Payment struct {
 	PaymentDate		time.Time			`json:"paymentDate"`
 	Notes 			*string				`json:"notes"`
 }
+
+
+type RestaurantItem struct {
+	Id 				int64				`json:"id"`
+	Name 			string 				`json:"name"`
+	Description 	*string 			`json:"description"`
+	Price 			decimal.Decimal 	`json:"price"`
+	Type			enum.ItemType 		`json:"type"`
+	Status 			enum.ItemStatus 	`json:"status"`
+	Image 			*string 			`json:"image"`
+	Notes 			*string 			`json:"notes"`
+	CreatedAt 		time.Time 			`json:"createdAt"`
+	UpdatedAt 		time.Time 			`json:"updatedAt"`
+	RestaurantId 	int64				`json:"restaurantId"`
+}
+

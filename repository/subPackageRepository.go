@@ -22,7 +22,8 @@ func NewSubPackageRepository(db *sql.DB) *SubPackageRepository {
 func (spr *SubPackageRepository) CheckSubPackageNameExists(ctx context.Context, name string) (bool, error) {
 	var err error
 	var rows *sql.Rows
-	rows, err = spr.Db.Query("SELECT name FROM sub_packages WHERE name = $1 LIMIT 1", name)
+	query := "SELECT name FROM sub_packages WHERE name = $1 LIMIT 1"
+	rows, err = spr.Db.QueryContext(ctx, query, name)
 	if err != nil {
 		return false, err
 	}
