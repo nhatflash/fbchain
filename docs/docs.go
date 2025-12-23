@@ -28,7 +28,7 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Create subscription package API",
+                "summary": "Create Subscription Package API",
                 "parameters": [
                     {
                         "description": "CreateSubPackage body",
@@ -40,18 +40,7 @@ const docTemplate = `{
                         }
                     }
                 ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/client.SubPackageResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
+                "responses": {}
             }
         },
         "/auth/change-password": {
@@ -323,6 +312,69 @@ const docTemplate = `{
                 }
             }
         },
+        "/restaurant": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create restaurant API",
+                "parameters": [
+                    {
+                        "description": "CreateRestaurant body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.CreateRestaurantRequest"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/restaurant/{restaurantId}/item": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Add New Restaurant Item API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Restaurant ID",
+                        "name": "restaurantId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "AddRestaurantItem body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.AddRestaurantItemRequest"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/tenant/order": {
             "post": {
                 "security": [
@@ -353,45 +405,6 @@ const docTemplate = `{
                         "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/client.OrderResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    }
-                }
-            }
-        },
-        "/tenant/restaurant": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Create restaurant API",
-                "parameters": [
-                    {
-                        "description": "CreateRestaurant body",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/client.CreateRestaurantRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/client.RestaurantResponse"
                         }
                     },
                     "400": {
@@ -442,6 +455,34 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "client.AddRestaurantItemRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "price",
+                "type"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/enum.ItemType"
+                }
+            }
+        },
         "client.ChangePasswordRequest": {
             "type": "object",
             "required": [
@@ -576,53 +617,6 @@ const docTemplate = `{
                 }
             }
         },
-        "client.RestaurantResponse": {
-            "type": "object",
-            "properties": {
-                "avgRating": {
-                    "type": "number"
-                },
-                "contactEmail": {
-                    "type": "string"
-                },
-                "contactPhone": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "images": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "location": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "notes": {
-                    "type": "string"
-                },
-                "postalCode": {
-                    "type": "string"
-                },
-                "subPackageId": {
-                    "type": "integer"
-                },
-                "tenantId": {
-                    "type": "integer"
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
         "client.SignInRequest": {
             "type": "object",
             "required": [
@@ -649,32 +643,6 @@ const docTemplate = `{
                 },
                 "refreshToken": {
                     "type": "string"
-                }
-            }
-        },
-        "client.SubPackageResponse": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "durationMonth": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "isActive": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
                 }
             }
         },
@@ -895,6 +863,17 @@ const docTemplate = `{
             "x-enum-varnames": [
                 "GENDER_MALE",
                 "GENDER_FEMALE"
+            ]
+        },
+        "enum.ItemType": {
+            "type": "string",
+            "enum": [
+                "FOOD",
+                "BEVERAGE"
+            ],
+            "x-enum-varnames": [
+                "ITEM_FOOD",
+                "ITEM_BEVERAGE"
             ]
         },
         "enum.OrderStatus": {

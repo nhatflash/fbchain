@@ -1,5 +1,24 @@
 basePath: /api
 definitions:
+  client.AddRestaurantItemRequest:
+    properties:
+      description:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      notes:
+        type: string
+      price:
+        type: string
+      type:
+        $ref: '#/definitions/enum.ItemType'
+    required:
+    - name
+    - price
+    - type
+    type: object
   client.ChangePasswordRequest:
     properties:
       confirmNewPassword:
@@ -90,37 +109,6 @@ definitions:
     - restaurantId
     - subPackageId
     type: object
-  client.RestaurantResponse:
-    properties:
-      avgRating:
-        type: number
-      contactEmail:
-        type: string
-      contactPhone:
-        type: string
-      description:
-        type: string
-      id:
-        type: integer
-      images:
-        items:
-          type: string
-        type: array
-      location:
-        type: string
-      name:
-        type: string
-      notes:
-        type: string
-      postalCode:
-        type: string
-      subPackageId:
-        type: integer
-      tenantId:
-        type: integer
-      type:
-        type: string
-    type: object
   client.SignInRequest:
     properties:
       login:
@@ -139,23 +127,6 @@ definitions:
         type: string
       refreshToken:
         type: string
-    type: object
-  client.SubPackageResponse:
-    properties:
-      description:
-        type: string
-      durationMonth:
-        type: integer
-      id:
-        type: integer
-      image:
-        type: string
-      isActive:
-        type: boolean
-      name:
-        type: string
-      price:
-        type: number
     type: object
   client.TenantInfoRequest:
     properties:
@@ -305,6 +276,14 @@ definitions:
     x-enum-varnames:
     - GENDER_MALE
     - GENDER_FEMALE
+  enum.ItemType:
+    enum:
+    - FOOD
+    - BEVERAGE
+    type: string
+    x-enum-varnames:
+    - ITEM_FOOD
+    - ITEM_BEVERAGE
   enum.OrderStatus:
     enum:
     - PENDING
@@ -376,17 +355,10 @@ paths:
           $ref: '#/definitions/client.CreateSubPackageRequest'
       produces:
       - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/client.SubPackageResponse'
-        "400":
-          description: Bad Request
-          schema: {}
+      responses: {}
       security:
       - BearerAuth: []
-      summary: Create subscription package API
+      summary: Create Subscription Package API
   /auth/change-password:
     post:
       consumes:
@@ -555,6 +527,45 @@ paths:
       security:
       - BearerAuth: []
       summary: Change Profile API
+  /restaurant:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: CreateRestaurant body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.CreateRestaurantRequest'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Create restaurant API
+  /restaurant/{restaurantId}/item:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Restaurant ID
+        in: path
+        name: restaurantId
+        required: true
+        type: string
+      - description: AddRestaurantItem body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.AddRestaurantItemRequest'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Add New Restaurant Item API
   /tenant/order:
     post:
       consumes:
@@ -579,30 +590,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Pay subscription package API
-  /tenant/restaurant:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: CreateRestaurant body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/client.CreateRestaurantRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/client.RestaurantResponse'
-        "400":
-          description: Bad Request
-          schema: {}
-      security:
-      - BearerAuth: []
-      summary: Create restaurant API
   /tenant/verify:
     post:
       consumes:

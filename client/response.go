@@ -59,26 +59,46 @@ type SubPackageResponse struct {
 }
 
 type RestaurantResponse struct {
-	Id             int64                `json:"id"`
-	TenantId       int64                `json:"tenantId"`
-	Name           string               `json:"name"`
-	Location       string               `json:"location"`
-	Description    *string               `json:"description"`
-	ContactEmail   *string               `json:"contactEmail"`
-	ContactPhone   *string               `json:"contactPhone"`
-	PostalCode     string               `json:"postalCode"`
-	Type           enum.RestaurantType `json:"type"`
-	AvgRating      decimal.Decimal      `json:"avgRating"`
-	Notes          *string               `json:"notes"`
-	SubPackageId   int64                `json:"subPackageId"`
-	Images         []string             `json:"images"`
+	Id             int64                	`json:"id"`
+	TenantId       int64                	`json:"tenantId"`
+	Name           string               	`json:"name"`
+	Location       string               	`json:"location"`
+	Description    *string               	`json:"description"`
+	ContactEmail   *string               	`json:"contactEmail"`
+	ContactPhone   *string               	`json:"contactPhone"`
+	PostalCode     string               	`json:"postalCode"`
+	Type           enum.RestaurantType 		`json:"type"`
+	AvgRating      decimal.Decimal      	`json:"avgRating"`
+	Notes          *string               	`json:"notes"`
+	SubPackageId   int64                	`json:"subPackageId"`
+	Images         []string             	`json:"images"`
+}
+
+
+type RestaurantImageResponse struct {
+	Id 				int64					`json:"id"`
+	Image 			string					`json:"image"`
+	RestaurantId 	int64					`json:"restaurantId"`
 }
 
 type OrderResponse struct {
-	Id           int64             `json:"id"`
-	TenantId     int64             `json:"tenantId"`
-	RestaurantId int64             `json:"restaurantId"`
-	OrderDate    time.Time         `json:"orderDate"`
-	Status       enum.OrderStatus `json:"status"`
-	Amount       decimal.Decimal   `json:"amount"`
+	Id           int64             	`json:"id"`
+	TenantId     int64             	`json:"tenantId"`
+	RestaurantId int64             	`json:"restaurantId"`
+	OrderDate    time.Time         	`json:"orderDate"`
+	Status       enum.OrderStatus 	`json:"status"`
+	Amount       decimal.Decimal   	`json:"amount"`
+}
+
+
+type RestaurantItemResponse struct {
+	Id 				int64				`json:"id"`
+	Name 			string 				`json:"name"`
+	Description 	*string				`json:"description"`
+	Price 			decimal.Decimal 	`json:"price"`
+	Type 			enum.ItemType 		`json:"type"`
+	Status 			enum.ItemStatus 	`json:"status"`
+	Image 			*string				`json:"image"`
+	Notes 			*string 			`json:"notes"`
+	RestaurantId 	int64				`json:"restaurantId"`
 }

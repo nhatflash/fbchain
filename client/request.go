@@ -30,23 +30,23 @@ type TenantInfoRequest struct {
 }
 
 type CreateSubPackageRequest struct {
-	Name          string `json:"name" binding:"required"`
-	Description   *string `json:"description" binding:"omitempty"`
-	DurationMonth *int    `json:"durationMonth" binding:"required,number"`
-	Price         string `json:"price" binding:"required,price"`
-	Image         *string `json:"image" binding:"omitempty"`
+	Name          string 				`json:"name" binding:"required"`
+	Description   *string 				`json:"description" binding:"omitempty"`
+	DurationMonth *int    				`json:"durationMonth" binding:"required,number"`
+	Price         string 				`json:"price" binding:"required,price"`
+	Image         *string 				`json:"image" binding:"omitempty"`
 }
 
 type CreateRestaurantRequest struct {
-	Name         string               `json:"name" binding:"required"`
-	Location     string               `json:"location" binding:"required"`
-	Description  *string               `json:"description" binding:"omitempty"`
-	ContactEmail *string               `json:"contactEmail" binding:"omitempty,email"`
-	ContactPhone *string               `json:"contactPhone" binding:"omitempty,phone"`
-	PostalCode   string               `json:"postalCode" binding:"required,postalcode"`
-	Type         *enum.RestaurantType `json:"type" binding:"required"`
-	Notes        string               `json:"notes" binding:"required"`
-	Images       []string             `json:"image"`
+	Name         string               	`json:"name" binding:"required"`
+	Location     string               	`json:"location" binding:"required"`
+	Description  *string               	`json:"description" binding:"omitempty"`
+	ContactEmail *string               	`json:"contactEmail" binding:"omitempty,email"`
+	ContactPhone *string               	`json:"contactPhone" binding:"omitempty,phone"`
+	PostalCode   string               	`json:"postalCode" binding:"required,postalcode"`
+	Type         *enum.RestaurantType 	`json:"type" binding:"required"`
+	Notes        string               	`json:"notes" binding:"required"`
+	Images       []string             	`json:"image"`
 }
 
 type PaySubPackageRequest struct {
@@ -88,3 +88,13 @@ type OnlineMethod string
 const (
 	VNPAY OnlineMethod = "VNPAY"
 )
+
+
+type AddRestaurantItemRequest struct {
+	Name 				string 				`json:"name" binding:"required"`
+	Description 		*string 		 	`json:"description" binding:"omitempty"`
+	Price 				string 				`json:"price" binding:"required,price"`
+	Type 				enum.ItemType 		`json:"type" binding:"required"`
+	Image 				*string 			`json:"image" binding:"omitempty"`
+	Notes 				*string 			`json:"notes" binding:"omitempty"`
+}

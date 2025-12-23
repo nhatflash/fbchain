@@ -20,7 +20,7 @@ func NewRestaurantRepository(db *sql.DB) *RestaurantRepository {
 	}
 }
 
-func (rr *RestaurantRepository) CreateRestaurant(ctx context.Context, name string, location string, description *string, email *string, phone *string, postalCode string, rType *enum.RestaurantType, notes string, subPackageId int64, images []string, tenantId int64) (*model.Restaurant, error) {
+func (rr *RestaurantRepository) CreateRestaurant(ctx context.Context, name string, location string, description *string, email *string, phone *string, postalCode string, rType enum.RestaurantType, notes string, subPackageId int64, images []string, tenantId int64) (*model.Restaurant, error) {
 	var tx *sql.Tx	
 	var err error
 	tx, err = rr.Db.BeginTx(ctx, nil)
@@ -332,4 +332,35 @@ func (rr *RestaurantRepository) ListAllRestaurantImages(ctx context.Context) ([]
 }
 
 
+func (rr *RestaurantRepository) AddNewRestaurantItem(ctx context.Context, name string, description *string, price decimal.Decimal, itemType enum.ItemType, image *string, notes *string, restaurantId int64) (*model.RestaurantItem, error) {
+	var err error
+	var tx *sql.Tx
+	tx, err = rr.Db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	var i model.RestaurantItem
+	query := "INSERT INTO restaurant_items (name, description, price, type, status, image, notes, restaurant_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *"
+	if err = tx.QueryRowContext(ctx, query, name, description, price, itemType, enum.ITEM_AVAILABLE, image, notes, restaurantId).Scan(
+		&i.Id,
+		&i.Name,
+		&i.Description,
+		&i.Price,
+		&i.Type,
+		&i.Status,
+		&i.Image,
+		&i.Notes,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.RestaurantId,
+	); err != nil {
+		return nil, err
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+	return &i, nil
+}
 

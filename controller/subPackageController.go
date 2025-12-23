@@ -21,12 +21,10 @@ func NewSubPackageController(sps service.ISubPackageService) *SubPackageControll
 }
 
 
-// @Summary Create subscription package API
+// @Summary Create Subscription Package API
 // @Accept json
 // @Produce json
 // @Param request body client.CreateSubPackageRequest true "CreateSubPackage body"
-// @Success 201 {object} client.SubPackageResponse
-// @Failure 400 {object} error
 // @Security BearerAuth
 // @Router /admin/subscription [post]
 func (spc *SubPackageController) CreateSubPackage(c *gin.Context) {

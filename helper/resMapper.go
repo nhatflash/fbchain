@@ -107,3 +107,19 @@ func MapToOrderResponse(o *model.Order) *client.OrderResponse {
 }
 
 
+func MapToRestaurantItemResponse(i *model.RestaurantItem) *client.RestaurantItemResponse {
+	itemRes := client.RestaurantItemResponse{
+		Id: 		i.Id,
+		Name: 		i.Name,
+		Description: i.Description,
+		Price: 		i.Price,
+		Type: 		i.Type,
+		Status: 	i.Status,
+		Image: 		i.Image,
+		Notes: 		i.Notes,
+		RestaurantId: i.RestaurantId,
+	}
+	return &itemRes
+}
+
+
