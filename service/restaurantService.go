@@ -20,6 +20,9 @@ type IRestaurantService interface {
 	GetRestaurantImages(ctx context.Context, restaurantId int64) ([]model.RestaurantImage, error)
 	GetAllRestaurantImages(ctx context.Context) ([]model.RestaurantImage, error)
 	HandleAddNewRestaurantItem(ctx context.Context, restaurantId int64, req *client.AddRestaurantItemRequest) (*client.RestaurantItemResponse, error)
+	GetItemsByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantItem, error)
+	GetAllRestaurantItems(ctx context.Context) ([]model.RestaurantItem, error)
+	GetRestaurantItemById(ctx context.Context, id int64) (*model.RestaurantItem, error)
 }
 
 type RestaurantService struct {
@@ -175,6 +178,34 @@ func (rs *RestaurantService) HandleAddNewRestaurantItem(ctx context.Context, res
 		return nil, err
 	}
 	return helper.MapToRestaurantItemResponse(i), nil
+}
+
+
+
+func (rs *RestaurantService) GetItemsByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantItem, error) {
+	items, err := rs.RestaurantRepo.GetItemsByRestaurantId(ctx, restaurantId)
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+
+func (rs *RestaurantService) GetAllRestaurantItems(ctx context.Context) ([]model.RestaurantItem, error) {
+	items, err := rs.RestaurantRepo.GetAllRestaurantItems(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+
+func (rs *RestaurantService) GetRestaurantItemById(ctx context.Context, id int64) (*model.RestaurantItem, error) {
+	item, err := rs.RestaurantRepo.GetRestaurantItemById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return item, nil
 }
 
 

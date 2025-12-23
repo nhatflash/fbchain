@@ -65,3 +65,20 @@ func MapToGqlRestaurantImage(rImg *model.RestaurantImage) *gqlModel.RestaurantIm
 		RestaurantID: &idStr,
 	}
 }
+
+
+func MapToGqlRestaurantItem(item *model.RestaurantItem) *gqlModel.RestaurantItem {
+	idStr := strconv.FormatInt(item.RestaurantId, 10)
+	price := item.Price.String()
+	return &gqlModel.RestaurantItem{
+		ID: strconv.FormatInt(item.Id, 10),
+		Name: item.Name,
+		Description: item.Description,
+		Price: &price,
+		Type: &item.Type,
+		Status: &item.Status,
+		Image: item.Image,
+		Notes: item.Notes,
+		RestaurantID: &idStr,
+	}
+}

@@ -39,6 +39,7 @@ type ResolverRoot interface {
 	Query() QueryResolver
 	Restaurant() RestaurantResolver
 	RestaurantImage() RestaurantImageResolver
+	RestaurantItem() RestaurantItemResolver
 	Tenant() TenantResolver
 }
 
@@ -55,6 +56,8 @@ type ComplexityRoot struct {
 		Restaurant       func(childComplexity int, id string) int
 		RestaurantImage  func(childComplexity int, id string) int
 		RestaurantImages func(childComplexity int) int
+		RestaurantItem   func(childComplexity int, id string) int
+		RestaurantItems  func(childComplexity int) int
 		Restaurants      func(childComplexity int) int
 		Tenant           func(childComplexity int, id string) int
 		Tenants          func(childComplexity int) int
@@ -70,6 +73,7 @@ type ComplexityRoot struct {
 		ID           func(childComplexity int) int
 		Images       func(childComplexity int) int
 		IsActive     func(childComplexity int) int
+		Items        func(childComplexity int) int
 		Location     func(childComplexity int) int
 		Name         func(childComplexity int) int
 		Notes        func(childComplexity int) int
@@ -85,6 +89,19 @@ type ComplexityRoot struct {
 		Image        func(childComplexity int) int
 		Restaurant   func(childComplexity int) int
 		RestaurantID func(childComplexity int) int
+	}
+
+	RestaurantItem struct {
+		Description  func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Image        func(childComplexity int) int
+		Name         func(childComplexity int) int
+		Notes        func(childComplexity int) int
+		Price        func(childComplexity int) int
+		Restaurant   func(childComplexity int) int
+		RestaurantID func(childComplexity int) int
+		Status       func(childComplexity int) int
+		Type         func(childComplexity int) int
 	}
 
 	Tenant struct {
@@ -189,6 +206,25 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.RestaurantImages(childComplexity), true
 
+	case "Query.restaurantItem":
+		if e.complexity.Query.RestaurantItem == nil {
+			break
+		}
+
+		args, err := ec.field_Query_restaurantItem_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.RestaurantItem(childComplexity, args["id"].(string)), true
+
+	case "Query.restaurantItems":
+		if e.complexity.Query.RestaurantItems == nil {
+			break
+		}
+
+		return e.complexity.Query.RestaurantItems(childComplexity), true
+
 	case "Query.restaurants":
 		if e.complexity.Query.Restaurants == nil {
 			break
@@ -283,6 +319,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Restaurant.IsActive(childComplexity), true
 
+	case "Restaurant.items":
+		if e.complexity.Restaurant.Items == nil {
+			break
+		}
+
+		return e.complexity.Restaurant.Items(childComplexity), true
+
 	case "Restaurant.location":
 		if e.complexity.Restaurant.Location == nil {
 			break
@@ -366,6 +409,76 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.RestaurantImage.RestaurantID(childComplexity), true
+
+	case "RestaurantItem.description":
+		if e.complexity.RestaurantItem.Description == nil {
+			break
+		}
+
+		return e.complexity.RestaurantItem.Description(childComplexity), true
+
+	case "RestaurantItem.id":
+		if e.complexity.RestaurantItem.ID == nil {
+			break
+		}
+
+		return e.complexity.RestaurantItem.ID(childComplexity), true
+
+	case "RestaurantItem.image":
+		if e.complexity.RestaurantItem.Image == nil {
+			break
+		}
+
+		return e.complexity.RestaurantItem.Image(childComplexity), true
+
+	case "RestaurantItem.name":
+		if e.complexity.RestaurantItem.Name == nil {
+			break
+		}
+
+		return e.complexity.RestaurantItem.Name(childComplexity), true
+
+	case "RestaurantItem.notes":
+		if e.complexity.RestaurantItem.Notes == nil {
+			break
+		}
+
+		return e.complexity.RestaurantItem.Notes(childComplexity), true
+
+	case "RestaurantItem.price":
+		if e.complexity.RestaurantItem.Price == nil {
+			break
+		}
+
+		return e.complexity.RestaurantItem.Price(childComplexity), true
+
+	case "RestaurantItem.restaurant":
+		if e.complexity.RestaurantItem.Restaurant == nil {
+			break
+		}
+
+		return e.complexity.RestaurantItem.Restaurant(childComplexity), true
+
+	case "RestaurantItem.restaurantId":
+		if e.complexity.RestaurantItem.RestaurantID == nil {
+			break
+		}
+
+		return e.complexity.RestaurantItem.RestaurantID(childComplexity), true
+
+	case "RestaurantItem.status":
+		if e.complexity.RestaurantItem.Status == nil {
+			break
+		}
+
+		return e.complexity.RestaurantItem.Status(childComplexity), true
+
+	case "RestaurantItem.type":
+		if e.complexity.RestaurantItem.Type == nil {
+			break
+		}
+
+		return e.complexity.RestaurantItem.Type(childComplexity), true
 
 	case "Tenant.code":
 		if e.complexity.Tenant.Code == nil {

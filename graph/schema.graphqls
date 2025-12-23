@@ -21,6 +21,18 @@ enum RestaurantType {
   RESTAURANT_FOOD_AND_BEVERAGE
 }
 
+
+enum ItemType {
+  ITEM_FOOD
+  ITEM_BEVERAGE
+}
+
+enum ItemStatus {
+  ITEM_AVAILABLE
+  ITEM_UNAVAILABLE
+  ITEM_DELETED
+}
+
 type Todo {
   id: ID!
   text: String!
@@ -68,12 +80,26 @@ type Restaurant {
   tenantId: String
   tenant: Tenant
   images: [RestaurantImage!]!
+  items: [RestaurantItem!]!
 }
 
 type RestaurantImage {
   id: ID!
   image: String!
   createdAt: DateTime
+  restaurantId: String
+  restaurant: Restaurant
+}
+
+type RestaurantItem {
+  id: ID!
+  name: String!
+  description: String
+  price: String
+  type: ItemType
+  status: ItemStatus
+  image: String
+  notes: String
   restaurantId: String
   restaurant: Restaurant
 }
@@ -99,6 +125,8 @@ type Query {
   restaurant(id: ID!): Restaurant
   restaurantImages: [RestaurantImage!]!
   restaurantImage(id: ID!): RestaurantImage
+  restaurantItems: [RestaurantItem!]!
+  restaurantItem(id: ID!): RestaurantItem
 }
 
 input NewTodo {

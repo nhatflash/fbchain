@@ -35,6 +35,7 @@ type Restaurant struct {
 	TenantID     *string              `json:"tenantId,omitempty"`
 	Tenant       *Tenant              `json:"tenant,omitempty"`
 	Images       []*RestaurantImage   `json:"images"`
+	Items        []*RestaurantItem    `json:"items"`
 }
 
 type RestaurantImage struct {
@@ -43,6 +44,19 @@ type RestaurantImage struct {
 	CreatedAt    *time.Time  `json:"createdAt,omitempty"`
 	RestaurantID *string     `json:"restaurantId,omitempty"`
 	Restaurant   *Restaurant `json:"restaurant,omitempty"`
+}
+
+type RestaurantItem struct {
+	ID           string           `json:"id"`
+	Name         string           `json:"name"`
+	Description  *string          `json:"description,omitempty"`
+	Price        *string          `json:"price,omitempty"`
+	Type         *enum.ItemType   `json:"type,omitempty"`
+	Status       *enum.ItemStatus `json:"status,omitempty"`
+	Image        *string          `json:"image,omitempty"`
+	Notes        *string          `json:"notes,omitempty"`
+	RestaurantID *string          `json:"restaurantId,omitempty"`
+	Restaurant   *Restaurant      `json:"restaurant,omitempty"`
 }
 
 type Tenant struct {

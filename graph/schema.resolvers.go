@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+
 	appErr "github.com/nhatflash/fbchain/error"
 	gqlModel "github.com/nhatflash/fbchain/graph/model"
 	"github.com/nhatflash/fbchain/middleware"
@@ -161,6 +162,36 @@ func (r *queryResolver) RestaurantImage(ctx context.Context, id string) (*gqlMod
 	return MapToGqlRestaurantImage(img), nil
 }
 
+// RestaurantItems is the resolver for the restaurantItems field.
+func (r *queryResolver) RestaurantItems(ctx context.Context) ([]*gqlModel.RestaurantItem, error) {
+	items, err := r.RestaurantService.GetAllRestaurantItems(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var gqlItems []*gqlModel.RestaurantItem
+	for _, i := range items {
+		gqlItem := MapToGqlRestaurantItem(&i)
+		gqlItems = append(gqlItems, gqlItem)
+	}
+	return gqlItems, nil
+}
+
+// RestaurantItem is the resolver for the restaurantItem field.
+func (r *queryResolver) RestaurantItem(ctx context.Context, id string) (*gqlModel.RestaurantItem, error) {
+	var itemId int64
+	var err error
+	itemId, err = strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var item *model.RestaurantItem
+	item, err = r.RestaurantService.GetRestaurantItemById(ctx, itemId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurantItem(item), nil
+}
+
 // Tenant is the resolver for the tenant field.
 func (r *restaurantResolver) Tenant(ctx context.Context, obj *gqlModel.Restaurant) (*gqlModel.Tenant, error) {
 	var tenantId int64
@@ -198,8 +229,45 @@ func (r *restaurantResolver) Images(ctx context.Context, obj *gqlModel.Restauran
 	return gqlRImgs, nil
 }
 
+// Items is the resolver for the items field.
+func (r *restaurantResolver) Items(ctx context.Context, obj *gqlModel.Restaurant) ([]*gqlModel.RestaurantItem, error) {
+	var restaurantId int64
+	var err error
+	restaurantId, err = strconv.ParseInt(obj.ID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var items []model.RestaurantItem
+	items, err = r.RestaurantService.GetItemsByRestaurantId(ctx, restaurantId)
+	if err != nil {
+		return nil, err
+	}
+	var gqlItems []*gqlModel.RestaurantItem
+	for _, i := range items {
+		gqlItem := MapToGqlRestaurantItem(&i)
+		gqlItems = append(gqlItems, gqlItem)
+	}
+	return gqlItems, nil
+}
+
 // Restaurant is the resolver for the restaurant field.
 func (r *restaurantImageResolver) Restaurant(ctx context.Context, obj *gqlModel.RestaurantImage) (*gqlModel.Restaurant, error) {
+	var restaurantId int64
+	var err error
+	restaurantId, err = strconv.ParseInt(*obj.RestaurantID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var res *model.Restaurant
+	res, err = r.RestaurantService.GetRestaurantById(ctx, restaurantId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurant(res), nil
+}
+
+// Restaurant is the resolver for the restaurant field.
+func (r *restaurantItemResolver) Restaurant(ctx context.Context, obj *gqlModel.RestaurantItem) (*gqlModel.Restaurant, error) {
 	var restaurantId int64
 	var err error
 	restaurantId, err = strconv.ParseInt(*obj.RestaurantID, 10, 64)
@@ -263,6 +331,9 @@ func (r *Resolver) Restaurant() RestaurantResolver { return &restaurantResolver{
 // RestaurantImage returns RestaurantImageResolver implementation.
 func (r *Resolver) RestaurantImage() RestaurantImageResolver { return &restaurantImageResolver{r} }
 
+// RestaurantItem returns RestaurantItemResolver implementation.
+func (r *Resolver) RestaurantItem() RestaurantItemResolver { return &restaurantItemResolver{r} }
+
 // Tenant returns TenantResolver implementation.
 func (r *Resolver) Tenant() TenantResolver { return &tenantResolver{r} }
 
@@ -270,30 +341,5 @@ type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type restaurantResolver struct{ *Resolver }
 type restaurantImageResolver struct{ *Resolver }
+type restaurantItemResolver struct{ *Resolver }
 type tenantResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-/*
-	func (r *mutationResolver) ChangeProfile(ctx context.Context, input gqlModel.UpdateProfile) (*gqlModel.User, error) {
-	firstName := input.FirstName
-	lastName :=
-}
-
-// Me is the resolver for the me field.
-func (r *queryResolver) Me(ctx context.Context) (*gqlModel.User, error) {
-	claims, ok := ctx.Value(middleware.UserKey{}).(*security.JwtAccessClaims)
-	if !ok || claims == nil {
-		return nil, appErr.UnauthorizedError("Authentication is required.")
-	}
-	u, err := r.UserService.GetUserById(claims.UserId)
-	if err != nil {
-		return nil, err
-	}
-	return MapToGqlModelUser(u), nil
-}
-*/

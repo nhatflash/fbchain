@@ -168,6 +168,10 @@ models:
     model: github.com/nhatflash/fbchain/enum.TenantType
   RestaurantType:
     model: github.com/nhatflash/fbchain/enum.RestaurantType
+  ItemType:
+    model: github.com/nhatflash/fbchain/enum.ItemType
+  ItemStatus:
+    model: github.com/nhatflash/fbchain/enum.ItemStatus
   Tenant:
     fields:
       user:
@@ -180,10 +184,17 @@ models:
         resolver: true
       images:
         resolver: true
+      items:
+        resolver: true
   RestaurantImage:
     fields:
       restaurant:
         resolver: true
+  RestaurantItem:
+    fields:
+      restaurant:
+        resolver: true
+      
 
   
   

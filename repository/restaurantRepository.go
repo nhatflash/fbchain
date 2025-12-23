@@ -364,3 +364,100 @@ func (rr *RestaurantRepository) AddNewRestaurantItem(ctx context.Context, name s
 	return &i, nil
 }
 
+
+func (rr *RestaurantRepository) GetItemsByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantItem, error) {
+	var err error
+	var rows *sql.Rows
+	query := "SELECT * FROM restaurant_items WHERE restaurant_id = $1 ORDER BY id ASC"
+	rows, err = rr.Db.QueryContext(ctx, query, restaurantId)
+	if err != nil {
+		return nil, err
+	}
+	var items []model.RestaurantItem
+	for rows.Next() {
+		var i model.RestaurantItem
+		if err = rows.Scan(
+			&i.Id,
+			&i.Name,
+			&i.Description,
+			&i.Price,
+			&i.Type,
+			&i.Status,
+			&i.Image,
+			&i.Notes,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.RestaurantId,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if len(items) == 0 {
+		return nil, appErr.NotFoundError("No restaurant item found.")
+	}
+	return items, nil
+}
+
+
+func (rr *RestaurantRepository) GetAllRestaurantItems(ctx context.Context) ([]model.RestaurantItem, error) {
+	var err error
+	var rows *sql.Rows
+	query := "SELECT * FROM restaurant_items ORDER BY id ASC"
+	rows, err = rr.Db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	var items []model.RestaurantItem
+	for rows.Next() {
+		var i model.RestaurantItem
+		if err = rows.Scan(
+			&i.Id,
+			&i.Name,
+			&i.Description,
+			&i.Price,
+			&i.Type,
+			&i.Status,
+			&i.Image,
+			&i.Notes,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.RestaurantId,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if len(items) == 0 {
+		return nil, appErr.NotFoundError("No restaurant item found.")
+	}
+	return items, nil
+}
+
+
+func (rr *RestaurantRepository) GetRestaurantItemById(ctx context.Context, id int64) (*model.RestaurantItem, error) {
+	var err error
+	var i model.RestaurantItem
+	query := "SELECT * FROM restaurant_items WHERE id = $1 LIMIT 1"
+	err = rr.Db.QueryRowContext(ctx, query, id).Scan(
+		&i.Id,
+		&i.Name,
+		&i.Description,
+		&i.Price,
+		&i.Type,
+		&i.Status,
+		&i.Image,
+		&i.Notes,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.RestaurantId,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, appErr.NotFoundError("No item found.")
+		}
+		return nil, err
+	}
+	return &i, nil
+}
+
