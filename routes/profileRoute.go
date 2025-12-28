@@ -9,5 +9,5 @@ import (
 func ProfileRoutes(r *gin.Engine, prefix string, uc *controller.UserController) {
 	profile := r.Group(prefix, middleware.JwtRestHandler())
 
-	profile.PATCH("/", uc.ChangeProfile)
+	profile.PATCH("/", uc.ChangeUserProfile)
 }

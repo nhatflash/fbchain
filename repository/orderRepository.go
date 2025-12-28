@@ -30,57 +30,31 @@ func (or *OrderRepository) CreateInitialOrder(ctx context.Context, restaurantId 
 
 	defer tx.Rollback()
 
-	var newOrder model.Order
+	var o model.Order
 	query := "INSERT INTO orders (status, amount, tenant_id, restaurant_id, subscription_id) VALUES ($1, $2, $3, $4, $5) RETURNING *"
 
 	if err = tx.QueryRowContext(ctx, query, enum.ORDER_PENDING, amount, tId, restaurantId, subPackageId).Scan(
-		&newOrder.Id,
-		&newOrder.OrderDate,
-		&newOrder.Status,
-		&newOrder.Amount,
-		&newOrder.UpdatedAt,
-		&newOrder.TenantId,
-		&newOrder.RestaurantId,
-		&newOrder.SubPackageId,
+		&o.Id,
+		&o.OrderDate,
+		&o.Status,
+		&o.Amount,
+		&o.UpdatedAt,
+		&o.TenantId,
+		&o.RestaurantId,
+		&o.SubPackageId,
 	); err != nil {
 		return nil, err
 	}
 	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
-	return &newOrder, nil
+	return &o, nil
 }
 
-func (or *OrderRepository) GetLatestTenantOrder(ctx context.Context, tenantId int64) (*model.Order, error) {
-	var err error
-
+func (or *OrderRepository) FindLatestTenantOrder(ctx context.Context, tenantId int64) (*model.Order, error) {
 	query := "SELECT * FROM orders WHERE tenant_id = $1 ORDER BY order_date DESC LIMIT 1"
-	var order model.Order
-	err = or.Db.QueryRowContext(ctx, query, tenantId).Scan(
-		&order.Id,
-		&order.OrderDate,
-		&order.Status,
-		&order.Amount,
-		&order.UpdatedAt,
-		&order.TenantId,
-		&order.RestaurantId,
-		&order.SubPackageId,
-	)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, appErr.NotFoundError("No order found.")
-		}
-		return nil, err
-	}
-	return &order, nil
-}
-
-
-func (or *OrderRepository) GetOrderById(ctx context.Context, id int64) (*model.Order, error) {
-	var err error
 	var o model.Order
-	query := "SELECT * FROM orders WHERE id = $1 LIMIT 1"
-	err = or.Db.QueryRowContext(ctx, query, id).Scan(
+	err := or.Db.QueryRowContext(ctx, query, tenantId).Scan(
 		&o.Id,
 		&o.OrderDate,
 		&o.Status,
@@ -94,6 +68,60 @@ func (or *OrderRepository) GetOrderById(ctx context.Context, id int64) (*model.O
 		if err == sql.ErrNoRows {
 			return nil, appErr.NotFoundError("No order found.")
 		}
+		return nil, err
+	}
+	return &o, nil
+}
+
+
+func (or *OrderRepository) FindOrderById(ctx context.Context, id int64) (*model.Order, error) {
+	query := "SELECT * FROM orders WHERE id = $1 LIMIT 1"
+	var o model.Order
+	err := or.Db.QueryRowContext(ctx, query, id).Scan(
+		&o.Id,
+		&o.OrderDate,
+		&o.Status,
+		&o.Amount,
+		&o.UpdatedAt,
+		&o.TenantId,
+		&o.RestaurantId,
+		&o.SubPackageId,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, appErr.NotFoundError("No order found.")
+		}
+		return nil, err
+	}
+	return &o, nil
+}
+
+
+func (or *OrderRepository) FinishOrder(ctx context.Context, orderId int64) (*model.Order, error) {
+	var err error
+	var tx *sql.Tx
+	tx, err = or.Db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	defer tx.Rollback()
+
+	var o model.Order
+	query := "UPDATE orders SET status = $1 WHERE id = $2"
+	if err = tx.QueryRowContext(ctx, query, enum.ORDER_COMPLETED, orderId).Scan(
+		&o.Id,
+		&o.OrderDate,
+		&o.Status,
+		&o.Amount,
+		&o.UpdatedAt,
+		&o.TenantId,
+		&o.RestaurantId,
+		&o.SubPackageId,
+	); err != nil {
+		return nil, err
+	}
+	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
 	return &o, nil

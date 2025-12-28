@@ -101,5 +101,6 @@ type AddRestaurantItemRequest struct {
 
 
 type AddRestaurantTableRequest struct {
-	
+	Label 				*string 			`json:"label" binding:"omitempty"`
+	Notes 				*string 			`json:"notes" binding:"omitempty"`
 }

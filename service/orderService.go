@@ -59,13 +59,13 @@ func (os *OrderService) HandlePaySubPackage(ctx context.Context, req *client.Pay
 func CheckRestaurantAndSubPackageExist(ctx context.Context, rId int64, sId int64, rr *repository.RestaurantRepository, spr *repository.SubPackageRepository) (*model.Restaurant, *model.SubPackage, error) {
 	var err error
 	var r *model.Restaurant
-	r, err = rr.GetRestaurantById(ctx, rId)
+	r, err = rr.FindRestaurantById(ctx, rId)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	var s *model.SubPackage
-	s, err = spr.GetSubPackageById(ctx, sId)
+	s, err = spr.FindSubPackageById(ctx, sId)
 	if s != nil {
 		return nil, nil, err
 	}

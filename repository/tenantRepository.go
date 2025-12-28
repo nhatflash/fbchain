@@ -74,11 +74,10 @@ func (tr *TenantRepository) CompleteTenantInformation(ctx context.Context, phone
 	return &u, &t, nil
 }
 
-func (tr *TenantRepository) GetTenantByCode(ctx context.Context, code string) (*model.Tenant, error) {
-	var err error
+func (tr *TenantRepository) FindTenantByCode(ctx context.Context, code string) (*model.Tenant, error) {
 	var t model.Tenant
 	query := "SELECT * FROM tenants WHERE code = $1 LIMIT 1"
-	err = tr.Db.QueryRowContext(ctx, query, code).Scan(
+	err := tr.Db.QueryRowContext(ctx, query, code).Scan(
 		&t.Id,
 		&t.Code,
 		&t.Description,
@@ -95,11 +94,10 @@ func (tr *TenantRepository) GetTenantByCode(ctx context.Context, code string) (*
 	return &t, nil
 }
 
-func (tr *TenantRepository) GetTenantById(ctx context.Context, id int64) (*model.Tenant, error) {
-	var err error
+func (tr *TenantRepository) FindTenantById(ctx context.Context, id int64) (*model.Tenant, error) {
 	var t model.Tenant
 	query := "SELECT * FROM tenants WHERE id = $1 LIMIT 1"
-	err = tr.Db.QueryRowContext(ctx, query, id).Scan(
+	err := tr.Db.QueryRowContext(ctx, query, id).Scan(
 		&t.Id,
 		&t.Code,
 		&t.Description,
@@ -116,11 +114,10 @@ func (tr *TenantRepository) GetTenantById(ctx context.Context, id int64) (*model
 	return &t, nil
 }
 
-func (tr *TenantRepository) GetTenantByUserId(ctx context.Context, userId int64) (*model.Tenant, error) {
-	var err error
+func (tr *TenantRepository) FindTenantByUserId(ctx context.Context, userId int64) (*model.Tenant, error) {
 	var t model.Tenant
 	query := "SELECT * FROM tenants WHERE user_id = $1 LIMIT 1"
-	err = tr.Db.QueryRowContext(ctx, query, userId).Scan(
+	err := tr.Db.QueryRowContext(ctx, query, userId).Scan(
 		&t.Id,
 		&t.Code,
 		&t.Description,
@@ -138,9 +135,9 @@ func (tr *TenantRepository) GetTenantByUserId(ctx context.Context, userId int64)
 }
 
 
-func (tr *TenantRepository) ListAllTenants(ctx context.Context) ([]model.Tenant, error) {
-	var rows *sql.Rows
+func (tr *TenantRepository) FindAllTenants(ctx context.Context) ([]model.Tenant, error) {
 	var err error
+	var rows *sql.Rows
 	query := "SELECT * FROM tenants ORDER BY id ASC"
 	rows, err = tr.Db.QueryContext(ctx, query)
 	if err != nil {

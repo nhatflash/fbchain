@@ -2,13 +2,14 @@ package controller
 
 import (
 	"net/http"
-	"github.com/nhatflash/fbchain/constant"
+
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/api"
 	"github.com/nhatflash/fbchain/client"
+	"github.com/nhatflash/fbchain/constant"
 	_ "github.com/nhatflash/fbchain/docs"
+	appErr "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/helper"
-	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/service"
 )
 
@@ -31,15 +32,23 @@ func NewUserController(us service.IUserService) *UserController {
 // @Failure 400 {object} error
 // @Security BearerAuth
 // @Router /profile [patch]
-func (uc *UserController) ChangeProfile(c *gin.Context) {
+func (uc *UserController) ChangeUserProfile(c *gin.Context) {
 	var req client.UpdateProfileRequest
-	var err error
-	if err = c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.Error(err)
 		return 
 	}
-	var updatedUser *model.User
-	updatedUser, err = uc.UserService.ChangeProfile(c.Request.Context(), &req)
+	ctx := c.Request.Context()
+	currUser, err := uc.UserService.FindCurrentUser(ctx)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	if !currUser.IsVerified {
+		c.Error(appErr.UnauthorizedError("You need to verify your account before doing this action."))
+		return
+	}
+	updatedUser, err := uc.UserService.HandleChangeUserProfile(c.Request.Context(), currUser, &req)
 	if err != nil {
 		c.Error(err)
 		return

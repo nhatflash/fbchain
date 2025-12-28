@@ -39,7 +39,7 @@ func NewVnPayService(or *repository.OrderRepository) IVnPayService {
 func (vs *VnPayService) GetOrderVnPayUrl(ctx context.Context, remoteAddr string, orderId int64) (string, error) {
 	var err error
 	var o *model.Order
-	o, err = vs.OrderRepo.GetOrderById(ctx, orderId)
+	o, err = vs.OrderRepo.FindOrderById(ctx, orderId)
 	if err != nil {
 		return "", err
 	}

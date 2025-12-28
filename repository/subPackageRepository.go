@@ -20,10 +20,8 @@ func NewSubPackageRepository(db *sql.DB) *SubPackageRepository {
 }
 
 func (spr *SubPackageRepository) CheckSubPackageNameExists(ctx context.Context, name string) (bool, error) {
-	var err error
-	var rows *sql.Rows
 	query := "SELECT name FROM sub_packages WHERE name = $1 LIMIT 1"
-	rows, err = spr.Db.QueryContext(ctx, query, name)
+	rows, err := spr.Db.QueryContext(ctx, query, name)
 	if err != nil {
 		return false, err
 	}
@@ -33,10 +31,9 @@ func (spr *SubPackageRepository) CheckSubPackageNameExists(ctx context.Context, 
 	return false, nil
 }
 
-func (spr *SubPackageRepository) CreateSubPackage(ctx context.Context, name string, description *string, durationMonth int, price decimal.Decimal, image *string) (*model.SubPackage, error) {
+func (spr *SubPackageRepository) CreateNewSubPackage(ctx context.Context, name string, description *string, durationMonth int, price decimal.Decimal, image *string) (*model.SubPackage, error) {
 	var err error
 	var tx *sql.Tx
-
 	tx, err = spr.Db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -66,11 +63,10 @@ func (spr *SubPackageRepository) CreateSubPackage(ctx context.Context, name stri
 	return &s, nil
 }
 
-func (spr *SubPackageRepository) GetSubPackageByName(ctx context.Context, name string) (*model.SubPackage, error) {
-	var err error
+func (spr *SubPackageRepository) FindSubPackageByName(ctx context.Context, name string) (*model.SubPackage, error) {
 	var s model.SubPackage
 	query := "SELECT * FROM sub_packages WHERE name = $1 LIMIT 1" 
-	err = spr.Db.QueryRowContext(ctx, query, name).Scan(
+	err := spr.Db.QueryRowContext(ctx, query, name).Scan(
 		&s.Id,
 		&s.Name,
 		&s.Description,
@@ -91,9 +87,7 @@ func (spr *SubPackageRepository) GetSubPackageByName(ctx context.Context, name s
 }
 
 func (spr *SubPackageRepository) AnySubPackageExists(ctx context.Context) (bool, error) {
-	var err error
-	var rows *sql.Rows
-	rows, err = spr.Db.QueryContext(ctx, "SELECT id FROM sub_packages")
+	rows, err := spr.Db.QueryContext(ctx, "SELECT id FROM sub_packages")
 	if err != nil {
 		return false, err
 	}
@@ -104,10 +98,8 @@ func (spr *SubPackageRepository) AnySubPackageExists(ctx context.Context) (bool,
 }
 
 func (spr *SubPackageRepository) IsSubPackageExist(ctx context.Context, sId int64) (bool, error) {
-	var err error
-	var rows *sql.Rows
 	query := "SELECT id FROM sub_packages WHERE id = $1 LIMIT 1"
-	rows, err = spr.Db.QueryContext(ctx, query, sId)
+	rows, err := spr.Db.QueryContext(ctx, query, sId)
 	if err != nil {
 		return false, err
 	}
@@ -117,11 +109,10 @@ func (spr *SubPackageRepository) IsSubPackageExist(ctx context.Context, sId int6
 	return false, nil
 }
 
-func (spr *SubPackageRepository) GetSubPackageById(ctx context.Context, id int64) (*model.SubPackage, error) {
-	var err error
+func (spr *SubPackageRepository) FindSubPackageById(ctx context.Context, id int64) (*model.SubPackage, error) {
 	var s model.SubPackage
 	query := "SELECT * FROM sub_packages WHERE id = $1 LIMIT 1"
-	err = spr.Db.QueryRowContext(ctx, query, id).Scan(
+	err := spr.Db.QueryRowContext(ctx, query, id).Scan(
 		&s.Id,
 		&s.Name,
 		&s.Description, 
@@ -141,11 +132,10 @@ func (spr *SubPackageRepository) GetSubPackageById(ctx context.Context, id int64
 	return &s, nil
 }
 
-func (spr *SubPackageRepository) GetFirstSubPackage(ctx context.Context) (*model.SubPackage, error) {
-	var err error
+func (spr *SubPackageRepository) FindFirstSubPackage(ctx context.Context) (*model.SubPackage, error) {
 	var s model.SubPackage
 	query := "SELECT * FROM sub_packages ORDER BY id ASC LIMIT 1"
-	err = spr.Db.QueryRowContext(ctx, query).Scan(
+	err := spr.Db.QueryRowContext(ctx, query).Scan(
 		&s.Id,
 		&s.Name,
 		&s.Description,

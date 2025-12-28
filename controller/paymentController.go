@@ -82,4 +82,4 @@ func (pc *PaymentController) PayOrderWithOnlinePayment(c *gin.Context) {
 			return
 	}
 	api.SuccessMessage(http.StatusOK, "Url retrieved successfully.", res, c)
-}
+} 

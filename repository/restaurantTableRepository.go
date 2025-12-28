@@ -20,7 +20,7 @@ func NewRestaurantTableRepository(db *sql.DB) *RestaurantTableRepository {
 }
 
 
-func (rtr *RestaurantTableRepository) AddNewRestaurantTable(ctx context.Context, restaurantId int64, notes *string) (*model.RestaurantTable, error) {
+func (rtr *RestaurantTableRepository) AddNewRestaurantTable(ctx context.Context, restaurantId int64, label string, notes *string) (*model.RestaurantTable, error) {
 	var err error
 	var tx *sql.Tx
 	tx, err = rtr.Db.BeginTx(ctx, nil)
@@ -76,10 +76,9 @@ func (rtr *RestaurantTableRepository) FindAllRestaurantTables(ctx context.Contex
 }
 
 func (rtr *RestaurantTableRepository) FindRestaurantTableById(ctx context.Context, id int64) (*model.RestaurantTable, error) {
-	var err error
 	var t model.RestaurantTable
 	query := "SELECT * FROM restaurant_tables WHERE id = $1 LIMIT 1"
-	err = rtr.Db.QueryRowContext(ctx, query, id).Scan(
+	err := rtr.Db.QueryRowContext(ctx, query, id).Scan(
 		&t.Id,
 		&t.RestaurantId,
 		&t.Label,
@@ -98,10 +97,9 @@ func (rtr *RestaurantTableRepository) FindRestaurantTableById(ctx context.Contex
 
 
 func (rtr *RestaurantTableRepository) CountRestaurantTableByRestaurantId(ctx context.Context, restaurantId int64) (int, error) {
-	var err error
 	var count int
 	query := "SELECT COUNT(*) FROM restaurant_tables WHERE restaurant_id = $1"
-	if err = rtr.Db.QueryRowContext(ctx, query, restaurantId).Scan(
+	if err := rtr.Db.QueryRowContext(ctx, query, restaurantId).Scan(
 		&count,
 	); err != nil {
 		return 0, err

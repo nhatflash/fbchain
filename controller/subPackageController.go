@@ -42,4 +42,4 @@ func (spc *SubPackageController) CreateSubPackage(c *gin.Context) {
 		return
 	}
 	api.SuccessMessage(http.StatusCreated, constant.SUBSCRIPTION_CREATED_SUCCESS, res, c)
-}
+} 

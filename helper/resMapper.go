@@ -123,3 +123,15 @@ func MapToRestaurantItemResponse(i *model.RestaurantItem) *client.RestaurantItem
 }
 
 
+func MapToRestaurantTableResponse(t *model.RestaurantTable) *client.RestaurantTableResponse {
+	return &client.RestaurantTableResponse{
+		Id: t.Id,
+		RestaurantId: t.RestaurantId,
+		Label: t.Label,
+		IsActive: t.IsActive,
+		Notes: t.Notes,
+	}
+}
+
+
+

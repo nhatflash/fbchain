@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/nhatflash/fbchain/client"
@@ -15,31 +16,35 @@ import (
 
 type IRestaurantService interface {
 	HandleCreateRestaurant(ctx context.Context, req *client.CreateRestaurantRequest, tenantId int64) (*client.RestaurantResponse, error)
-	GetRestaurantsByTenantId(ctx context.Context, tenantId int64) ([]model.Restaurant, error)
-	GetAllRestaurants(ctx context.Context) ([]model.Restaurant, error)
-	GetRestaurantById(ctx context.Context, id int64) (*model.Restaurant, error)
-	GetRestaurantImageById(ctx context.Context, id int64) (*model.RestaurantImage, error)
-	GetRestaurantImages(ctx context.Context, restaurantId int64) ([]model.RestaurantImage, error)
-	GetAllRestaurantImages(ctx context.Context) ([]model.RestaurantImage, error)
+	FindRestaurantsByTenantId(ctx context.Context, tenantId int64) ([]model.Restaurant, error)
+	FindAllRestaurants(ctx context.Context) ([]model.Restaurant, error)
+	FindRestaurantById(ctx context.Context, id int64) (*model.Restaurant, error)
+	FindRestaurantImageById(ctx context.Context, id int64) (*model.RestaurantImage, error)
+	FindRestaurantImagesByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantImage, error)
+	FindAllRestaurantImages(ctx context.Context) ([]model.RestaurantImage, error)
 	HandleAddNewRestaurantItem(ctx context.Context, restaurantId int64, tenantId int64, req *client.AddRestaurantItemRequest) (*client.RestaurantItemResponse, error)
-	GetItemsByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantItem, error)
-	GetAllRestaurantItems(ctx context.Context) ([]model.RestaurantItem, error)
-	GetRestaurantItemById(ctx context.Context, id string) (*model.RestaurantItem, error)
+	FindItemsByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantItem, error)
+	FindAllRestaurantItems(ctx context.Context) ([]model.RestaurantItem, error)
+	FindRestaurantItemById(ctx context.Context, id string) (*model.RestaurantItem, error)
+	HandleAddNewRestaurantTable(ctx context.Context, tenantId int64, restaurantId int64, req *client.AddRestaurantTableRequest) (*client.RestaurantTableResponse, error)
 }
 
 type RestaurantService struct {
 	RestaurantRepo 		*repository.RestaurantRepository
 	SubPackageRepo 		*repository.SubPackageRepository
 	RestaurantItemRepo 	*repository.RestaurantItemRepository
+	RestaurantTableRepo *repository.RestaurantTableRepository
 }
 
 func NewRestaurantService(rr *repository.RestaurantRepository, 
 						  spr *repository.SubPackageRepository, 
-						  rir *repository.RestaurantItemRepository) IRestaurantService {
+						  rir *repository.RestaurantItemRepository, 
+						  rtr *repository.RestaurantTableRepository) IRestaurantService {
 	return &RestaurantService{
 		RestaurantRepo: rr,
 		SubPackageRepo: spr,
 		RestaurantItemRepo: rir,
+		RestaurantTableRepo: rtr,
 	}
 }
 
@@ -60,17 +65,17 @@ func (rs *RestaurantService) HandleCreateRestaurant(ctx context.Context, req *cl
 		return nil, err
 	}
 	var s *model.SubPackage
-	s, err = rs.SubPackageRepo.GetFirstSubPackage(ctx)
+	s, err = rs.SubPackageRepo.FindFirstSubPackage(ctx)
 	if err != nil {
 		return nil, err
 	}
 	var r *model.Restaurant
-	r, err = rs.RestaurantRepo.CreateRestaurant(ctx, name, location, description, contactEmail, contactPhone, postalCode, *rType, notes, s.Id, images, tenantId)
+	r, err = rs.RestaurantRepo.CreateNewRestaurant(ctx, name, location, description, contactEmail, contactPhone, postalCode, *rType, notes, s.Id, images, tenantId)
 	if err != nil {
 		return nil, err
 	}
 	var rImgs []model.RestaurantImage
-	rImgs, err = rs.RestaurantRepo.GetRestaurantImages(ctx, r.Id)
+	rImgs, err = rs.RestaurantRepo.FindRestaurantImagesByRestaurantId(ctx, r.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -79,9 +84,9 @@ func (rs *RestaurantService) HandleCreateRestaurant(ctx context.Context, req *cl
 
 
 
-func (rs *RestaurantService) GetRestaurantsByTenantId(ctx context.Context, tenantId int64) ([]model.Restaurant, error) {
+func (rs *RestaurantService) FindRestaurantsByTenantId(ctx context.Context, tenantId int64) ([]model.Restaurant, error) {
 	
-	r, err := rs.RestaurantRepo.GetRestaurantsByTenantId(ctx, tenantId)
+	r, err := rs.RestaurantRepo.FindRestaurantsByTenantId(ctx, tenantId)
 	if err != nil {
 		return nil, err
 	}
@@ -90,19 +95,8 @@ func (rs *RestaurantService) GetRestaurantsByTenantId(ctx context.Context, tenan
 
 
 
-func (rs *RestaurantService) GetAllRestaurants(ctx context.Context) ([]model.Restaurant, error) {
-	r, err := rs.RestaurantRepo.ListAllRestaurants(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return r, nil
-}
-
-
-
-
-func (rs *RestaurantService) GetRestaurantById(ctx context.Context, id int64) (*model.Restaurant, error) {
-	r, err := rs.RestaurantRepo.GetRestaurantById(ctx, id)
+func (rs *RestaurantService) FindAllRestaurants(ctx context.Context) ([]model.Restaurant, error) {
+	r, err := rs.RestaurantRepo.FindAllRestaurants(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -112,8 +106,19 @@ func (rs *RestaurantService) GetRestaurantById(ctx context.Context, id int64) (*
 
 
 
-func (rs *RestaurantService) GetRestaurantImageById(ctx context.Context, id int64) (*model.RestaurantImage, error) {
-	img, err := rs.RestaurantRepo.GetRestaurantImageById(ctx, id)
+func (rs *RestaurantService) FindRestaurantById(ctx context.Context, id int64) (*model.Restaurant, error) {
+	r, err := rs.RestaurantRepo.FindRestaurantById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+
+
+
+func (rs *RestaurantService) FindRestaurantImageById(ctx context.Context, id int64) (*model.RestaurantImage, error) {
+	img, err := rs.RestaurantRepo.FindRestaurantImageById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -122,8 +127,8 @@ func (rs *RestaurantService) GetRestaurantImageById(ctx context.Context, id int6
 
 
 
-func (rs *RestaurantService) GetRestaurantImages(ctx context.Context, restaurantId int64) ([]model.RestaurantImage, error) {
-	imgs, err := rs.RestaurantRepo.GetRestaurantImages(ctx, restaurantId)
+func (rs *RestaurantService) FindRestaurantImagesByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantImage, error) {
+	imgs, err := rs.RestaurantRepo.FindRestaurantImagesByRestaurantId(ctx, restaurantId)
 	if err != nil {
 		return nil, err
 	}
@@ -131,8 +136,8 @@ func (rs *RestaurantService) GetRestaurantImages(ctx context.Context, restaurant
 }
 
 
-func (rs *RestaurantService) GetAllRestaurantImages(ctx context.Context) ([]model.RestaurantImage, error) {
-	imgs, err := rs.RestaurantRepo.ListAllRestaurantImages(ctx)
+func (rs *RestaurantService) FindAllRestaurantImages(ctx context.Context) ([]model.RestaurantImage, error) {
+	imgs, err := rs.RestaurantRepo.FindAllRestaurantImages(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +150,7 @@ func (rs *RestaurantService) HandleAddNewRestaurantItem(ctx context.Context, res
 	var err error 
 	var r *model.Restaurant
 	
-	r, err = rs.RestaurantRepo.GetRestaurantById(ctx, restaurantId)
+	r, err = rs.RestaurantRepo.FindRestaurantById(ctx, restaurantId)
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +187,7 @@ func (rs *RestaurantService) HandleAddNewRestaurantItem(ctx context.Context, res
 }
 
 
-func (rs *RestaurantService) GetItemsByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantItem, error) {
+func (rs *RestaurantService) FindItemsByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantItem, error) {
 	items, err := rs.RestaurantItemRepo.FindRestaurantItemsByRestaurantId(ctx, restaurantId)
 	if err != nil {
 		return nil, err
@@ -191,7 +196,7 @@ func (rs *RestaurantService) GetItemsByRestaurantId(ctx context.Context, restaur
 }
 
 
-func (rs *RestaurantService) GetAllRestaurantItems(ctx context.Context) ([]model.RestaurantItem, error) {
+func (rs *RestaurantService) FindAllRestaurantItems(ctx context.Context) ([]model.RestaurantItem, error) {
 	items, err := rs.RestaurantItemRepo.FindAllRestaurantItems(ctx)
 	if err != nil {
 		return nil, err
@@ -200,7 +205,7 @@ func (rs *RestaurantService) GetAllRestaurantItems(ctx context.Context) ([]model
 }
 
 
-func (rs *RestaurantService) GetRestaurantItemById(ctx context.Context, id string) (*model.RestaurantItem, error) {
+func (rs *RestaurantService) FindRestaurantItemById(ctx context.Context, id string) (*model.RestaurantItem, error) {
 	item, err := rs.RestaurantItemRepo.FindRestaurantItemById(ctx, id)
 	if err != nil {
 		return nil, err
@@ -211,8 +216,28 @@ func (rs *RestaurantService) GetRestaurantItemById(ctx context.Context, id strin
 
 
 
-func (rs *RestaurantService) HandleAddNewRestaurantTable(ctx context.Context, req *client.AddRestaurantTableRequest) (*model.RestaurantTable, error) {
-	return nil, nil
+func (rs *RestaurantService) HandleAddNewRestaurantTable(ctx context.Context, tenantId int64, restaurantId int64, req *client.AddRestaurantTableRequest) (*client.RestaurantTableResponse, error) {
+	restaurant, err := rs.RestaurantRepo.FindRestaurantById(ctx, restaurantId)
+	if err != nil {
+		return nil, err
+	}
+	if restaurant.TenantId != tenantId {
+		return nil, appErr.ForbiddenError("You are not allow to perform this action.")
+	}
+	var label string
+	if req.Label == nil || *req.Label == "" {
+		count, err := rs.RestaurantTableRepo.CountRestaurantTableByRestaurantId(ctx, restaurantId)
+		if err != nil {
+			return nil, err
+		}
+		count++
+		label = strconv.Itoa(count)
+	}
+	table, err := rs.RestaurantTableRepo.AddNewRestaurantTable(ctx, restaurantId, label, req.Notes)
+	if err != nil {
+		return nil, err
+	}
+	return helper.MapToRestaurantTableResponse(table), nil
 }
 
 

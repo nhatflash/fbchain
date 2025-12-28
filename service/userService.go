@@ -13,11 +13,11 @@ import (
 )
 
 type IUserService interface {
-	GetCurrentUser(ctx context.Context) (*model.User, error)
+	FindCurrentUser(ctx context.Context) (*model.User, error)
 	IsUserRoleTenant(u *model.User) bool
-	GetListUser(ctx context.Context) ([]model.User, error)
-	GetUserById(ctx context.Context, id int64) (*model.User, error)
-	ChangeProfile(ctx context.Context, req *client.UpdateProfileRequest) (*model.User, error)
+	FindAllUsers(ctx context.Context) ([]model.User, error)
+	FindUserById(ctx context.Context, id int64) (*model.User, error)
+	HandleChangeUserProfile(ctx context.Context, user *model.User, req *client.UpdateProfileRequest) (*model.User, error)
 }
 
 type UserService struct {
@@ -31,7 +31,7 @@ func NewUserService(ur *repository.UserRepository) IUserService {
 	}
 }
 
-func (us *UserService) GetCurrentUser(ctx context.Context) (*model.User, error) {
+func (us *UserService) FindCurrentUser(ctx context.Context) (*model.User, error) {
 	var err error
 	var claims *security.JwtAccessClaims
 	claims, err = GetCurrentClaims(ctx)
@@ -40,7 +40,7 @@ func (us *UserService) GetCurrentUser(ctx context.Context) (*model.User, error) 
 	}
 	email := claims.Email
 	var user *model.User
-	user, err = us.UserRepo.GetUserByEmail(ctx, email)
+	user, err = us.UserRepo.FindUserByEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}
@@ -51,8 +51,8 @@ func (*UserService) IsUserRoleTenant(u *model.User) bool {
 	return u.Role == enum.ROLE_TENANT
 }
 
-func (us *UserService) GetListUser(ctx context.Context) ([]model.User, error) {
-	users, err := us.UserRepo.ListAllUsers(ctx)
+func (us *UserService) FindAllUsers(ctx context.Context) ([]model.User, error) {
+	users, err := us.UserRepo.FindAllUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -60,10 +60,10 @@ func (us *UserService) GetListUser(ctx context.Context) ([]model.User, error) {
 }
 
 
-func (us *UserService) GetUserById(ctx context.Context, id int64) (*model.User, error) {
+func (us *UserService) FindUserById(ctx context.Context, id int64) (*model.User, error) {
 	var err error
 	var user *model.User
-	user, err = us.UserRepo.GetUserById(ctx, id)
+	user, err = us.UserRepo.FindUserById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -71,55 +71,35 @@ func (us *UserService) GetUserById(ctx context.Context, id int64) (*model.User, 
 }
 
 
-func (us *UserService) ChangeProfile(ctx context.Context, req *client.UpdateProfileRequest) (*model.User, error) {
-	firstName := req.FirstName
-	lastName := req.LastName
-	birthdate := req.Birthdate
-	gender := req.Gender
-	phone := req.Phone
-	identity := req.Identity
-	address := req.Address
-	postalCode := req.PostalCode
-	profileImage := req.ProfileImage
-
-	var err error
-	var u *model.User
-	u, err = us.GetCurrentUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if !u.IsVerified {
-		return nil, appErr.UnauthorizedError("Please verify your account before doing this action.")
-	}
-	var uFirstName *string
-	var uLastName *string
-	var uBirthdate *time.Time
-	var uGender *enum.Gender
-	var uPhone *string
-	var uIdentity *string
-	var uAddress *string
-	var uPostalCode *string
-	var uProfileImage *string
-
-	uFirstName, uLastName, uBirthdate, uGender, uPhone, uIdentity, uAddress, uPostalCode, uProfileImage, err = GetDataForUserUpdate(firstName, lastName, birthdate, gender, phone, identity, address, postalCode, profileImage, u)
+func (us *UserService) HandleChangeUserProfile(ctx context.Context, user *model.User, req *client.UpdateProfileRequest) (*model.User, error) {
+	firstName, lastName, birthdate, gender, phone, identity, address, postalCode, profileImage, err := getDataForUserUpdate(req.FirstName, 
+						 req.LastName, 
+						 req.Birthdate, 
+						 req.Gender, 
+						 req.Phone, 
+						 req.Identity, 
+						 req.Address, 
+						 req.PostalCode, 
+						 req.ProfileImage, 
+						 user)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = ValidateChangeProfileRequest(ctx, phone, identity, uPhone, uIdentity, us.UserRepo); err != nil {
+	if err := validateChangeProfileRequest(ctx, req.Phone, req.Identity, phone, identity, us.UserRepo); err != nil {
 		return nil, err
 	}
-
-	var updatedUser *model.User
-	updatedUser, err = us.UserRepo.UpdateUser(ctx, u.Id, uFirstName, uLastName, uBirthdate, uGender, uPhone, uIdentity, uAddress, uPostalCode, uProfileImage)
+	
+	updatedUser, err := us.UserRepo.UpdateUserInfo(ctx, user.Id, firstName, lastName, birthdate, gender, phone, identity, address, postalCode, profileImage)
 	if err != nil {
 		return nil, err
 	}
+
 	return updatedUser, nil
 }
 
 
-func GetDataForUserUpdate(firstName *string, lastName *string, birthdate *string, gender *enum.Gender, phone *string, identity *string, address *string, postalCode *string, profileImage *string, u *model.User) (*string, *string, *time.Time, *enum.Gender, *string, *string, *string, *string, *string, error)  {
+func getDataForUserUpdate(firstName *string, lastName *string, birthdate *string, gender *enum.Gender, phone *string, identity *string, address *string, postalCode *string, profileImage *string, u *model.User) (*string, *string, *time.Time, *enum.Gender, *string, *string, *string, *string, *string, error)  {
 	if firstName == nil || *firstName == "" {
 		firstName = &u.FirstName
 	}
@@ -158,11 +138,9 @@ func GetDataForUserUpdate(firstName *string, lastName *string, birthdate *string
 	return firstName, lastName, bd, gender, phone, identity, address, postalCode, profileImage, err
 }
 
-func ValidateChangeProfileRequest(ctx context.Context, phone *string, identity *string, uPhone *string, uIdentity *string, ur *repository.UserRepository) error {
-	var exist bool
-	var err error 
-	if phone != nil && uPhone != nil && *phone != *uPhone {
-		exist, err = ur.CheckUserPhoneExists(ctx, *phone)
+func validateChangeProfileRequest(ctx context.Context, reqPhone *string, reqIdentity *string, phone *string, identity *string, ur *repository.UserRepository) error {
+	if reqPhone != nil && phone != nil && *reqPhone != *phone {
+		exist, err := ur.CheckUserPhoneExists(ctx, *reqPhone)
 		if err != nil {
 			return err
 		}
@@ -170,8 +148,8 @@ func ValidateChangeProfileRequest(ctx context.Context, phone *string, identity *
 			return appErr.BadRequestError("This phone is already in use.")
 		}
 	}
-	if identity != nil && uIdentity != nil && *identity != *uIdentity {
-		exist, err = ur.CheckUserIdentityExists(ctx, *identity)
+	if reqIdentity != nil && identity != nil && *reqIdentity != *identity {
+		exist, err := ur.CheckUserIdentityExists(ctx, *reqIdentity)
 		if err != nil {
 			return err
 		}

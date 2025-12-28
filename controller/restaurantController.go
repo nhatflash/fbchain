@@ -9,7 +9,6 @@ import (
 	"github.com/nhatflash/fbchain/client"
 	"github.com/nhatflash/fbchain/constant"
 	_ "github.com/nhatflash/fbchain/docs"
-	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/service"
 )
 
@@ -36,31 +35,28 @@ func NewRestaurantController(us service.IUserService, rs service.IRestaurantServ
 // @Router /restaurant [post]
 func (rc *RestaurantController) CreateRestaurant(c *gin.Context) {
 	var req client.CreateRestaurantRequest
-	ctx := c.Request.Context()
-	var err error
-	if err = c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.Error(err)
 		return
 	}
-	var u *model.User
-	u, err = rc.UserService.GetCurrentUser(ctx)
+	ctx := c.Request.Context()
+	currUser, err := rc.UserService.FindCurrentUser(ctx)
 	if err != nil {
 		c.Error(err)
 		return
 	}
-	if !u.IsVerified {
+	if !currUser.IsVerified {
 		c.Error(appErr.UnauthorizedError("Please verify your account before doing this action."))
 		return
 	}
-	var t *model.Tenant
-	t, err = rc.TenantService.GetTenantByUserId(ctx, u.Id)
+
+	currTenant, err := rc.TenantService.FindTenantByUserId(ctx, currUser.Id)
 	if err != nil {
 		c.Error(err)
 		return
 	} 
 
-	var res *client.RestaurantResponse
-	res, err = rc.RestaurantService.HandleCreateRestaurant(ctx, &req, t.Id)
+	res, err := rc.RestaurantService.HandleCreateRestaurant(ctx, &req, currTenant.Id)
 	if err != nil {
 		c.Error(err)
 		return
@@ -78,38 +74,73 @@ func (rc *RestaurantController) CreateRestaurant(c *gin.Context) {
 // @Router /restaurant/{restaurantId}/item [post]
 func (rc *RestaurantController) AddNewRestaurantItem(c *gin.Context) {
 	var req client.AddRestaurantItemRequest
-	var err error
-	ctx := c.Request.Context()
-	if err = c.ShouldBindJSON(&req); err != nil {
+	
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.Error(err)
 		return
 	}
-
-	restaurantIdStr := c.Param("restaurantId")
-	var restaurantId int64
-	restaurantId, err = strconv.ParseInt(restaurantIdStr, 10, 64)
+	rIdStr := c.Param("restaurantId")
+	restaurantId, err := strconv.ParseInt(rIdStr, 10, 64)
 	if err != nil {
 		c.Error(appErr.BadRequestError("Invalid restaurant id."))
 		return
 	}
-	var u *model.User
-	u, err = rc.UserService.GetCurrentUser(ctx)
+
+	ctx := c.Request.Context()
+	currUser, err := rc.UserService.FindCurrentUser(ctx)
 	if err != nil {
 		c.Error(err)
 		return
 	}
-	var t *model.Tenant
-	t, err = rc.TenantService.GetTenantByUserId(ctx, u.Id)
+	currTenant, err := rc.TenantService.FindTenantByUserId(ctx, currUser.Id)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	var res *client.RestaurantItemResponse
-	res, err = rc.RestaurantService.HandleAddNewRestaurantItem(ctx, restaurantId, t.Id, &req)
+	res, err := rc.RestaurantService.HandleAddNewRestaurantItem(ctx, restaurantId, currTenant.Id, &req)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 	api.SuccessMessage(http.StatusCreated, "New item added successfully.", res, c)
+}
+
+
+// @Summary Add New Restaurant Table API
+// @Produce json
+// @Accept json
+// @Param restaurantId path string true "Restaurant ID"
+// @Param request body client.AddRestaurantTableRequest true "AddRestaurantTable body"
+// @Security BearerAuth
+// @Router /restaurant/{restaurantId}/table [post]
+func (rc *RestaurantController) AddNewRestaurantTable(c *gin.Context) {
+	var req client.AddRestaurantTableRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.Error(err)
+		return
+	}
+	rIdStr := c.Param("restaurantId")
+	restaurantId, err := strconv.ParseInt(rIdStr, 10, 64)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	ctx := c.Request.Context()
+	currUser, err := rc.UserService.FindCurrentUser(ctx)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	currTenant, err := rc.TenantService.FindTenantByUserId(ctx, currUser.Id)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	res, err := rc.RestaurantService.HandleAddNewRestaurantTable(ctx, currTenant.Id, restaurantId, &req)
+	if err != nil {
+		c.Error(err)
+		return 
+	}
+	api.SuccessMessage(http.StatusCreated, "Restaurant table added successfully.", res, c)
 }

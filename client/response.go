@@ -107,6 +107,7 @@ type RestaurantItemResponse struct {
 type RestaurantTableResponse struct {
 	Id 				int64				`json:"id"`
 	RestaurantId 	int64				`json:"restaurantId"`
+	Label 			string				`json:"label"`
 	IsActive 		bool 				`json:"isActive"`
 	Notes 			*string				`json:"notes"`
 }

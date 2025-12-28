@@ -7,7 +7,6 @@ import (
 	"github.com/nhatflash/fbchain/api"
 	"github.com/nhatflash/fbchain/client"
 	_ "github.com/nhatflash/fbchain/docs"
-	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/service"
 	appErr "github.com/nhatflash/fbchain/error"
 )
@@ -35,25 +34,22 @@ func NewTenantController(ts service.ITenantService, us service.IUserService) *Te
 // @Router /tenant/verify [post]
 func (tc *TenantController) CompleteTenantInfo(c *gin.Context) {
 	var req client.TenantInfoRequest
-	var err error
-	ctx := c.Request.Context()
-	if err = c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.Error(err)
 		return
 	}
-	var u *model.User
-	u, err = tc.UserService.GetCurrentUser(ctx)
+	ctx := c.Request.Context()
+	currUser, err := tc.UserService.FindCurrentUser(ctx)
 	if err != nil {
 		c.Error(err)
 		return
 	}
-	if u.IsVerified {
+	if currUser.IsVerified {
 		c.Error(appErr.BadRequestError("Your account is already verified."))
 		return
 	}
 
-	var res *client.TenantResponse
-	res, err = tc.TenantService.HandleCompleteTenantInfo(ctx, u.Id, &req)
+	res, err := tc.TenantService.HandleCompleteTenantInfo(ctx, currUser.Id, &req)
 	if err != nil {
 		c.Error(err)
 		return

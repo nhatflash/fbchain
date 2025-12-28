@@ -20,9 +20,9 @@ func NewRestaurantRepository(db *sql.DB) *RestaurantRepository {
 	}
 }
 
-func (rr *RestaurantRepository) CreateRestaurant(ctx context.Context, name string, location string, description *string, email *string, phone *string, postalCode string, rType enum.RestaurantType, notes string, subPackageId int64, images []string, tenantId int64) (*model.Restaurant, error) {
-	var tx *sql.Tx	
+func (rr *RestaurantRepository) CreateNewRestaurant(ctx context.Context, name string, location string, description *string, email *string, phone *string, postalCode string, rType enum.RestaurantType, notes string, subPackageId int64, images []string, tenantId int64) (*model.Restaurant, error) {
 	var err error
+	var tx *sql.Tx
 	tx, err = rr.Db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -30,15 +30,15 @@ func (rr *RestaurantRepository) CreateRestaurant(ctx context.Context, name strin
 
 	defer tx.Rollback()
 
-	var ar decimal.Decimal
-	ar, err = decimal.NewFromString("0.0")
+	var avgRating decimal.Decimal
+	avgRating, err = decimal.NewFromString("0.0")
 	if err != nil {
 		return nil, err
 	}
 
 	query := "INSERT INTO restaurants (name, location, description, contact_email, contact_phone, postal_code, type, avg_rating, is_active, notes, subscription_id, tenant_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *"
 	var r model.Restaurant
-	if err = tx.QueryRowContext(ctx, query, name, location, description, email, phone, postalCode, rType, ar, true, notes, subPackageId, tenantId).Scan(
+	if err = tx.QueryRowContext(ctx, query, name, location, description, email, phone, postalCode, rType, avgRating, true, notes, subPackageId, tenantId).Scan(
 		&r.Id,
 		&r.Name,
 		&r.Location,
@@ -99,11 +99,10 @@ func (rr *RestaurantRepository) CreateRestaurantImages(ctx context.Context, rId 
 	return imgs, nil
 }
 
-func (rr *RestaurantRepository) GetRestaurantByName(ctx context.Context, name string) (*model.Restaurant, error) {
-	var err error
+func (rr *RestaurantRepository) FindRestaurantByName(ctx context.Context, name string) (*model.Restaurant, error) {
 	var r model.Restaurant
 	query := "SELECT * FROM restaurants WHERE name = $1 LIMIT 1"
-	err = rr.Db.QueryRowContext(ctx, query, name).Scan(
+	err := rr.Db.QueryRowContext(ctx, query, name).Scan(
 		&r.Id,
 		&r.Location,
 		&r.Description,
@@ -128,10 +127,11 @@ func (rr *RestaurantRepository) GetRestaurantByName(ctx context.Context, name st
 	return &r, nil
 }
 
-func (rr *RestaurantRepository) GetRestaurantImages(ctx context.Context, restaurantId int64) ([]model.RestaurantImage, error) {
+func (rr *RestaurantRepository) FindRestaurantImagesByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantImage, error) {
 	var err error
 	var rows *sql.Rows
-	rows, err = rr.Db.QueryContext(ctx, "SELECT * FROM restaurant_images WHERE restaurant_id = $1", restaurantId)
+	query := "SELECT * FROM restaurant_images WHERE restaurant_id = $1"
+	rows, err = rr.Db.QueryContext(ctx, query, restaurantId)
 	if err != nil {
 		return nil, err
 	}
@@ -151,9 +151,7 @@ func (rr *RestaurantRepository) GetRestaurantImages(ctx context.Context, restaur
 }
 
 func (rr *RestaurantRepository) IsRestaurantNameExist(ctx context.Context, name string) (bool, error) {
-	var err error
-	var rows *sql.Rows
-	rows, err = rr.Db.QueryContext(ctx, "SELECT id FROM restaurants WHERE name = $1 LIMIT 1", name)
+	rows, err := rr.Db.QueryContext(ctx, "SELECT id FROM restaurants WHERE name = $1 LIMIT 1", name)
 	if err != nil {
 		return false, err
 	}
@@ -165,9 +163,7 @@ func (rr *RestaurantRepository) IsRestaurantNameExist(ctx context.Context, name 
 
 
 func (rr *RestaurantRepository) IsRestaurantExist(ctx context.Context, restaurantId int64) (bool, error) {
-	var err error
-	var rows *sql.Rows
-	rows, err = rr.Db.QueryContext(ctx, "SELECT id FROM restaurants WHERE id = $1 LIMIT 1", restaurantId)
+	rows, err := rr.Db.QueryContext(ctx, "SELECT id FROM restaurants WHERE id = $1 LIMIT 1", restaurantId)
 	if err != nil {
 		return false, err
 	}
@@ -177,11 +173,10 @@ func (rr *RestaurantRepository) IsRestaurantExist(ctx context.Context, restauran
 	return false, nil
 }
 
-func (rr *RestaurantRepository) GetRestaurantById(ctx context.Context, id int64) (*model.Restaurant, error) {
-	var err error
+func (rr *RestaurantRepository) FindRestaurantById(ctx context.Context, id int64) (*model.Restaurant, error) {
 	var r model.Restaurant
 	query := "SELECT * FROM restaurants WHERE id = $1 LIMIT 1"
-	err = rr.Db.QueryRowContext(ctx, query, id).Scan(
+	err := rr.Db.QueryRowContext(ctx, query, id).Scan(
 		&r.Id,
 		&r.Name,
 		&r.Location,
@@ -207,7 +202,7 @@ func (rr *RestaurantRepository) GetRestaurantById(ctx context.Context, id int64)
 	return &r, nil
 }
 
-func (rr *RestaurantRepository) GetRestaurantsByTenantId(ctx context.Context, tenantId int64) ([]model.Restaurant, error) {
+func (rr *RestaurantRepository) FindRestaurantsByTenantId(ctx context.Context, tenantId int64) ([]model.Restaurant, error) {
 	var err error
 	var rows *sql.Rows
 	query := "SELECT * FROM restaurants WHERE tenant_id = $1"
@@ -245,7 +240,7 @@ func (rr *RestaurantRepository) GetRestaurantsByTenantId(ctx context.Context, te
 	return restaurants, nil
 }
 
-func (rr *RestaurantRepository) ListAllRestaurants(ctx context.Context) ([]model.Restaurant, error) {
+func (rr *RestaurantRepository) FindAllRestaurants(ctx context.Context) ([]model.Restaurant, error) {
 	var err error
 	var rows *sql.Rows
 	query := "SELECT * FROM restaurants ORDER BY id ASC"
@@ -284,11 +279,10 @@ func (rr *RestaurantRepository) ListAllRestaurants(ctx context.Context) ([]model
 }
 
 
-func (rr *RestaurantRepository) GetRestaurantImageById(ctx context.Context, id int64) (*model.RestaurantImage, error) {
-	var err error
+func (rr *RestaurantRepository) FindRestaurantImageById(ctx context.Context, id int64) (*model.RestaurantImage, error) {
 	var i model.RestaurantImage
 	query := "SELECT * FROM restaurant_images WHERE id = $1 LIMIT 1"
-	err = rr.Db.QueryRowContext(ctx, query, id).Scan(
+	err := rr.Db.QueryRowContext(ctx, query, id).Scan(
 		&i.Id, 
 		&i.Image,
 		&i.CreatedAt,
@@ -304,7 +298,7 @@ func (rr *RestaurantRepository) GetRestaurantImageById(ctx context.Context, id i
 }
 
 
-func (rr *RestaurantRepository) ListAllRestaurantImages(ctx context.Context) ([]model.RestaurantImage, error) {
+func (rr *RestaurantRepository) FindAllRestaurantImages(ctx context.Context) ([]model.RestaurantImage, error) {
 	var err error
 	var rows *sql.Rows
 	query := "SELECT * FROM restaurant_images ORDER BY id ASC"

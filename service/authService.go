@@ -44,34 +44,30 @@ func NewAuthService(ur *repository.UserRepository, tr *repository.TenantReposito
 
 // Sign in method
 func (as *AuthService) HandleSignIn(ctx context.Context, req *client.SignInRequest) (*client.SignInResponse, error) {
-	login := req.Login
-
-	var loggedUser *model.User
 	var err error
 	var foundUser *model.User
-	if strings.Contains(login, "@") {
-		foundUser, err = as.UserRepo.GetUserByEmail(ctx, req.Login)
+	if strings.Contains(req.Login, "@") {
+		foundUser, err = as.UserRepo.FindUserByEmail(ctx, req.Login)
 		if err != nil {
 			return nil, appErr.UnauthorizedError("Invalid credentials.")
 		}
 	} else {
-		foundUser, err = as.UserRepo.GetUserByPhone(ctx, req.Login)
+		foundUser, err = as.UserRepo.FindUserByPhone(ctx, req.Login)
 		if err != nil {
 			return nil, appErr.UnauthorizedError("Invalid credentials.")
 		}
 	}
-	loggedUser = foundUser
-	if !security.VerifyPassword(req.Password, loggedUser.Password) {
+	if !security.VerifyPassword(req.Password, foundUser.Password) {
 		return nil, appErr.UnauthorizedError("Invalid credentials.")
 	}
 	
 	var accessToken string
-	accessToken, err = security.GenerateJwtAccessToken(loggedUser)
+	accessToken, err = security.GenerateJwtAccessToken(foundUser)
 	if err != nil {
 		return nil, err
 	}
 	var refreshToken string
-	refreshToken, err = security.GenerateJwtRefreshToken(loggedUser)
+	refreshToken, err = security.GenerateJwtRefreshToken(foundUser)
 	if err != nil {
 		return nil, err
 	}
@@ -85,31 +81,23 @@ func (as *AuthService) HandleSignIn(ctx context.Context, req *client.SignInReque
 
 // tenant sign up method
 func (as *AuthService) HandleTenantUserSignUp(ctx context.Context, req *client.TenantSignUpRequest) (*client.UserResponse, error) {
-	firstName := req.FirstName
-	lastName := req.LastName
-	email := req.Email
-	password := req.Password
-	confirmPassword := req.Password
-	birthdateStr := req.Birthdate
-	gender := req.Gender
-
 	var err error
-	if err = ValidateSignUpRequest(ctx, email, password, confirmPassword, as.UserRepo); err != nil {
+	if err = ValidateSignUpRequest(ctx, req.Email, req.Password, req.ConfirmPassword, as.UserRepo); err != nil {
 		return nil, err
 	}
 
 	var birthdate *time.Time
-	birthdate, err = helper.ConvertToDate(birthdateStr)
+	birthdate, err = helper.ConvertToDate(req.Birthdate)
 	if err != nil {
 		return nil, err
 	}
 	var hashedPassword string
-	hashedPassword, err = security.GenerateHashedPassword(password)
+	hashedPassword, err = security.GenerateHashedPassword(req.Password)
 	if err != nil {
 		return nil, err
 	}
 	var tenantUser *model.User
-	tenantUser, err = as.UserRepo.CreateTenantUser(ctx, firstName, lastName, email, hashedPassword, birthdate, gender)
+	tenantUser, err = as.UserRepo.CreateTenantUser(ctx, req.FirstName, req.LastName, req.Email, hashedPassword, birthdate, req.Gender)
 	if err != nil {
 		return nil, err
 	}
@@ -234,11 +222,15 @@ func GenerateTenantCode() string {
 }
 
 
+
+
 func GenerateStaffCode() string {
 	now := time.Now()
 	unixMilli := now.UnixMilli()
 	return fmt.Sprintf("STAFF-%d", unixMilli)
 }
+
+
 
 func ValidateSignUpRequest(ctx context.Context, email string, password string, confirmPassword string, ur *repository.UserRepository) error {
 	var err error

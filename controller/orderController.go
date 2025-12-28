@@ -7,7 +7,6 @@ import (
 	"github.com/nhatflash/fbchain/api"
 	"github.com/nhatflash/fbchain/client"
 	_ "github.com/nhatflash/fbchain/docs"
-	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/service"
 	appErr "github.com/nhatflash/fbchain/error"
 )
@@ -37,32 +36,28 @@ func NewOrderController(os service.IOrderService, ts service.ITenantService, us 
 // @Router /tenant/order [post]
 func (oc OrderController) PaySubPackage(c *gin.Context) {
 	var paySubPackageReq client.PaySubPackageRequest
-	var err error
+	
+	if err := c.ShouldBindJSON(&paySubPackageReq); err != nil {
+		c.Error(err)
+		return
+	}
 	ctx := c.Request.Context()
-	if err = c.ShouldBindJSON(&paySubPackageReq); err != nil {
-		c.Error(err)
-		return
-	}
-
-	var u *model.User
-	u, err = oc.UserService.GetCurrentUser(ctx)
+	currUser, err := oc.UserService.FindCurrentUser(ctx)
 	if err != nil {
 		c.Error(err)
 		return
 	}
-	if !u.IsVerified {
+	if !currUser.IsVerified {
 		c.Error(appErr.UnauthorizedError("Please verify your account before doing this action."))
+		return
 	}
-
-	var t *model.Tenant
-	t, err = oc.TenantService.GetTenantByUserId(ctx, u.Id)
+	currTenant, err := oc.TenantService.FindTenantByUserId(ctx, currUser.Id)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	var res *client.OrderResponse
-	res, err = oc.OrderService.HandlePaySubPackage(ctx, &paySubPackageReq, t.Id)
+	res, err := oc.OrderService.HandlePaySubPackage(ctx, &paySubPackageReq, currTenant.Id)
 	if err != nil {
 		c.Error(err)
 		return

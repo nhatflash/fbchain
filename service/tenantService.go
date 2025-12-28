@@ -10,10 +10,10 @@ import (
 )
 
 type ITenantService interface {
-	GetTenantById(ctx context.Context, id int64) (*model.Tenant, error)
-	GetListTenant(ctx context.Context) ([]model.Tenant, error)
+	FindTenantById(ctx context.Context, id int64) (*model.Tenant, error)
+	FindAllTenants(ctx context.Context) ([]model.Tenant, error)
 	HandleCompleteTenantInfo(ctx context.Context, userId int64, req *client.TenantInfoRequest) (*client.TenantResponse, error)
-	GetTenantByUserId(ctx context.Context, userId int64) (*model.Tenant, error)
+	FindTenantByUserId(ctx context.Context, userId int64) (*model.Tenant, error)
 }
 
 type TenantService struct {
@@ -29,8 +29,8 @@ func NewTenantService(tr *repository.TenantRepository, ur *repository.UserReposi
 }
 
 
-func (ts *TenantService) GetTenantById(ctx context.Context, id int64) (*model.Tenant, error) {
-	tenant, err := ts.TenantRepo.GetTenantById(ctx, id)
+func (ts *TenantService) FindTenantById(ctx context.Context, id int64) (*model.Tenant, error) {
+	tenant, err := ts.TenantRepo.FindTenantById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -38,8 +38,8 @@ func (ts *TenantService) GetTenantById(ctx context.Context, id int64) (*model.Te
 }
 
 
-func (ts *TenantService) GetListTenant(ctx context.Context) ([]model.Tenant, error) {
-	tenants, err := ts.TenantRepo.ListAllTenants(ctx)
+func (ts *TenantService) FindAllTenants(ctx context.Context) ([]model.Tenant, error) {
+	tenants, err := ts.TenantRepo.FindAllTenants(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -72,8 +72,8 @@ func (ts *TenantService) HandleCompleteTenantInfo(ctx context.Context, userId in
 }
 
 
-func (ts *TenantService) GetTenantByUserId(ctx context.Context, userId int64) (*model.Tenant, error) {
-	t, err := ts.TenantRepo.GetTenantByUserId(ctx, userId)
+func (ts *TenantService) FindTenantByUserId(ctx context.Context, userId int64) (*model.Tenant, error) {
+	t, err := ts.TenantRepo.FindTenantByUserId(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
