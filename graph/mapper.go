@@ -71,7 +71,7 @@ func MapToGqlRestaurantItem(item *model.RestaurantItem) *gqlModel.RestaurantItem
 	idStr := strconv.FormatInt(item.RestaurantId, 10)
 	price := item.Price.String()
 	return &gqlModel.RestaurantItem{
-		ID: strconv.FormatInt(item.Id, 10),
+		ID: item.Id,
 		Name: item.Name,
 		Description: item.Description,
 		Price: &price,

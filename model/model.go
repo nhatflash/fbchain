@@ -98,7 +98,7 @@ type Payment struct {
 
 
 type RestaurantItem struct {
-	Id 				int64				`json:"id"`
+	Id 				string				`json:"id"`
 	Name 			string 				`json:"name"`
 	Description 	*string 			`json:"description"`
 	Price 			decimal.Decimal 	`json:"price"`
@@ -111,3 +111,12 @@ type RestaurantItem struct {
 	RestaurantId 	int64				`json:"restaurantId"`
 }
 
+
+type RestaurantTable struct {
+	Id 				int64				`json:"id"`
+	RestaurantId 	int64				`json:"restaurantId"`
+	Label 			string 				`json:"label"`
+	IsActive 		bool				`json:"isActive"`
+	Notes 			*string				`json:"notes"`
+	CreatedAt 		time.Time			`json:"createdAt"`
+}

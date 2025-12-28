@@ -1,10 +1,12 @@
 package database
 
 import (
-	_ "github.com/lib/pq"
 	sql "database/sql"
 	"os"
+	_ "github.com/lib/pq"
 	"github.com/redis/go-redis/v9"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 func ConnectToPostgreSQL() (*sql.DB, error) {
@@ -29,4 +31,16 @@ func ConnectToRedisServer() *redis.Client {
 		Addr: server,
 	})
 	return rdb
+}
+
+
+func ConnectToMongoDB() (*mongo.Client, error) {
+	uri := os.Getenv("MONGO_URI")
+	clientOptions := options.Client().ApplyURI(uri)
+
+	client, err := mongo.Connect(clientOptions)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
 }

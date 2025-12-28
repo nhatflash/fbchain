@@ -98,3 +98,8 @@ type AddRestaurantItemRequest struct {
 	Image 				*string 			`json:"image" binding:"omitempty"`
 	Notes 				*string 			`json:"notes" binding:"omitempty"`
 }
+
+
+type AddRestaurantTableRequest struct {
+	
+}

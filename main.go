@@ -30,6 +30,7 @@ import (
 	ginSwg "github.com/swaggo/gin-swagger"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 // @title FB Chain Management API
@@ -70,11 +71,26 @@ func main() {
 	// Redis 
 	rdb := database.ConnectToRedisServer()
 
+	var mongodb *mongo.Client
+	mongodb, err = database.ConnectToMongoDB()
+	if err != nil {
+		log.Fatalln("Connect to MongoDB failed", err.Error())
+		return
+	}
+
+	defer mongodb.Disconnect(context.TODO())
+	err = database.ValidateRestaurantItemSchema(mongodb.Database("restaurants"))
+	if err != nil {
+		log.Fatalln("Error when validate restaurant items schema:", err)
+		return
+	}
+	rItemColl := mongodb.Database("restaurants").Collection("restaurant_items")
 	
 	// Dependency injection
 	userRepository := repository.NewUserRepository(db)
 	tenantRepository := repository.NewTenantRepository(db)
 	restaurantRepository := repository.NewRestaurantRepository(db)
+	restaurantItemRepository := repository.NewRestaurantItemRepository(rItemColl)
 	subPackageRepository := repository.NewSubPackageRepository(db)
 	orderRepository := repository.NewOrderRepository(db)
 	paymentRepository := repository.NewPaymentRepository(db)
@@ -82,7 +98,7 @@ func main() {
 	authService := service.NewAuthService(userRepository, tenantRepository, rdb)
 	userService := service.NewUserService(userRepository)
 	tenantService := service.NewTenantService(tenantRepository, userRepository)
-	restaurantService := service.NewRestaurantService(restaurantRepository, subPackageRepository)
+	restaurantService := service.NewRestaurantService(restaurantRepository, subPackageRepository, restaurantItemRepository)
 	subPackageService := service.NewSubPackageService(subPackageRepository)
 	orderService := service.NewOrderService(restaurantRepository, subPackageRepository, orderRepository)
 	paymentService := service.NewPaymentService(paymentRepository, orderRepository)

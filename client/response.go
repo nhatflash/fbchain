@@ -92,7 +92,7 @@ type OrderResponse struct {
 
 
 type RestaurantItemResponse struct {
-	Id 				int64				`json:"id"`
+	Id 				string				`json:"id"`
 	Name 			string 				`json:"name"`
 	Description 	*string				`json:"description"`
 	Price 			decimal.Decimal 	`json:"price"`
@@ -101,4 +101,12 @@ type RestaurantItemResponse struct {
 	Image 			*string				`json:"image"`
 	Notes 			*string 			`json:"notes"`
 	RestaurantId 	int64				`json:"restaurantId"`
+}
+
+
+type RestaurantTableResponse struct {
+	Id 				int64				`json:"id"`
+	RestaurantId 	int64				`json:"restaurantId"`
+	IsActive 		bool 				`json:"isActive"`
+	Notes 			*string				`json:"notes"`
 }

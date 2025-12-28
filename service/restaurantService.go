@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/nhatflash/fbchain/client"
+	"github.com/nhatflash/fbchain/enum"
 	appErr "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/helper"
 	"github.com/nhatflash/fbchain/model"
@@ -22,19 +24,22 @@ type IRestaurantService interface {
 	HandleAddNewRestaurantItem(ctx context.Context, restaurantId int64, tenantId int64, req *client.AddRestaurantItemRequest) (*client.RestaurantItemResponse, error)
 	GetItemsByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantItem, error)
 	GetAllRestaurantItems(ctx context.Context) ([]model.RestaurantItem, error)
-	GetRestaurantItemById(ctx context.Context, id int64) (*model.RestaurantItem, error)
+	GetRestaurantItemById(ctx context.Context, id string) (*model.RestaurantItem, error)
 }
 
 type RestaurantService struct {
 	RestaurantRepo 		*repository.RestaurantRepository
 	SubPackageRepo 		*repository.SubPackageRepository
+	RestaurantItemRepo 	*repository.RestaurantItemRepository
 }
 
-func NewRestaurantService(rr *repository.RestaurantRepository, spr *repository.SubPackageRepository) IRestaurantService {
+func NewRestaurantService(rr *repository.RestaurantRepository, 
+						  spr *repository.SubPackageRepository, 
+						  rir *repository.RestaurantItemRepository) IRestaurantService {
 	return &RestaurantService{
 		RestaurantRepo: rr,
 		SubPackageRepo: spr,
-
+		RestaurantItemRepo: rir,
 	}
 }
 
@@ -155,18 +160,30 @@ func (rs *RestaurantService) HandleAddNewRestaurantItem(ctx context.Context, res
 		return nil, appErr.BadRequestError("Invalid price.")
 	}
 
-	var i *model.RestaurantItem
-	i, err = rs.RestaurantRepo.AddNewRestaurantItem(ctx, req.Name, req.Description, price, req.Type, req.Image, req.Notes, restaurantId)
+	item := &model.RestaurantItem{
+		Name: req.Name,
+		Description: req.Description,
+		Price: price,
+		Type: req.Type,
+		Status: enum.ITEM_AVAILABLE,
+		Image: req.Image,
+		Notes: req.Notes,
+		RestaurantId: restaurantId,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	var newItem *model.RestaurantItem
+	newItem, err = rs.RestaurantItemRepo.AddNewRestaurantItem(ctx, item)
 	if err != nil {
 		return nil, err
 	}
-	return helper.MapToRestaurantItemResponse(i), nil
+
+	return helper.MapToRestaurantItemResponse(newItem), nil
 }
 
 
-
 func (rs *RestaurantService) GetItemsByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantItem, error) {
-	items, err := rs.RestaurantRepo.GetItemsByRestaurantId(ctx, restaurantId)
+	items, err := rs.RestaurantItemRepo.FindRestaurantItemsByRestaurantId(ctx, restaurantId)
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +192,7 @@ func (rs *RestaurantService) GetItemsByRestaurantId(ctx context.Context, restaur
 
 
 func (rs *RestaurantService) GetAllRestaurantItems(ctx context.Context) ([]model.RestaurantItem, error) {
-	items, err := rs.RestaurantRepo.GetAllRestaurantItems(ctx)
+	items, err := rs.RestaurantItemRepo.FindAllRestaurantItems(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -183,8 +200,8 @@ func (rs *RestaurantService) GetAllRestaurantItems(ctx context.Context) ([]model
 }
 
 
-func (rs *RestaurantService) GetRestaurantItemById(ctx context.Context, id int64) (*model.RestaurantItem, error) {
-	item, err := rs.RestaurantRepo.GetRestaurantItemById(ctx, id)
+func (rs *RestaurantService) GetRestaurantItemById(ctx context.Context, id string) (*model.RestaurantItem, error) {
+	item, err := rs.RestaurantItemRepo.FindRestaurantItemById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -192,6 +209,11 @@ func (rs *RestaurantService) GetRestaurantItemById(ctx context.Context, id int64
 }
 
 
+
+
+func (rs *RestaurantService) HandleAddNewRestaurantTable(ctx context.Context, req *client.AddRestaurantTableRequest) (*model.RestaurantTable, error) {
+	return nil, nil
+}
 
 
 func validateCreateRestaurantRequest(ctx context.Context, name string, subPackageRepo *repository.SubPackageRepository, resRepo *repository.RestaurantRepository) error {
@@ -213,3 +235,5 @@ func validateCreateRestaurantRequest(ctx context.Context, name string, subPackag
 	}
 	return nil
 }
+
+

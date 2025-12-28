@@ -178,14 +178,9 @@ func (r *queryResolver) RestaurantItems(ctx context.Context) ([]*gqlModel.Restau
 
 // RestaurantItem is the resolver for the restaurantItem field.
 func (r *queryResolver) RestaurantItem(ctx context.Context, id string) (*gqlModel.RestaurantItem, error) {
-	var itemId int64
-	var err error
-	itemId, err = strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		return nil, err
-	}
 	var item *model.RestaurantItem
-	item, err = r.RestaurantService.GetRestaurantItemById(ctx, itemId)
+	var err error
+	item, err = r.RestaurantService.GetRestaurantItemById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
