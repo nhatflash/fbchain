@@ -35,6 +35,10 @@ func (ps *PaymentService) HandleCashPayment(ctx context.Context, orderId int64, 
 	if err = ps.PaymentRepo.CreateCashPayment(ctx, orderId, o.Amount, notes); err != nil {
 		return err
 	}
+	_, err = ps.OrderRepo.FinishOrder(ctx, orderId)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

@@ -121,6 +121,8 @@ func main() {
 					UserService: userService,
 					TenantService: tenantService,
 					RestaurantService: restaurantService,
+					SubPackageService: subPackageService,
+					OrderService: orderService,
 				},
 			},
 		),

@@ -22,6 +22,54 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input gqlModel.NewTod
 	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
 }
 
+// Tenant is the resolver for the tenant field.
+func (r *orderResolver) Tenant(ctx context.Context, obj *gqlModel.Order) (*gqlModel.Tenant, error) {
+	var tenantId int64
+	var err error
+	tenantId, err = strconv.ParseInt(*obj.TenantID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var t *model.Tenant
+	t, err = r.TenantService.FindTenantById(ctx, tenantId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlTenant(t), nil
+}
+
+// Restaurant is the resolver for the restaurant field.
+func (r *orderResolver) Restaurant(ctx context.Context, obj *gqlModel.Order) (*gqlModel.Restaurant, error) {
+	var restaurantId int64
+	var err error
+	restaurantId, err = strconv.ParseInt(*obj.RestaurantID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var res *model.Restaurant
+	res, err = r.RestaurantService.FindRestaurantById(ctx, restaurantId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurant(res), nil
+}
+
+// SubPackage is the resolver for the subPackage field.
+func (r *orderResolver) SubPackage(ctx context.Context, obj *gqlModel.Order) (*gqlModel.SubPackage, error) {
+	var subId int64
+	var err error
+	subId, err = strconv.ParseInt(*obj.SubPackageID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var s *model.SubPackage
+	s, err = r.SubPackageService.FindSubPackageById(ctx, subId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlSubPackage(s), nil
+}
+
 // Me is the resolver for the me field.
 func (r *queryResolver) Me(ctx context.Context) (*gqlModel.User, error) {
 	claims, ok := ctx.Value(middleware.UserKey{}).(*security.JwtAccessClaims)
@@ -32,28 +80,18 @@ func (r *queryResolver) Me(ctx context.Context) (*gqlModel.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	return MapToGqlModelUser(u), nil
+	return MapToGqlUser(u), nil
 }
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*gqlModel.User, error) {
 	var err error
-	// user, ok := ctx.Value(middleware.UserKey{}).(*security.JwtAccessClaims)
-	// if !ok || user == nil {
-	// 	return nil, appErr.UnauthorizedError("Authentication is required.")
-	// }
-
 	var users []model.User
 	users, err = r.UserService.FindAllUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
-	var gqlUsers []*gqlModel.User
-	for _, u := range users {
-		var gqlU = MapToGqlModelUser(&u)
-		gqlUsers = append(gqlUsers, gqlU)
-	}
-	return gqlUsers, nil
+	return MapToGqlUsers(users), nil
 }
 
 // User is the resolver for the user field.
@@ -69,21 +107,16 @@ func (r *queryResolver) User(ctx context.Context, id string) (*gqlModel.User, er
 	if err != nil {
 		return nil, err
 	}
-	return MapToGqlModelUser(u), nil
+	return MapToGqlUser(u), nil
 }
 
 // Tenants is the resolver for the tenants field.
 func (r *queryResolver) Tenants(ctx context.Context) ([]*gqlModel.Tenant, error) {
-	t, err := r.TenantService.FindAllTenants(ctx)
+	tenants, err := r.TenantService.FindAllTenants(ctx)
 	if err != nil {
 		return nil, err
 	}
-	var tenants []*gqlModel.Tenant
-	for _, tenant := range t {
-		tn := MapToGqlModelTenant(&tenant)
-		tenants = append(tenants, tn)
-	}
-	return tenants, nil
+	return MapToGqlTenants(tenants), nil
 }
 
 // Tenant is the resolver for the tenant field.
@@ -99,7 +132,7 @@ func (r *queryResolver) Tenant(ctx context.Context, id string) (*gqlModel.Tenant
 	if err != nil {
 		return nil, err
 	}
-	return MapToGqlModelTenant(t), nil
+	return MapToGqlTenant(t), nil
 }
 
 // Restaurants is the resolver for the restaurants field.
@@ -108,12 +141,7 @@ func (r *queryResolver) Restaurants(ctx context.Context) ([]*gqlModel.Restaurant
 	if err != nil {
 		return nil, err
 	}
-	var gqlRestaurants []*gqlModel.Restaurant
-	for _, res := range restaurants {
-		gqlRes := MapToGqlRestaurant(&res)
-		gqlRestaurants = append(gqlRestaurants, gqlRes)
-	}
-	return gqlRestaurants, nil
+	return MapToGqlRestaurants(restaurants), nil
 }
 
 // Restaurant is the resolver for the restaurant field.
@@ -138,12 +166,7 @@ func (r *queryResolver) RestaurantImages(ctx context.Context) ([]*gqlModel.Resta
 	if err != nil {
 		return nil, err
 	}
-	var gqlRImgs []*gqlModel.RestaurantImage
-	for _, img := range imgs {
-		gqlRImg := MapToGqlRestaurantImage(&img)
-		gqlRImgs = append(gqlRImgs, gqlRImg)
-	}
-	return gqlRImgs, nil
+	return MapToGqlRestaurantImages(imgs), nil
 }
 
 // RestaurantImage is the resolver for the restaurantImage field.
@@ -168,12 +191,7 @@ func (r *queryResolver) RestaurantItems(ctx context.Context) ([]*gqlModel.Restau
 	if err != nil {
 		return nil, err
 	}
-	var gqlItems []*gqlModel.RestaurantItem
-	for _, i := range items {
-		gqlItem := MapToGqlRestaurantItem(&i)
-		gqlItems = append(gqlItems, gqlItem)
-	}
-	return gqlItems, nil
+	return MapToGqlRestaurantItems(items), nil
 }
 
 // RestaurantItem is the resolver for the restaurantItem field.
@@ -185,6 +203,81 @@ func (r *queryResolver) RestaurantItem(ctx context.Context, id string) (*gqlMode
 		return nil, err
 	}
 	return MapToGqlRestaurantItem(item), nil
+}
+
+// RestaurantTables is the resolver for the restaurantTables field.
+func (r *queryResolver) RestaurantTables(ctx context.Context) ([]*gqlModel.RestaurantTable, error) {
+	tables, err := r.RestaurantService.FindAllRestaurantTables(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurantTables(tables), nil
+}
+
+// RestaurantTable is the resolver for the restaurantTable field.
+func (r *queryResolver) RestaurantTable(ctx context.Context, id string) (*gqlModel.RestaurantTable, error) {
+	var err error
+	var tableId int64
+	tableId, err = strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var table *model.RestaurantTable
+	table, err = r.RestaurantService.FindRestaurantTableById(ctx, tableId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurantTable(table), nil
+}
+
+// SubPackages is the resolver for the subPackages field.
+func (r *queryResolver) SubPackages(ctx context.Context) ([]*gqlModel.SubPackage, error) {
+	s, err := r.SubPackageService.FindAllSubPackages(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlSubPackages(s), nil
+}
+
+// SubPackage is the resolver for the subPackage field.
+func (r *queryResolver) SubPackage(ctx context.Context, id string) (*gqlModel.SubPackage, error) {
+	var subId int64
+	var err error
+	subId, err = strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var s *model.SubPackage
+	s, err = r.SubPackageService.FindSubPackageById(ctx, subId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlSubPackage(s), nil
+}
+
+// Orders is the resolver for the orders field.
+func (r *queryResolver) Orders(ctx context.Context) ([]*gqlModel.Order, error) {
+	o, err := r.OrderService.FindAllOrders(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlOrders(o), nil
+}
+
+// Order is the resolver for the order field.
+func (r *queryResolver) Order(ctx context.Context, id string) (*gqlModel.Order, error) {
+	var orderId int64
+	var err error
+	orderId, err = strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var o *model.Order
+	o, err = r.OrderService.FindOrderById(ctx, orderId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlOrder(o), nil
 }
 
 // Tenant is the resolver for the tenant field.
@@ -200,7 +293,7 @@ func (r *restaurantResolver) Tenant(ctx context.Context, obj *gqlModel.Restauran
 	if err != nil {
 		return nil, err
 	}
-	return MapToGqlModelTenant(t), nil
+	return MapToGqlTenant(t), nil
 }
 
 // Images is the resolver for the images field.
@@ -216,12 +309,7 @@ func (r *restaurantResolver) Images(ctx context.Context, obj *gqlModel.Restauran
 	if err != nil {
 		return nil, err
 	}
-	var gqlRImgs []*gqlModel.RestaurantImage
-	for _, img := range imgs {
-		gqlRImg := MapToGqlRestaurantImage(&img)
-		gqlRImgs = append(gqlRImgs, gqlRImg)
-	}
-	return gqlRImgs, nil
+	return MapToGqlRestaurantImages(imgs), nil
 }
 
 // Items is the resolver for the items field.
@@ -237,12 +325,7 @@ func (r *restaurantResolver) Items(ctx context.Context, obj *gqlModel.Restaurant
 	if err != nil {
 		return nil, err
 	}
-	var gqlItems []*gqlModel.RestaurantItem
-	for _, i := range items {
-		gqlItem := MapToGqlRestaurantItem(&i)
-		gqlItems = append(gqlItems, gqlItem)
-	}
-	return gqlItems, nil
+	return MapToGqlRestaurantItems(items), nil
 }
 
 // Restaurant is the resolver for the restaurant field.
@@ -277,6 +360,22 @@ func (r *restaurantItemResolver) Restaurant(ctx context.Context, obj *gqlModel.R
 	return MapToGqlRestaurant(res), nil
 }
 
+// Restaurant is the resolver for the restaurant field.
+func (r *restaurantTableResolver) Restaurant(ctx context.Context, obj *gqlModel.RestaurantTable) (*gqlModel.Restaurant, error) {
+	var restaurantId int64
+	var err error
+	restaurantId, err = strconv.ParseInt(*obj.RestaurantID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var res *model.Restaurant
+	res, err = r.RestaurantService.FindRestaurantById(ctx, restaurantId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurant(res), nil
+}
+
 // User is the resolver for the user field.
 func (r *tenantResolver) User(ctx context.Context, obj *gqlModel.Tenant) (*gqlModel.User, error) {
 	var err error
@@ -290,7 +389,7 @@ func (r *tenantResolver) User(ctx context.Context, obj *gqlModel.Tenant) (*gqlMo
 	if err != nil {
 		return nil, err
 	}
-	return MapToGqlModelUser(u), nil
+	return MapToGqlUser(u), nil
 }
 
 // Restaurants is the resolver for the restaurants field.
@@ -314,8 +413,27 @@ func (r *tenantResolver) Restaurants(ctx context.Context, obj *gqlModel.Tenant) 
 	return gqlRestaurants, nil
 }
 
+// Orders is the resolver for the orders field.
+func (r *tenantResolver) Orders(ctx context.Context, obj *gqlModel.Tenant) ([]*gqlModel.Order, error) {
+	var err error
+	var tenantId int64
+	tenantId, err = strconv.ParseInt(obj.ID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var orders []model.Order
+	orders, err = r.OrderService.FindOrdersByTenantId(ctx, tenantId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlOrders(orders), nil
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
+
+// Order returns OrderResolver implementation.
+func (r *Resolver) Order() OrderResolver { return &orderResolver{r} }
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
@@ -329,12 +447,17 @@ func (r *Resolver) RestaurantImage() RestaurantImageResolver { return &restauran
 // RestaurantItem returns RestaurantItemResolver implementation.
 func (r *Resolver) RestaurantItem() RestaurantItemResolver { return &restaurantItemResolver{r} }
 
+// RestaurantTable returns RestaurantTableResolver implementation.
+func (r *Resolver) RestaurantTable() RestaurantTableResolver { return &restaurantTableResolver{r} }
+
 // Tenant returns TenantResolver implementation.
 func (r *Resolver) Tenant() TenantResolver { return &tenantResolver{r} }
 
 type mutationResolver struct{ *Resolver }
+type orderResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type restaurantResolver struct{ *Resolver }
 type restaurantImageResolver struct{ *Resolver }
 type restaurantItemResolver struct{ *Resolver }
+type restaurantTableResolver struct{ *Resolver }
 type tenantResolver struct{ *Resolver }

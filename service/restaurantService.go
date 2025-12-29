@@ -27,6 +27,9 @@ type IRestaurantService interface {
 	FindAllRestaurantItems(ctx context.Context) ([]model.RestaurantItem, error)
 	FindRestaurantItemById(ctx context.Context, id string) (*model.RestaurantItem, error)
 	HandleAddNewRestaurantTable(ctx context.Context, tenantId int64, restaurantId int64, req *client.AddRestaurantTableRequest) (*client.RestaurantTableResponse, error)
+	FindRestaurantTableById(ctx context.Context, id int64) (*model.RestaurantTable, error)
+	FindRestaurantTablesByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantTable, error)
+	FindAllRestaurantTables(ctx context.Context) ([]model.RestaurantTable, error)
 }
 
 type RestaurantService struct {
@@ -49,19 +52,9 @@ func NewRestaurantService(rr *repository.RestaurantRepository,
 }
 
 func (rs *RestaurantService) HandleCreateRestaurant(ctx context.Context, req *client.CreateRestaurantRequest, tenantId int64) (*client.RestaurantResponse, error) {
-	name := req.Name
-	location := req.Location
-	description := req.Description
-	contactEmail := req.ContactEmail
-	contactPhone := req.ContactPhone
-	postalCode := req.PostalCode
-	rType := req.Type
-	notes := req.Notes
-	images := req.Images
-
 	var err error
 	
-	if err = validateCreateRestaurantRequest(ctx, name, rs.SubPackageRepo, rs.RestaurantRepo); err != nil {
+	if err = validateCreateRestaurantRequest(ctx, req.Name, rs.SubPackageRepo, rs.RestaurantRepo); err != nil {
 		return nil, err
 	}
 	var s *model.SubPackage
@@ -70,7 +63,7 @@ func (rs *RestaurantService) HandleCreateRestaurant(ctx context.Context, req *cl
 		return nil, err
 	}
 	var r *model.Restaurant
-	r, err = rs.RestaurantRepo.CreateNewRestaurant(ctx, name, location, description, contactEmail, contactPhone, postalCode, *rType, notes, s.Id, images, tenantId)
+	r, err = rs.RestaurantRepo.CreateNewRestaurant(ctx, req.Name, req.Location, req.Description, req.ContactEmail, req.ContactPhone, req.PostalCode, *req.Type, req.Notes, s.Id, req.Images, tenantId)
 	if err != nil {
 		return nil, err
 	}
@@ -238,6 +231,33 @@ func (rs *RestaurantService) HandleAddNewRestaurantTable(ctx context.Context, te
 		return nil, err
 	}
 	return helper.MapToRestaurantTableResponse(table), nil
+}
+
+
+func (rs *RestaurantService) FindRestaurantTableById(ctx context.Context, id int64) (*model.RestaurantTable, error) {
+	t, err := rs.RestaurantTableRepo.FindRestaurantTableById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
+}
+
+
+func (rs *RestaurantService) FindRestaurantTablesByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantTable, error) {
+	tables, err := rs.RestaurantTableRepo.FindRestaurantTablesByRestaurantId(ctx, restaurantId)
+	if err != nil {
+		return nil, err
+	}
+	return tables, nil
+}
+
+
+func (rs *RestaurantService) FindAllRestaurantTables(ctx context.Context) ([]model.RestaurantTable, error) {
+	tables, err := rs.RestaurantTableRepo.FindAllRestaurantTables(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return tables, nil
 }
 
 

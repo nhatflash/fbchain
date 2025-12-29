@@ -172,11 +172,15 @@ models:
     model: github.com/nhatflash/fbchain/enum.ItemType
   ItemStatus:
     model: github.com/nhatflash/fbchain/enum.ItemStatus
+  OrderStatus:
+    model: github.com/nhatflash/fbchain/enum.OrderStatus
   Tenant:
     fields:
       user:
         resolver: true
       restaurants:
+        resolver: true
+      orders: 
         resolver: true
   Restaurant:
     fields:
@@ -194,6 +198,19 @@ models:
     fields:
       restaurant:
         resolver: true
+  RestaurantTable:
+    fields:
+      restaurant:
+        resolver: true
+  Order:
+    fields:
+      tenant:
+        resolver: true
+      restaurant:
+        resolver: true
+      subPackage:
+        resolver: true
+
       
 
   

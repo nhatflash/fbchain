@@ -13,6 +13,8 @@ import (
 
 type ISubPackageService interface {
 	HandleCreateSubPackage(ctx context.Context, req *client.CreateSubPackageRequest) (*client.SubPackageResponse, error)
+	FindSubPackageById(ctx context.Context, id int64) (*model.SubPackage, error)
+	FindAllSubPackages(ctx context.Context) ([]model.SubPackage, error)
 }
 
 type SubPackageService struct {
@@ -26,32 +28,44 @@ func NewSubPackageService(spr *repository.SubPackageRepository) ISubPackageServi
 }
 
 func (ss *SubPackageService) HandleCreateSubPackage(ctx context.Context, req *client.CreateSubPackageRequest) (*client.SubPackageResponse, error) {
-	name := req.Name
-	description := req.Description
-	durationMonth := req.DurationMonth
-	priceStr := req.Price
-	image := req.Image
-
 	var err error
-	var price decimal.Decimal
-	
 	var exist bool
-	exist, err = ss.SubPackageRepo.CheckSubPackageNameExists(ctx, name)
+	exist, err = ss.SubPackageRepo.CheckSubPackageNameExists(ctx, req.Name)
 	if err != nil {
 		return nil, err
 	}
 	if exist {
 		return nil, appErr.BadRequestError("Subscription package name is already in use.")
 	}
-	price, err = decimal.NewFromString(priceStr)
+
+	var price decimal.Decimal
+	price, err = decimal.NewFromString(req.Price)
 	if err != nil {
 		return nil, err
 	}
 
 	var s *model.SubPackage
-	s, err = ss.SubPackageRepo.CreateNewSubPackage(ctx, name, description, *durationMonth, price, image)
+	s, err = ss.SubPackageRepo.CreateNewSubPackage(ctx, req.Name, req.Description, *req.DurationMonth, price, req.Image)
 	if err != nil {
 		return nil, err
 	}
 	return helper.MapToSubPackageResponse(s), nil
+}
+
+
+func (ss *SubPackageService) FindSubPackageById(ctx context.Context, id int64) (*model.SubPackage, error) {
+	s, err := ss.SubPackageRepo.FindSubPackageById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return s, nil
+}
+
+
+func (ss *SubPackageService) FindAllSubPackages(ctx context.Context) ([]model.SubPackage, error) {
+	s, err := ss.SubPackageRepo.FindAllSubPackages(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return s, nil
 }

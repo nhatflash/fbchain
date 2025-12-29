@@ -48,23 +48,15 @@ func (ts *TenantService) FindAllTenants(ctx context.Context) ([]model.Tenant, er
 
 
 func (ts *TenantService) HandleCompleteTenantInfo(ctx context.Context, userId int64, req *client.TenantInfoRequest) (*client.TenantResponse, error) {
-	phone := req.Phone
-	identity := req.Identity
-	address := req.Address
-	postalCode := req.PostalCode
-	description := req.Description
-	tenantType := req.Type
-	profileImage := req.ProfileImage
-
 	var err error
-	if err = validateCompleteTenantInfoRequest(ctx, phone, identity, ts.UserRepo); err != nil {
+	if err = validateCompleteTenantInfoRequest(ctx, req.Phone, req.Identity, ts.UserRepo); err != nil {
 		return nil, err
 	} 
 	
 	code := GenerateTenantCode()
 	var u *model.User
 	var t *model.Tenant
-	u, t, err = ts.TenantRepo.CompleteTenantInformation(ctx, phone, identity, address, postalCode, profileImage, code, description, tenantType, userId)
+	u, t, err = ts.TenantRepo.CompleteTenantInformation(ctx, req.Phone, req.Identity, req.Address, req.PostalCode, req.ProfileImage, code, req.Description, req.Type, userId)
 	if err != nil {
 		return nil, err
 	}

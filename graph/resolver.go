@@ -12,4 +12,6 @@ type Resolver struct{
 	UserService		service.IUserService
 	TenantService	service.ITenantService
 	RestaurantService	service.IRestaurantService
+	SubPackageService 	service.ISubPackageService
+	OrderService 		service.IOrderService
 }

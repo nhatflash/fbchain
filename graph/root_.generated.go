@@ -36,10 +36,12 @@ type Config struct {
 
 type ResolverRoot interface {
 	Mutation() MutationResolver
+	Order() OrderResolver
 	Query() QueryResolver
 	Restaurant() RestaurantResolver
 	RestaurantImage() RestaurantImageResolver
 	RestaurantItem() RestaurantItemResolver
+	RestaurantTable() RestaurantTableResolver
 	Tenant() TenantResolver
 }
 
@@ -51,14 +53,34 @@ type ComplexityRoot struct {
 		CreateTodo func(childComplexity int, input model.NewTodo) int
 	}
 
+	Order struct {
+		Amount       func(childComplexity int) int
+		ID           func(childComplexity int) int
+		OrderDate    func(childComplexity int) int
+		Restaurant   func(childComplexity int) int
+		RestaurantID func(childComplexity int) int
+		Status       func(childComplexity int) int
+		SubPackage   func(childComplexity int) int
+		SubPackageID func(childComplexity int) int
+		Tenant       func(childComplexity int) int
+		TenantID     func(childComplexity int) int
+		UpdatedAt    func(childComplexity int) int
+	}
+
 	Query struct {
 		Me               func(childComplexity int) int
+		Order            func(childComplexity int, id string) int
+		Orders           func(childComplexity int) int
 		Restaurant       func(childComplexity int, id string) int
 		RestaurantImage  func(childComplexity int, id string) int
 		RestaurantImages func(childComplexity int) int
 		RestaurantItem   func(childComplexity int, id string) int
 		RestaurantItems  func(childComplexity int) int
+		RestaurantTable  func(childComplexity int, id string) int
+		RestaurantTables func(childComplexity int) int
 		Restaurants      func(childComplexity int) int
+		SubPackage       func(childComplexity int, id string) int
+		SubPackages      func(childComplexity int) int
 		Tenant           func(childComplexity int, id string) int
 		Tenants          func(childComplexity int) int
 		User             func(childComplexity int, id string) int
@@ -104,11 +126,34 @@ type ComplexityRoot struct {
 		Type         func(childComplexity int) int
 	}
 
+	RestaurantTable struct {
+		CreatedAt    func(childComplexity int) int
+		ID           func(childComplexity int) int
+		IsActive     func(childComplexity int) int
+		Label        func(childComplexity int) int
+		Notes        func(childComplexity int) int
+		Restaurant   func(childComplexity int) int
+		RestaurantID func(childComplexity int) int
+	}
+
+	SubPackage struct {
+		CreatedAt     func(childComplexity int) int
+		Description   func(childComplexity int) int
+		DurationMonth func(childComplexity int) int
+		ID            func(childComplexity int) int
+		Image         func(childComplexity int) int
+		IsActive      func(childComplexity int) int
+		Name          func(childComplexity int) int
+		Price         func(childComplexity int) int
+		UpdatedAt     func(childComplexity int) int
+	}
+
 	Tenant struct {
 		Code        func(childComplexity int) int
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Notes       func(childComplexity int) int
+		Orders      func(childComplexity int) int
 		Restaurants func(childComplexity int) int
 		Type        func(childComplexity int) int
 		User        func(childComplexity int) int
@@ -168,12 +213,108 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.CreateTodo(childComplexity, args["input"].(model.NewTodo)), true
 
+	case "Order.amount":
+		if e.complexity.Order.Amount == nil {
+			break
+		}
+
+		return e.complexity.Order.Amount(childComplexity), true
+
+	case "Order.id":
+		if e.complexity.Order.ID == nil {
+			break
+		}
+
+		return e.complexity.Order.ID(childComplexity), true
+
+	case "Order.orderDate":
+		if e.complexity.Order.OrderDate == nil {
+			break
+		}
+
+		return e.complexity.Order.OrderDate(childComplexity), true
+
+	case "Order.restaurant":
+		if e.complexity.Order.Restaurant == nil {
+			break
+		}
+
+		return e.complexity.Order.Restaurant(childComplexity), true
+
+	case "Order.restaurantId":
+		if e.complexity.Order.RestaurantID == nil {
+			break
+		}
+
+		return e.complexity.Order.RestaurantID(childComplexity), true
+
+	case "Order.status":
+		if e.complexity.Order.Status == nil {
+			break
+		}
+
+		return e.complexity.Order.Status(childComplexity), true
+
+	case "Order.subPackage":
+		if e.complexity.Order.SubPackage == nil {
+			break
+		}
+
+		return e.complexity.Order.SubPackage(childComplexity), true
+
+	case "Order.subPackageId":
+		if e.complexity.Order.SubPackageID == nil {
+			break
+		}
+
+		return e.complexity.Order.SubPackageID(childComplexity), true
+
+	case "Order.tenant":
+		if e.complexity.Order.Tenant == nil {
+			break
+		}
+
+		return e.complexity.Order.Tenant(childComplexity), true
+
+	case "Order.tenantId":
+		if e.complexity.Order.TenantID == nil {
+			break
+		}
+
+		return e.complexity.Order.TenantID(childComplexity), true
+
+	case "Order.updatedAt":
+		if e.complexity.Order.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Order.UpdatedAt(childComplexity), true
+
 	case "Query.me":
 		if e.complexity.Query.Me == nil {
 			break
 		}
 
 		return e.complexity.Query.Me(childComplexity), true
+
+	case "Query.order":
+		if e.complexity.Query.Order == nil {
+			break
+		}
+
+		args, err := ec.field_Query_order_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Order(childComplexity, args["id"].(string)), true
+
+	case "Query.orders":
+		if e.complexity.Query.Orders == nil {
+			break
+		}
+
+		return e.complexity.Query.Orders(childComplexity), true
 
 	case "Query.restaurant":
 		if e.complexity.Query.Restaurant == nil {
@@ -225,12 +366,50 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.RestaurantItems(childComplexity), true
 
+	case "Query.restaurantTable":
+		if e.complexity.Query.RestaurantTable == nil {
+			break
+		}
+
+		args, err := ec.field_Query_restaurantTable_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.RestaurantTable(childComplexity, args["id"].(string)), true
+
+	case "Query.restaurantTables":
+		if e.complexity.Query.RestaurantTables == nil {
+			break
+		}
+
+		return e.complexity.Query.RestaurantTables(childComplexity), true
+
 	case "Query.restaurants":
 		if e.complexity.Query.Restaurants == nil {
 			break
 		}
 
 		return e.complexity.Query.Restaurants(childComplexity), true
+
+	case "Query.subPackage":
+		if e.complexity.Query.SubPackage == nil {
+			break
+		}
+
+		args, err := ec.field_Query_subPackage_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.SubPackage(childComplexity, args["id"].(string)), true
+
+	case "Query.subPackages":
+		if e.complexity.Query.SubPackages == nil {
+			break
+		}
+
+		return e.complexity.Query.SubPackages(childComplexity), true
 
 	case "Query.tenant":
 		if e.complexity.Query.Tenant == nil {
@@ -480,6 +659,118 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.RestaurantItem.Type(childComplexity), true
 
+	case "RestaurantTable.createdAt":
+		if e.complexity.RestaurantTable.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.RestaurantTable.CreatedAt(childComplexity), true
+
+	case "RestaurantTable.id":
+		if e.complexity.RestaurantTable.ID == nil {
+			break
+		}
+
+		return e.complexity.RestaurantTable.ID(childComplexity), true
+
+	case "RestaurantTable.isActive":
+		if e.complexity.RestaurantTable.IsActive == nil {
+			break
+		}
+
+		return e.complexity.RestaurantTable.IsActive(childComplexity), true
+
+	case "RestaurantTable.label":
+		if e.complexity.RestaurantTable.Label == nil {
+			break
+		}
+
+		return e.complexity.RestaurantTable.Label(childComplexity), true
+
+	case "RestaurantTable.notes":
+		if e.complexity.RestaurantTable.Notes == nil {
+			break
+		}
+
+		return e.complexity.RestaurantTable.Notes(childComplexity), true
+
+	case "RestaurantTable.restaurant":
+		if e.complexity.RestaurantTable.Restaurant == nil {
+			break
+		}
+
+		return e.complexity.RestaurantTable.Restaurant(childComplexity), true
+
+	case "RestaurantTable.restaurantId":
+		if e.complexity.RestaurantTable.RestaurantID == nil {
+			break
+		}
+
+		return e.complexity.RestaurantTable.RestaurantID(childComplexity), true
+
+	case "SubPackage.createdAt":
+		if e.complexity.SubPackage.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.SubPackage.CreatedAt(childComplexity), true
+
+	case "SubPackage.description":
+		if e.complexity.SubPackage.Description == nil {
+			break
+		}
+
+		return e.complexity.SubPackage.Description(childComplexity), true
+
+	case "SubPackage.durationMonth":
+		if e.complexity.SubPackage.DurationMonth == nil {
+			break
+		}
+
+		return e.complexity.SubPackage.DurationMonth(childComplexity), true
+
+	case "SubPackage.id":
+		if e.complexity.SubPackage.ID == nil {
+			break
+		}
+
+		return e.complexity.SubPackage.ID(childComplexity), true
+
+	case "SubPackage.image":
+		if e.complexity.SubPackage.Image == nil {
+			break
+		}
+
+		return e.complexity.SubPackage.Image(childComplexity), true
+
+	case "SubPackage.isActive":
+		if e.complexity.SubPackage.IsActive == nil {
+			break
+		}
+
+		return e.complexity.SubPackage.IsActive(childComplexity), true
+
+	case "SubPackage.name":
+		if e.complexity.SubPackage.Name == nil {
+			break
+		}
+
+		return e.complexity.SubPackage.Name(childComplexity), true
+
+	case "SubPackage.price":
+		if e.complexity.SubPackage.Price == nil {
+			break
+		}
+
+		return e.complexity.SubPackage.Price(childComplexity), true
+
+	case "SubPackage.updatedAt":
+		if e.complexity.SubPackage.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.SubPackage.UpdatedAt(childComplexity), true
+
 	case "Tenant.code":
 		if e.complexity.Tenant.Code == nil {
 			break
@@ -507,6 +798,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Tenant.Notes(childComplexity), true
+
+	case "Tenant.orders":
+		if e.complexity.Tenant.Orders == nil {
+			break
+		}
+
+		return e.complexity.Tenant.Orders(childComplexity), true
 
 	case "Tenant.restaurants":
 		if e.complexity.Tenant.Restaurants == nil {

@@ -153,3 +153,36 @@ func (spr *SubPackageRepository) FindFirstSubPackage(ctx context.Context) (*mode
 	}
 	return &s, nil
 }
+
+
+func (spr *SubPackageRepository) FindAllSubPackages(ctx context.Context) ([]model.SubPackage, error) {
+	var err error
+	var rows *sql.Rows
+	query := "SELECT * FROM sub_packages"
+	rows, err = spr.Db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	var subPackages []model.SubPackage
+	for rows.Next() {
+		var s model.SubPackage
+		if err = rows.Scan(
+			&s.Id,
+			&s.Name,
+			&s.Description,
+			&s.DurationMonth,
+			&s.Price,
+			&s.IsActive,
+			&s.CreatedAt,
+			&s.UpdatedAt,
+			&s.Image,
+		); err != nil {
+			return nil, err
+		}
+		subPackages = append(subPackages, s)
+	}
+	if len(subPackages) == 0 {
+		return nil, appErr.NotFoundError("No subscription package found.")
+	}
+	return subPackages, nil
+}

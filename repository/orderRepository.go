@@ -97,6 +97,70 @@ func (or *OrderRepository) FindOrderById(ctx context.Context, id int64) (*model.
 }
 
 
+func (or *OrderRepository) FindAllOrders(ctx context.Context) ([]model.Order, error) {
+	var err error
+	var rows *sql.Rows
+	query := "SELECT * FROM orders"
+	rows, err = or.Db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	var orders []model.Order
+	for rows.Next() {
+		var o model.Order
+		if err = rows.Scan(
+			&o.Id,
+			&o.OrderDate,
+			&o.Status,
+			&o.Amount,
+			&o.UpdatedAt,
+			&o.TenantId,
+			&o.RestaurantId,
+			&o.SubPackageId,
+		); err != nil {
+			return nil, err
+		}
+		orders = append(orders, o)
+	}
+	if len(orders) == 0 {
+		return nil, appErr.NotFoundError("No order found.")
+	}
+	return orders, nil
+}
+
+
+func (or *OrderRepository) FindOrdersByTenantId(ctx context.Context, tenantId int64) ([]model.Order, error) {
+	var err error
+	var rows *sql.Rows
+	query := "SELECT * FROM orders WHERE tenant_id = $1"
+	rows, err = or.Db.QueryContext(ctx, query, tenantId)
+	if err != nil {
+		return nil, err
+	}
+	var orders []model.Order
+	for rows.Next() {
+		var o model.Order
+		if err = rows.Scan(
+			&o.Id,
+			&o.OrderDate,
+			&o.Status,
+			&o.Amount,
+			&o.UpdatedAt,
+			&o.TenantId,
+			&o.RestaurantId,
+			&o.SubPackageId,
+		); err != nil {
+			return nil, err
+		}
+		orders = append(orders, o)
+	}
+	if len(orders) == 0 {
+		return nil, appErr.NotFoundError("No order found.")
+	}
+	return orders, nil
+}
+
+
 func (or *OrderRepository) FinishOrder(ctx context.Context, orderId int64) (*model.Order, error) {
 	var err error
 	var tx *sql.Tx

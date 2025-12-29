@@ -19,6 +19,13 @@ definitions:
     - price
     - type
     type: object
+  client.AddRestaurantTableRequest:
+    properties:
+      label:
+        type: string
+      notes:
+        type: string
+    type: object
   client.ChangePasswordRequest:
     properties:
       confirmNewPassword:
@@ -566,6 +573,28 @@ paths:
       security:
       - BearerAuth: []
       summary: Add New Restaurant Item API
+  /restaurant/{restaurantId}/table:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Restaurant ID
+        in: path
+        name: restaurantId
+        required: true
+        type: string
+      - description: AddRestaurantTable body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.AddRestaurantTableRequest'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Add New Restaurant Table API
   /tenant/order:
     post:
       consumes:

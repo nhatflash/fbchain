@@ -33,6 +33,12 @@ enum ItemStatus {
   ITEM_DELETED
 }
 
+enum OrderStatus {
+  ORDER_PENDING
+  ORDER_COMPLETED
+  ORDER_CANCELED
+}
+
 type Todo {
   id: ID!
   text: String!
@@ -63,6 +69,7 @@ type Tenant {
   userId: String
   user: User
   restaurants: [Restaurant!]!
+  orders: [Order!]!
 }
 
 type Restaurant {
@@ -74,7 +81,7 @@ type Restaurant {
   contactPhone: String
   postalCode: String
   type: RestaurantType
-  avgRating: Float
+  avgRating: String
   isActive: Boolean
   notes: String
   tenantId: String
@@ -104,15 +111,43 @@ type RestaurantItem {
   restaurant: Restaurant
 }
 
-# type Order {
-#   id: ID!
-#   name: String!
-#   description: String
-#   durationMonth: Int
-#   price: Float
-#   isActive: Boolean
-#   image: String
-# }
+
+type RestaurantTable {
+  id: ID!
+  label: String!
+  restaurantId: String
+  isActive: Boolean
+  notes: String
+  createdAt: DateTime
+  restaurant: Restaurant
+}
+
+
+type SubPackage {
+  id: ID!
+  name: String!
+  description: String
+  durationMonth: Int
+  price: String
+  isActive: Boolean
+  createdAt: DateTime
+  updatedAt: DateTime
+  image: String
+}
+
+type Order {
+  id: ID!
+  amount: String!
+  orderDate: DateTime
+  status: OrderStatus
+  tenantId: String
+  restaurantId: String
+  subPackageId: String
+  updatedAt: DateTime
+  tenant: Tenant
+  restaurant: Restaurant
+  subPackage: SubPackage
+}
 
 
 type Query {
@@ -127,6 +162,12 @@ type Query {
   restaurantImage(id: ID!): RestaurantImage
   restaurantItems: [RestaurantItem!]!
   restaurantItem(id: ID!): RestaurantItem
+  restaurantTables: [RestaurantTable!]!
+  restaurantTable(id: ID!): RestaurantTable
+  subPackages: [SubPackage!]!
+  subPackage(id: ID!): SubPackage
+  orders: [Order!]!
+  order(id: ID!): Order
 }
 
 input NewTodo {

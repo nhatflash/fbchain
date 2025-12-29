@@ -17,6 +17,20 @@ type NewTodo struct {
 	UserID string `json:"userId"`
 }
 
+type Order struct {
+	ID           string            `json:"id"`
+	Amount       string            `json:"amount"`
+	OrderDate    *time.Time        `json:"orderDate,omitempty"`
+	Status       *enum.OrderStatus `json:"status,omitempty"`
+	TenantID     *string           `json:"tenantId,omitempty"`
+	RestaurantID *string           `json:"restaurantId,omitempty"`
+	SubPackageID *string           `json:"subPackageId,omitempty"`
+	UpdatedAt    *time.Time        `json:"updatedAt,omitempty"`
+	Tenant       *Tenant           `json:"tenant,omitempty"`
+	Restaurant   *Restaurant       `json:"restaurant,omitempty"`
+	SubPackage   *SubPackage       `json:"subPackage,omitempty"`
+}
+
 type Query struct {
 }
 
@@ -29,7 +43,7 @@ type Restaurant struct {
 	ContactPhone *string              `json:"contactPhone,omitempty"`
 	PostalCode   *string              `json:"postalCode,omitempty"`
 	Type         *enum.RestaurantType `json:"type,omitempty"`
-	AvgRating    *float64             `json:"avgRating,omitempty"`
+	AvgRating    *string              `json:"avgRating,omitempty"`
 	IsActive     *bool                `json:"isActive,omitempty"`
 	Notes        *string              `json:"notes,omitempty"`
 	TenantID     *string              `json:"tenantId,omitempty"`
@@ -59,6 +73,28 @@ type RestaurantItem struct {
 	Restaurant   *Restaurant      `json:"restaurant,omitempty"`
 }
 
+type RestaurantTable struct {
+	ID           string      `json:"id"`
+	Label        string      `json:"label"`
+	RestaurantID *string     `json:"restaurantId,omitempty"`
+	IsActive     *bool       `json:"isActive,omitempty"`
+	Notes        *string     `json:"notes,omitempty"`
+	CreatedAt    *time.Time  `json:"createdAt,omitempty"`
+	Restaurant   *Restaurant `json:"restaurant,omitempty"`
+}
+
+type SubPackage struct {
+	ID            string     `json:"id"`
+	Name          string     `json:"name"`
+	Description   *string    `json:"description,omitempty"`
+	DurationMonth *int32     `json:"durationMonth,omitempty"`
+	Price         *string    `json:"price,omitempty"`
+	IsActive      *bool      `json:"isActive,omitempty"`
+	CreatedAt     *time.Time `json:"createdAt,omitempty"`
+	UpdatedAt     *time.Time `json:"updatedAt,omitempty"`
+	Image         *string    `json:"image,omitempty"`
+}
+
 type Tenant struct {
 	ID          string           `json:"id"`
 	Code        string           `json:"code"`
@@ -68,6 +104,7 @@ type Tenant struct {
 	UserID      *string          `json:"userId,omitempty"`
 	User        *User            `json:"user,omitempty"`
 	Restaurants []*Restaurant    `json:"restaurants"`
+	Orders      []*Order         `json:"orders"`
 }
 
 type Todo struct {

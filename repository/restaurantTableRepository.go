@@ -106,3 +106,33 @@ func (rtr *RestaurantTableRepository) CountRestaurantTableByRestaurantId(ctx con
 	}
 	return count, nil
 }
+
+
+func (rtr *RestaurantTableRepository) FindRestaurantTablesByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantTable, error) {
+	var err error
+	var rows *sql.Rows
+	query := "SELECT * FROM restaurant_tables WHERE restaurant_id = $1"
+	rows, err = rtr.Db.QueryContext(ctx, query, restaurantId)
+	if err != nil {
+		return nil, err
+	}
+	var tables []model.RestaurantTable
+	for rows.Next() {
+		var t model.RestaurantTable
+		if err = rows.Scan(
+			&t.Id,
+			&t.RestaurantId,
+			&t.Label,
+			&t.IsActive,
+			&t.Notes,
+			&t.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		tables = append(tables, t)
+	}
+	if len(tables) == 0 {
+		return nil, appErr.NotFoundError("No restaurant table found.")
+	}
+	return tables, nil
+}

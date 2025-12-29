@@ -17,7 +17,7 @@ func MapToSignInResponse(accessToken string, refreshToken string) *client.SignIn
 
 
 func MapToUserResponse(u *model.User) *client.UserResponse {
-	userRes := client.UserResponse{
+	return &client.UserResponse{
 		Id:           u.Id,
 		Email:        u.Email,
 		Role:         u.Role,
@@ -32,11 +32,10 @@ func MapToUserResponse(u *model.User) *client.UserResponse {
 		ProfileImage: u.ProfileImage,
 		Status:       u.Status,
 	}
-	return &userRes
 }
 
 func MapToTenantResponse(u *model.User, t *model.Tenant) *client.TenantResponse {
-	tenantRes := client.TenantResponse{
+	return &client.TenantResponse{
 		UserId:       u.Id,
 		Email:        u.Email,
 		Phone:        u.Phone,
@@ -54,11 +53,10 @@ func MapToTenantResponse(u *model.User, t *model.Tenant) *client.TenantResponse 
 		Notes:        t.Notes,
 		Status:       u.Status,
 	}
-	return &tenantRes
 }
 
 func MapToSubPackageResponse(s *model.SubPackage) *client.SubPackageResponse {
-	subscriptionRes := client.SubPackageResponse{
+	return &client.SubPackageResponse{
 		Id:            s.Id,
 		Name:          s.Name,
 		Description:   s.Description,
@@ -67,7 +65,6 @@ func MapToSubPackageResponse(s *model.SubPackage) *client.SubPackageResponse {
 		IsActive:      s.IsActive,
 		Image:         s.Image,
 	}
-	return &subscriptionRes
 }
 
 func MapToRestaurantResponse(r *model.Restaurant, rImgs []model.RestaurantImage) *client.RestaurantResponse {
@@ -76,7 +73,7 @@ func MapToRestaurantResponse(r *model.Restaurant, rImgs []model.RestaurantImage)
 		image := rImgs[i]
 		images = append(images, image.Image)
 	}
-	restaurantRes := client.RestaurantResponse{
+	return &client.RestaurantResponse{
 		Id:             r.Id,
 		TenantId:       r.TenantId,
 		Name:           r.Name,
@@ -91,11 +88,10 @@ func MapToRestaurantResponse(r *model.Restaurant, rImgs []model.RestaurantImage)
 		SubPackageId:   r.SubPackageId,
 		Images:         images,
 	}
-	return &restaurantRes
 }
 
 func MapToOrderResponse(o *model.Order) *client.OrderResponse {
-	orderRes := client.OrderResponse{
+	return &client.OrderResponse{
 		Id:           o.Id,
 		TenantId:     o.TenantId,
 		RestaurantId: o.RestaurantId,
@@ -103,12 +99,11 @@ func MapToOrderResponse(o *model.Order) *client.OrderResponse {
 		Status:       o.Status,
 		Amount:       o.Amount,
 	}
-	return &orderRes
 }
 
 
 func MapToRestaurantItemResponse(i *model.RestaurantItem) *client.RestaurantItemResponse {
-	itemRes := client.RestaurantItemResponse{
+	return &client.RestaurantItemResponse{
 		Id: 		i.Id,
 		Name: 		i.Name,
 		Description: i.Description,
@@ -119,7 +114,6 @@ func MapToRestaurantItemResponse(i *model.RestaurantItem) *client.RestaurantItem
 		Notes: 		i.Notes,
 		RestaurantId: i.RestaurantId,
 	}
-	return &itemRes
 }
 
 

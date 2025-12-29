@@ -375,6 +375,41 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/restaurant/{restaurantId}/table": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Add New Restaurant Table API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Restaurant ID",
+                        "name": "restaurantId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "AddRestaurantTable body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.AddRestaurantTableRequest"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/tenant/order": {
             "post": {
                 "security": [
@@ -480,6 +515,17 @@ const docTemplate = `{
                 },
                 "type": {
                     "$ref": "#/definitions/enum.ItemType"
+                }
+            }
+        },
+        "client.AddRestaurantTableRequest": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
                 }
             }
         },
