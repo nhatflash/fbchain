@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 	"time"
-
+	"github.com/skip2/go-qrcode"
 	"github.com/nhatflash/fbchain/client"
 	"github.com/nhatflash/fbchain/enum"
 	appErr "github.com/nhatflash/fbchain/error"
@@ -30,6 +30,7 @@ type IRestaurantService interface {
 	FindRestaurantTableById(ctx context.Context, id int64) (*model.RestaurantTable, error)
 	FindRestaurantTablesByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantTable, error)
 	FindAllRestaurantTables(ctx context.Context) ([]model.RestaurantTable, error)
+	GetQRCodeOnRestaurantTable(ctx context.Context) ([]byte, error)
 }
 
 type RestaurantService struct {
@@ -258,6 +259,17 @@ func (rs *RestaurantService) FindAllRestaurantTables(ctx context.Context) ([]mod
 		return nil, err
 	}
 	return tables, nil
+}
+
+
+func (rs *RestaurantService) GetQRCodeOnRestaurantTable(ctx context.Context) ([]byte, error) {
+	var qrCodePng []byte
+	var err error
+	qrCodePng, err = qrcode.Encode("https://google.com", qrcode.Medium, 256)
+	if err != nil {
+		return nil, err
+	}
+	return qrCodePng, nil
 }
 
 

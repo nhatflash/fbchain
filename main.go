@@ -172,7 +172,7 @@ func main() {
 
 
 	// GraphQL routes
-	r.GET("/graphql", func(c *gin.Context) {
+	r.GET("/playground", func(c *gin.Context) {
 		playground.Handler("GraphQL", "/graphql")(c.Writer, c.Request)
 	})
 	r.POST("/graphql", middleware.JwtGraphQLHandler(), func(c *gin.Context) {

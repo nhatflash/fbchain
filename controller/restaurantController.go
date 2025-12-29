@@ -144,3 +144,15 @@ func (rc *RestaurantController) AddNewRestaurantTable(c *gin.Context) {
 	}
 	api.SuccessMessage(http.StatusCreated, "Restaurant table added successfully.", res, c)
 }
+
+
+
+func (rc *RestaurantController) GetTableQrCode(c *gin.Context) {
+	png, err := rc.RestaurantService.GetQRCodeOnRestaurantTable(c.Request.Context())
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.Writer.Header().Set("Content-Type", "image/png")
+	c.Writer.Write(png)
+}

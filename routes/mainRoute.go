@@ -24,6 +24,7 @@ func MainRoutes(r *gin.Engine,
 	TenantRoutes(r, "/api/tenant", tc, rc, oc)
 	ProfileRoutes(r, "/api/profile", uc)
 	PaymentRoutes(r, "/api/payment", pc)
+	RestaurantRoutes(r, "/api/restaurant", rc)
 }
 
 
