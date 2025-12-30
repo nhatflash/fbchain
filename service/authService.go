@@ -114,10 +114,13 @@ func (as *AuthService) GenerateChangePasswordVerifyOTP(ctx context.Context) (str
 	}
 	userId := strconv.FormatInt(claims.UserId, 10)
 	validTimeKey := constant.USER_CHANGE_PASSWORD_TIME_KEY + userId
-	var validTimeValue string
-	validTimeValue, _ = as.Rdb.Get(ctx, validTimeKey).Result()
-	if validTimeValue == constant.USER_CHANGE_PASSWORD_TIME_VALUE {
-		return "", appErr.BadRequestError("You are already on an attempt for password changing. Please try again later.")
+	var exists int64
+	exists, err  = as.Rdb.Exists(ctx, validTimeKey).Result()
+	if err != nil {
+		return "", err
+	}
+	if exists == 1 {
+		return "", appErr.UnauthorizedError("You are on a password change session. Please try again later.")
 	}
 
 	otpLen := 6
@@ -143,6 +146,7 @@ func (as *AuthService) HandleVerifyChangePassword(ctx context.Context, req *clie
 	if err != nil {
 		return err
 	}
+	
 	userId := strconv.FormatInt(claims.UserId, 10)
 	var actualOTP string
 	otpKey := constant.USER_VERIFY_PASSWORD_OTP_KEY + userId
@@ -176,12 +180,14 @@ func (as *AuthService) HandleChangePassword(ctx context.Context, req *client.Cha
 	}
 	userId := strconv.FormatInt(claims.UserId, 10)
 	validTimeKey := constant.USER_CHANGE_PASSWORD_TIME_KEY + userId
-	_, err = as.Rdb.Get(ctx, validTimeKey).Result()
-	if err == redis.Nil {
-		return appErr.UnauthorizedError("Password change session expired. Please perform another request.")
-	}
+
+	var exists int64
+	exists, err = as.Rdb.Exists(ctx, validTimeKey).Result()
 	if err != nil {
 		return err
+	}
+	if exists != 1 {
+		return appErr.UnauthorizedError("Password change session has expired.")
 	}
 
 	newPassword := req.NewPassword

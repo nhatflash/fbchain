@@ -15,6 +15,8 @@ import (
 	"github.com/skip2/go-qrcode"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"github.com/ncruces/zenity"
+	"github.com/redis/go-redis/v9"
+	"github.com/nhatflash/fbchain/constant"
 )
 
 type IRestaurantService interface {
@@ -35,6 +37,8 @@ type IRestaurantService interface {
 	FindAllRestaurantTables(ctx context.Context) ([]model.RestaurantTable, error)
 	GetQRCodeOnRestaurantTable(ctx context.Context, tableId int64, tenantId int64, restaurantId int64) error
 	HandleShowRestaurantItemsViaQRCode(ctx context.Context, tableId int64) ([]model.RestaurantItem, error)
+	HandleStartTableOrderingSession(ctx context.Context, tableId int64) error
+	HandleEndTableOrderingSession(ctx context.Context, tableId int64) error
 }
 
 type RestaurantService struct {
@@ -42,17 +46,20 @@ type RestaurantService struct {
 	SubPackageRepo 		*repository.SubPackageRepository
 	RestaurantItemRepo 	*repository.RestaurantItemRepository
 	RestaurantTableRepo *repository.RestaurantTableRepository
+	Rdb 				*redis.Client
 }
 
 func NewRestaurantService(rr *repository.RestaurantRepository, 
 						  spr *repository.SubPackageRepository, 
 						  rir *repository.RestaurantItemRepository, 
-						  rtr *repository.RestaurantTableRepository) IRestaurantService {
+						  rtr *repository.RestaurantTableRepository, 
+						  rdb *redis.Client) IRestaurantService {
 	return &RestaurantService{
 		RestaurantRepo: rr,
 		SubPackageRepo: spr,
 		RestaurantItemRepo: rir,
 		RestaurantTableRepo: rtr,
+		Rdb: rdb,
 	}
 }
 
@@ -312,6 +319,7 @@ func (rs *RestaurantService) GetQRCodeOnRestaurantTable(ctx context.Context, tab
 }
 
 
+// In development stage, location handling on the client devices is not viable
 func (rs *RestaurantService) HandleShowRestaurantItemsViaQRCode(ctx context.Context, tableId int64) ([]model.RestaurantItem, error) {
 	var err error
 	var table *model.RestaurantTable
@@ -325,6 +333,40 @@ func (rs *RestaurantService) HandleShowRestaurantItemsViaQRCode(ctx context.Cont
 		return nil, err
 	}
 	return items, nil
+}
+
+
+func (rs *RestaurantService) HandleStartTableOrderingSession(ctx context.Context, tableId int64) error {
+	var err error
+	_, err = rs.FindRestaurantTableById(ctx, tableId)
+	if err != nil {
+		return err
+	}
+	tableIdStr := strconv.FormatInt(tableId, 10)
+	sessionKey := constant.RESTAURANT_ORDERING_SESSION_KEY + tableIdStr
+	duration := time.Duration(constant.RESTAURANT_ORDERING_SESSION_TIME) * time.Minute
+	
+	if err = rs.Rdb.Set(ctx, sessionKey, "true", duration).Err(); err != nil {
+		return err
+	}
+	return nil
+}
+
+
+func (rs *RestaurantService) HandleEndTableOrderingSession(ctx context.Context, tableId int64) error {
+	tableIdStr := strconv.FormatInt(tableId, 10)
+	sessionKey := constant.RESTAURANT_ORDERING_SESSION_KEY + tableIdStr
+	var err error
+	var exists int64
+	exists, err = rs.Rdb.Exists(ctx, sessionKey).Result()
+	if err != nil {
+		return err
+	}
+	if exists == 1 {
+		rs.Rdb.Del(ctx, sessionKey)
+		return nil
+	}
+	return appErr.NotFoundError("No session or session already closed for table: " + tableIdStr)
 }
 
 

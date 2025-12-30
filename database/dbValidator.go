@@ -32,8 +32,6 @@ func ValidateRestaurantItemSchema(db *mongo.Database) error {
 				"bsonType": "long",
 			},
 		},
-
-
 	}
 	opts := options.CreateCollection().SetValidator(bson.M{
 		"$jsonSchema": schema,

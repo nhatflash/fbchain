@@ -214,3 +214,44 @@ func (rc *RestaurantController) GetTableQrCode(c *gin.Context) {
 	}
 	api.SuccessMessage(http.StatusOK, "QR Code saved successfully.", nil, c)
 }
+
+
+// @Summary Start Table Ordering Session API
+// @Param tableId path string true "Table ID"
+// @Security BearerAuth
+// @Router /table/{tableId}/session/start [get]
+func (rc *RestaurantController) StartTableOrderingSession(c *gin.Context) {
+	tblIdParam := c.Param("tableId")
+
+	tableId, err := strconv.ParseInt(tblIdParam, 10, 64)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	if err := rc.RestaurantService.HandleStartTableOrderingSession(c.Request.Context(), tableId); err != nil {
+		c.Error(err)
+		return
+	}
+	api.SuccessMessage(http.StatusOK, "Restaurant table ordering session started successfully.", tableId, c)
+}
+
+
+// @Summary End Table Ordering Session API
+// @Param tableId path string true "Table ID"
+// @Security BearerAuth
+// @Router /table/{tableId}/session/end [get]
+func (rc *RestaurantController) EndTableOrderingSession(c *gin.Context) {
+	tblIdParam := c.Param("tableId")
+
+	tableId, err := strconv.ParseInt(tblIdParam, 10, 64)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	if err := rc.RestaurantService.HandleEndTableOrderingSession(c.Request.Context(), tableId); err != nil {
+		c.Error(err)
+		return
+	}
+	api.SuccessMessage(http.StatusOK, "Restaurant table ordering session ended successfully.", tableId, c)
+}
+
