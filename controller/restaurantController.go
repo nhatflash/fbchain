@@ -148,6 +148,9 @@ func (rc *RestaurantController) AddNewRestaurantTable(c *gin.Context) {
 }
 
 
+
+// This is only available when using web browser to display data directly
+// When integrating with front-end environment, use the front-end redirect url that handle GraphQL query instead
 func (rc *RestaurantController) ShowRestaurantItemsViaQRCode(c *gin.Context) {
 	tblIdParam := c.Param("tableId")
 	tableId, err := strconv.ParseInt(tblIdParam, 10, 64)
