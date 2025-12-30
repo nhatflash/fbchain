@@ -117,6 +117,16 @@ func MapToRestaurantItemResponse(i *model.RestaurantItem) *client.RestaurantItem
 }
 
 
+func MapToRestaurantItemsResponse(items []model.RestaurantItem) []client.RestaurantItemResponse {
+	var itemsRes []client.RestaurantItemResponse
+	for _, i := range items {
+		itemRes := MapToRestaurantItemResponse(&i)
+		itemsRes = append(itemsRes, *itemRes)
+	}
+	return itemsRes
+}
+
+
 func MapToRestaurantTableResponse(t *model.RestaurantTable) *client.RestaurantTableResponse {
 	return &client.RestaurantTableResponse{
 		Id: t.Id,

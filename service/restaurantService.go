@@ -2,9 +2,10 @@ package service
 
 import (
 	"context"
+	"os"
 	"strconv"
 	"time"
-	"github.com/skip2/go-qrcode"
+
 	"github.com/nhatflash/fbchain/client"
 	"github.com/nhatflash/fbchain/enum"
 	appErr "github.com/nhatflash/fbchain/error"
@@ -12,6 +13,7 @@ import (
 	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/repository"
 	"github.com/shopspring/decimal"
+	"github.com/skip2/go-qrcode"
 )
 
 type IRestaurantService interface {
@@ -30,7 +32,8 @@ type IRestaurantService interface {
 	FindRestaurantTableById(ctx context.Context, id int64) (*model.RestaurantTable, error)
 	FindRestaurantTablesByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantTable, error)
 	FindAllRestaurantTables(ctx context.Context) ([]model.RestaurantTable, error)
-	GetQRCodeOnRestaurantTable(ctx context.Context) ([]byte, error)
+	GetQRCodeOnRestaurantTable(ctx context.Context, tableId int64, tenantId int64, restaurantId int64) error
+	HandleShowRestaurantItemsViaQRCode(ctx context.Context, tableId int64) ([]model.RestaurantItem, error)
 }
 
 type RestaurantService struct {
@@ -262,14 +265,49 @@ func (rs *RestaurantService) FindAllRestaurantTables(ctx context.Context) ([]mod
 }
 
 
-func (rs *RestaurantService) GetQRCodeOnRestaurantTable(ctx context.Context) ([]byte, error) {
-	var qrCodePng []byte
+func (rs *RestaurantService) GetQRCodeOnRestaurantTable(ctx context.Context, tableId int64, tenantId int64, restaurantId int64) error {
 	var err error
-	qrCodePng, err = qrcode.Encode("https://google.com", qrcode.Medium, 256)
+	var table *model.RestaurantTable
+	table, err = rs.FindRestaurantTableById(ctx, tableId)
+	if err != nil {
+		return err
+	}
+	
+	var restaurant *model.Restaurant
+	restaurant, err = rs.FindRestaurantById(ctx, restaurantId)
+	if err != nil {
+		return err
+	}
+
+	if table.RestaurantId != restaurantId || restaurant.TenantId != tenantId {
+		return appErr.ForbiddenError("You are not allowed to perform action on table or restaurant that does not belong to you.")
+	}
+
+	baseUrl := os.Getenv("BASE_URL")
+	tblIdStr := strconv.FormatInt(tableId, 10)
+	url := baseUrl + "/" + tblIdStr
+	fileName := "qrCode-" + tblIdStr + ".png"
+	err = qrcode.WriteFile(url, qrcode.Medium, 256, fileName)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+
+func (rs *RestaurantService) HandleShowRestaurantItemsViaQRCode(ctx context.Context, tableId int64) ([]model.RestaurantItem, error) {
+	var err error
+	var table *model.RestaurantTable
+	table, err = rs.FindRestaurantTableById(ctx, tableId)
 	if err != nil {
 		return nil, err
 	}
-	return qrCodePng, nil
+	var items []model.RestaurantItem
+	items, err = rs.FindItemsByRestaurantId(ctx, table.RestaurantId)
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 
@@ -292,5 +330,7 @@ func validateCreateRestaurantRequest(ctx context.Context, name string, subPackag
 	}
 	return nil
 }
+
+
 
 

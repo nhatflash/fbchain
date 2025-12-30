@@ -12,5 +12,5 @@ func RestaurantRoutes(r *gin.Engine, prefix string, rc *controller.RestaurantCon
 	restaurant.POST("/", rc.CreateRestaurant)
 	restaurant.POST("/:restaurantId/item", rc.AddNewRestaurantItem)
 	restaurant.POST("/:restaurantId/table", rc.AddNewRestaurantTable)
-	restaurant.GET("/test", rc.GetTableQrCode)
+	restaurant.GET("/:restaurantId/table/:tableId/qrCode", rc.GetTableQrCode)
 }

@@ -3,12 +3,14 @@ package controller
 import (
 	"net/http"
 	"strconv"
-	appErr "github.com/nhatflash/fbchain/error"
+
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/api"
 	"github.com/nhatflash/fbchain/client"
 	"github.com/nhatflash/fbchain/constant"
 	_ "github.com/nhatflash/fbchain/docs"
+	appErr "github.com/nhatflash/fbchain/error"
+	"github.com/nhatflash/fbchain/helper"
 	"github.com/nhatflash/fbchain/service"
 )
 
@@ -146,13 +148,66 @@ func (rc *RestaurantController) AddNewRestaurantTable(c *gin.Context) {
 }
 
 
-
-func (rc *RestaurantController) GetTableQrCode(c *gin.Context) {
-	png, err := rc.RestaurantService.GetQRCodeOnRestaurantTable(c.Request.Context())
+func (rc *RestaurantController) ShowRestaurantItemsViaQRCode(c *gin.Context) {
+	tblIdParam := c.Param("tableId")
+	tableId, err := strconv.ParseInt(tblIdParam, 10, 64)
 	if err != nil {
 		c.Error(err)
 		return
 	}
-	c.Writer.Header().Set("Content-Type", "image/png")
-	c.Writer.Write(png)
+	items, err := rc.RestaurantService.HandleShowRestaurantItemsViaQRCode(c.Request.Context(), tableId)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	res := helper.MapToRestaurantItemsResponse(items)
+	api.SuccessMessage(http.StatusOK, "Restaurant items show successfully.", res, c)
+}
+
+
+// @Summary Get Restaurant Table QR Code
+// @Param tableId path string true "Table ID"
+// @Param restaurantId path string true "Restaurant ID"
+// @Security BearerAuth
+// @Router /restaurant/{restaurantId}/table/{tableId}/qrCode [get]
+func (rc *RestaurantController) GetTableQrCode(c *gin.Context) {
+	resIdParam := c.Param("restaurantId")
+	tblIdParam := c.Param("tableId")
+
+	restaurantId, err := strconv.ParseInt(resIdParam, 10, 64)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	tableId, err := strconv.ParseInt(tblIdParam, 10, 64)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	ctx := c.Request.Context()
+	currUser, err := rc.UserService.FindCurrentUser(ctx)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	if !currUser.IsVerified {
+		c.Error(appErr.UnauthorizedError("Please verify your account before doing this action."))
+		return
+	}
+
+	currTenant, err := rc.TenantService.FindTenantByUserId(ctx, currUser.Id)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	err = rc.RestaurantService.GetQRCodeOnRestaurantTable(ctx, tableId, currTenant.Id, restaurantId)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	api.SuccessMessage(http.StatusOK, "QR Code saved successfully.", nil, c)
 }
