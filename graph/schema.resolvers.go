@@ -15,6 +15,7 @@ import (
 	"github.com/nhatflash/fbchain/middleware"
 	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/security"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 // CreateTodo is the resolver for the createTodo field.
@@ -198,7 +199,12 @@ func (r *queryResolver) RestaurantItems(ctx context.Context) ([]*gqlModel.Restau
 func (r *queryResolver) RestaurantItem(ctx context.Context, id string) (*gqlModel.RestaurantItem, error) {
 	var item *model.RestaurantItem
 	var err error
-	item, err = r.RestaurantService.FindRestaurantItemById(ctx, id)
+	var itemId bson.ObjectID
+	itemId, err = bson.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	item, err = r.RestaurantService.FindRestaurantItemById(ctx, itemId)
 	if err != nil {
 		return nil, err
 	}

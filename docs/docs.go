@@ -410,6 +410,33 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/restaurant/{restaurantId}/table/{tableId}/qrCode": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Get Restaurant Table QR Code",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Table ID",
+                        "name": "tableId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Restaurant ID",
+                        "name": "restaurantId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/tenant/order": {
             "post": {
                 "security": [

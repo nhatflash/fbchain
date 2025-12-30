@@ -24,11 +24,9 @@ func ValidateRestaurantItemSchema(db *mongo.Database) error {
 			},
 			"type": bson.M{
 				"bsonType": "string",
-				"enum": []string{"FOOD", "BEVERAGE"},
 			},
 			"status": bson.M{
 				"bsonType": "string",
-				"enum": []string{"AVAILABLE", "UNAVAILABLE", "DELETED"},
 			},
 			"restaurantId": bson.M{
 				"bsonType": "long",

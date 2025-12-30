@@ -595,6 +595,23 @@ paths:
       security:
       - BearerAuth: []
       summary: Add New Restaurant Table API
+  /restaurant/{restaurantId}/table/{tableId}/qrCode:
+    get:
+      parameters:
+      - description: Table ID
+        in: path
+        name: tableId
+        required: true
+        type: string
+      - description: Restaurant ID
+        in: path
+        name: restaurantId
+        required: true
+        type: string
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Get Restaurant Table QR Code
   /tenant/order:
     post:
       consumes:

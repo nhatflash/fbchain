@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-
 	appErr "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/model"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -27,16 +26,19 @@ func (rir *RestaurantItemRepository) AddNewRestaurantItem(ctx context.Context, r
 		return nil, err
 	}
 	var newItem *model.RestaurantItem
-	newId := result.InsertedID
-	newItem, err = rir.FindRestaurantItemById(ctx, newId.(string))
-	if err != nil {
-		return nil, err
+	if itemId, ok := result.InsertedID.(bson.ObjectID); ok {
+		newItem, err = rir.FindRestaurantItemById(ctx, itemId)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, appErr.InternalError("Error when convert inserted ID into object Id")
 	}
 	return newItem, nil
 }
 
 
-func (rir *RestaurantItemRepository) FindRestaurantItemById(ctx context.Context, id string) (*model.RestaurantItem, error) {
+func (rir *RestaurantItemRepository) FindRestaurantItemById(ctx context.Context, id bson.ObjectID) (*model.RestaurantItem, error) {
 	filter := bson.D{
 		{Key: "_id", Value: id},
 	}
@@ -53,10 +55,12 @@ func (rir *RestaurantItemRepository) FindRestaurantItemById(ctx context.Context,
 
 
 func (rir *RestaurantItemRepository) FindAllRestaurantItems(ctx context.Context) ([]model.RestaurantItem, error) {
-	cursor, err := rir.rItemColl.Find(ctx, nil, nil)
+	cursor, err := rir.rItemColl.Find(ctx, bson.D{})
 	if err != nil {
 		return nil, err
 	}
+	defer cursor.Close(ctx)
+
 	var items []model.RestaurantItem
 	if err = cursor.All(ctx, &items); err != nil {
 		return nil, err
@@ -68,10 +72,12 @@ func (rir *RestaurantItemRepository) FindRestaurantItemsByRestaurantId(ctx conte
 	filter := bson.D{
 		{Key: "restaurantId", Value: restaurantId},
 	}
-	cursor, err := rir.rItemColl.Find(ctx, filter, nil)
+	cursor, err := rir.rItemColl.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
+	defer cursor.Close(ctx)
+	
 	var items []model.RestaurantItem
 	if err = cursor.All(ctx, &items); err != nil {
 		return nil, err

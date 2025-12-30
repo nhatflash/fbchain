@@ -12,8 +12,9 @@ import (
 	"github.com/nhatflash/fbchain/helper"
 	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/repository"
-	"github.com/shopspring/decimal"
 	"github.com/skip2/go-qrcode"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"github.com/sqweek/dialog"
 )
 
 type IRestaurantService interface {
@@ -27,7 +28,7 @@ type IRestaurantService interface {
 	HandleAddNewRestaurantItem(ctx context.Context, restaurantId int64, tenantId int64, req *client.AddRestaurantItemRequest) (*client.RestaurantItemResponse, error)
 	FindItemsByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantItem, error)
 	FindAllRestaurantItems(ctx context.Context) ([]model.RestaurantItem, error)
-	FindRestaurantItemById(ctx context.Context, id string) (*model.RestaurantItem, error)
+	FindRestaurantItemById(ctx context.Context, id bson.ObjectID) (*model.RestaurantItem, error)
 	HandleAddNewRestaurantTable(ctx context.Context, tenantId int64, restaurantId int64, req *client.AddRestaurantTableRequest) (*client.RestaurantTableResponse, error)
 	FindRestaurantTableById(ctx context.Context, id int64) (*model.RestaurantTable, error)
 	FindRestaurantTablesByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantTable, error)
@@ -156,8 +157,8 @@ func (rs *RestaurantService) HandleAddNewRestaurantItem(ctx context.Context, res
 		return nil, appErr.UnauthorizedError("You are not allowed to add new item on this restaurant.")
 	}
 
-	var price decimal.Decimal
-	price, err = decimal.NewFromString(req.Price)
+	var price bson.Decimal128
+	price, err = bson.ParseDecimal128(req.Price)
 	if err != nil {
 		return nil, appErr.BadRequestError("Invalid price.")
 	}
@@ -202,7 +203,7 @@ func (rs *RestaurantService) FindAllRestaurantItems(ctx context.Context) ([]mode
 }
 
 
-func (rs *RestaurantService) FindRestaurantItemById(ctx context.Context, id string) (*model.RestaurantItem, error) {
+func (rs *RestaurantService) FindRestaurantItemById(ctx context.Context, id bson.ObjectID) (*model.RestaurantItem, error) {
 	item, err := rs.RestaurantItemRepo.FindRestaurantItemById(ctx, id)
 	if err != nil {
 		return nil, err
@@ -229,6 +230,8 @@ func (rs *RestaurantService) HandleAddNewRestaurantTable(ctx context.Context, te
 		}
 		count++
 		label = strconv.Itoa(count)
+	} else {
+		label = *req.Label
 	}
 	table, err := rs.RestaurantTableRepo.AddNewRestaurantTable(ctx, restaurantId, label, req.Notes)
 	if err != nil {
@@ -286,7 +289,14 @@ func (rs *RestaurantService) GetQRCodeOnRestaurantTable(ctx context.Context, tab
 	baseUrl := os.Getenv("BASE_URL")
 	tblIdStr := strconv.FormatInt(tableId, 10)
 	url := baseUrl + "/" + tblIdStr
-	fileName := "qrCode-" + tblIdStr + ".png"
+	var fileName string
+	fileName, err = dialog.File().Filter("PNG Image", "png").Title("Save Table QR Code").Save()
+	if err != nil {
+		if err.Error() == "Cancelled" {
+			return appErr.BadRequestError("Request cancelled.")
+		}
+		return err
+	}
 	err = qrcode.WriteFile(url, qrcode.Medium, 256, fileName)
 	if err != nil {
 		return err

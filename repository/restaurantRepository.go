@@ -36,7 +36,7 @@ func (rr *RestaurantRepository) CreateNewRestaurant(ctx context.Context, name st
 		return nil, err
 	}
 
-	query := "INSERT INTO restaurants (name, location, description, contact_email, contact_phone, postal_code, type, avg_rating, is_active, notes, subscription_id, tenant_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *"
+	query := "INSERT INTO restaurants (name, location, description, contact_email, contact_phone, postal_code, type, avg_rating, is_active, notes, sub_package_id, tenant_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *"
 	var r model.Restaurant
 	if err = tx.QueryRowContext(ctx, query, name, location, description, email, phone, postalCode, rType, avgRating, true, notes, subPackageId, tenantId).Scan(
 		&r.Id,

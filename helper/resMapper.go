@@ -103,11 +103,13 @@ func MapToOrderResponse(o *model.Order) *client.OrderResponse {
 
 
 func MapToRestaurantItemResponse(i *model.RestaurantItem) *client.RestaurantItemResponse {
+	price := i.Price.String()
+	itemId := i.Id.Hex()
 	return &client.RestaurantItemResponse{
-		Id: 		i.Id,
+		Id: 		itemId,
 		Name: 		i.Name,
 		Description: i.Description,
-		Price: 		i.Price,
+		Price: 		price,
 		Type: 		i.Type,
 		Status: 	i.Status,
 		Image: 		i.Image,

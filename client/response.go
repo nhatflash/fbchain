@@ -95,7 +95,7 @@ type RestaurantItemResponse struct {
 	Id 				string				`json:"id"`
 	Name 			string 				`json:"name"`
 	Description 	*string				`json:"description"`
-	Price 			decimal.Decimal 	`json:"price"`
+	Price 			string 				`json:"price"`
 	Type 			enum.ItemType 		`json:"type"`
 	Status 			enum.ItemStatus 	`json:"status"`
 	Image 			*string				`json:"image"`

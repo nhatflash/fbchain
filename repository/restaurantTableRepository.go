@@ -31,8 +31,8 @@ func (rtr *RestaurantTableRepository) AddNewRestaurantTable(ctx context.Context,
 	defer tx.Rollback()
 
 	var t model.RestaurantTable
-	query := "INSERT INTO restaurant_tables (restaurant_id, notes) VALUES ($1, $2) RETURNING *"
-	if err = tx.QueryRowContext(ctx, query, restaurantId, notes).Scan(
+	query := "INSERT INTO restaurant_tables (restaurant_id, label, notes) VALUES ($1, $2, $3) RETURNING *"
+	if err = tx.QueryRowContext(ctx, query, restaurantId, label, notes).Scan(
 		&t.Id,
 		&t.RestaurantId,
 		&t.Label,
@@ -40,6 +40,10 @@ func (rtr *RestaurantTableRepository) AddNewRestaurantTable(ctx context.Context,
 		&t.Notes,
 		&t.CreatedAt,
 	); err != nil {
+		return nil, err
+	}
+
+	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
 	return &t, nil

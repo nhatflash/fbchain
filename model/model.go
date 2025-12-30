@@ -5,6 +5,7 @@ import (
 
 	"github.com/nhatflash/fbchain/enum"
 	"github.com/shopspring/decimal"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type User struct {
@@ -98,17 +99,17 @@ type Payment struct {
 
 
 type RestaurantItem struct {
-	Id 				string				`json:"id"`
-	Name 			string 				`json:"name"`
-	Description 	*string 			`json:"description"`
-	Price 			decimal.Decimal 	`json:"price"`
-	Type			enum.ItemType 		`json:"type"`
-	Status 			enum.ItemStatus 	`json:"status"`
-	Image 			*string 			`json:"image"`
-	Notes 			*string 			`json:"notes"`
-	CreatedAt 		time.Time 			`json:"createdAt"`
-	UpdatedAt 		time.Time 			`json:"updatedAt"`
-	RestaurantId 	int64				`json:"restaurantId"`
+	Id 				bson.ObjectID		`json:"id" bson:"_id,omitempty"`
+	Name 			string 				`json:"name" bson:"name"`
+	Description 	*string 			`json:"description" bson:"description"`
+	Price 			bson.Decimal128		`json:"price" bson:"price"`
+	Type			enum.ItemType 		`json:"type" bson:"type"`
+	Status 			enum.ItemStatus 	`json:"status" bson:"status"`
+	Image 			*string 			`json:"image" bson:"image"`
+	Notes 			*string 			`json:"notes" bson:"notes"`
+	CreatedAt 		time.Time 			`json:"createdAt" bson:"createdAt"`
+	UpdatedAt 		time.Time 			`json:"updatedAt" bson:"updatedAt"`
+	RestaurantId 	int64				`json:"restaurantId" bson:"restaurantId"`
 }
 
 

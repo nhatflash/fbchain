@@ -113,8 +113,9 @@ func MapToGqlRestaurantImages(rImgs []model.RestaurantImage) []*gqlModel.Restaur
 func MapToGqlRestaurantItem(item *model.RestaurantItem) *gqlModel.RestaurantItem {
 	idStr := strconv.FormatInt(item.RestaurantId, 10)
 	price := item.Price.String()
+	itemId := item.Id.Hex()
 	return &gqlModel.RestaurantItem{
-		ID: item.Id,
+		ID: itemId,
 		Name: item.Name,
 		Description: item.Description,
 		Price: &price,
