@@ -14,7 +14,7 @@ import (
 	"github.com/nhatflash/fbchain/repository"
 	"github.com/skip2/go-qrcode"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"github.com/sqweek/dialog"
+	"github.com/ncruces/zenity"
 )
 
 type IRestaurantService interface {
@@ -289,15 +289,22 @@ func (rs *RestaurantService) GetQRCodeOnRestaurantTable(ctx context.Context, tab
 	baseUrl := os.Getenv("BASE_URL")
 	tblIdStr := strconv.FormatInt(tableId, 10)
 	url := baseUrl + "/" + tblIdStr
-	var fileName string
-	fileName, err = dialog.File().Filter("PNG Image", "png").Title("Save Table QR Code").Save()
+	fileName := "qrcode-" + tblIdStr + ".png"
+	var path string
+	path, err = zenity.SelectFileSave(
+		zenity.Title("Save Table QR Code"),
+		zenity.Filename(fileName),
+		zenity.FileFilters{
+			{Name: "PNG Images", Patterns: []string{"*.png"}},
+		},
+	)
 	if err != nil {
-		if err.Error() == "Cancelled" {
-			return appErr.BadRequestError("Request cancelled.")
+		if err == zenity.ErrCanceled {
+			return appErr.BadRequestError("QR code PNG image saving has been canceled.")
 		}
 		return err
 	}
-	err = qrcode.WriteFile(url, qrcode.Medium, 256, fileName)
+	err = qrcode.WriteFile(url, qrcode.Medium, 256, path)
 	if err != nil {
 		return err
 	}
