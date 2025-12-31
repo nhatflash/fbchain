@@ -104,3 +104,15 @@ type AddRestaurantTableRequest struct {
 	Label 				*string 			`json:"label" binding:"omitempty"`
 	Notes 				*string 			`json:"notes" binding:"omitempty"`
 }
+
+
+type RestaurantItemOrderRequest struct {
+	ItemId 				string 				`json:"item" binding:"required"`
+	Quantity 			*int				`json:"quantity" binding:"required"`
+}
+
+
+type CreateRestaurantOrderRequest struct {
+	Items 				[]*RestaurantItemOrderRequest 			`json:"items" binding:"required,dive"`
+	Notes 				*string 								`json:"notes" binding:"omitempty"`
+}
