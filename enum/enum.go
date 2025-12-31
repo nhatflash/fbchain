@@ -84,3 +84,13 @@ const (
 	ITEM_UNAVAILABLE ItemStatus = "UNAVAILABLE"
 	ITEM_DELETED ItemStatus = "DELETED"
 )
+
+
+type RestaurantOrderStatus string 
+
+const (
+	R_ORDER_PENDING RestaurantOrderStatus = "PENDING"
+	R_ORDER_WORKING RestaurantOrderStatus = "WORKING"
+	R_ORDER_FINISHED RestaurantOrderStatus = "FINISHED"
+	R_ORDER_CANCELED RestaurantOrderStatus = "CANCELED"
+)

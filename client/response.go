@@ -111,3 +111,32 @@ type RestaurantTableResponse struct {
 	IsActive 		bool 				`json:"isActive"`
 	Notes 			*string				`json:"notes"`
 }
+
+
+type RestaurantOrderResponse struct {
+	Id 				int64					`json:"id"`
+	RestaurantId 	int64					`json:"restaurantId"`
+	TableId 		int64				`json:"tableId"`
+	Amount 			decimal.Decimal 			`json:"amount"`
+	Status 			enum.RestaurantOrderStatus		`json:"status"`
+	Notes 			*string 			`json:"notes"`
+	Items 			[]RestaurantOrderItemResponse 		`json:"items"`
+}
+
+
+type RestaurantOrderItemResponse struct {
+	Id 				int64					`json:"id"`
+	ROrderId 		int64					`json:"rOrderId"`
+	ItemId 			string 					`json:"itemId"`
+	Quantity 		int 					`json:"quantity"`
+	Total 			decimal.Decimal 			`json:"total"`
+}
+
+
+type RestaurantOrderPaymentResponse struct {
+	Id 				int64 					`json:"id"`
+	ROrderId 		int64				`json:"rOrderId"`
+	Amount 			decimal.Decimal 			`json:"amount"`
+	Method 			enum.PaymentMethod			`json:"method"`
+	Status 			enum.PaymentStatus 			`json:"status"`
+}

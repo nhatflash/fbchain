@@ -121,3 +121,35 @@ type RestaurantTable struct {
 	Notes 			*string				`json:"notes"`
 	CreatedAt 		time.Time			`json:"createdAt"`
 }
+
+
+type RestaurantOrder struct {
+	Id 				int64						`json:"id"`
+	RestaurantId 	int64						`json:"restaurantId"`
+	TableId 		int64						`json:"tableId"`
+	Amount 			decimal.Decimal 			`json:"amount"`
+	Status 			enum.RestaurantOrderStatus 	`json:"status"`
+	Notes 			*string 					`json:"notes"`
+	CreatedAt 		time.Time 					`json:"createdAt"`
+	UpdatedAt 		time.Time 					`json:"updatedAt"`
+	Items 			[]RestaurantOrderItem 		`json:"items"`
+}
+
+
+type RestaurantOrderItem struct {
+	Id 				int64 						`json:"id"`
+	ROrderId 		int64						`json:"rOrderId"`
+	ItemId 			string 						`json:"itemId"`
+	Quantity 		int 						`json:"quantity"`
+	Total 			decimal.Decimal 			`json:"total"`
+}
+
+
+type RestaurantOrderPayment struct {
+	Id 				int64						`json:"id"`
+	ROrderId 		int64 						`json:"rOrderId"`
+	Amount 			decimal.Decimal 			`json:"amount"`
+	Method 			enum.PaymentMethod   		`json:"method"`
+	Status 			enum.PaymentStatus 			`json:"status"`
+	CreatedAt 		time.Time 					`json:"createdAt"`
+}

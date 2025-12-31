@@ -370,6 +370,18 @@ func (rs *RestaurantService) HandleEndTableOrderingSession(ctx context.Context, 
 }
 
 
+func (rs *RestaurantService) HandleCreateRestaurantOrder(ctx context.Context, tableId int64, req *client.CreateRestaurantOrderRequest) (*client.RestaurantOrderResponse, error) {
+	var err error
+	var table *model.RestaurantTable
+	table, err = rs.FindRestaurantTableById(ctx, tableId)
+	if err != nil {
+		return nil, err
+	}
+	var rOrder *model.RestaurantOrder
+	return nil, nil
+}
+
+
 func validateCreateRestaurantRequest(ctx context.Context, name string, subPackageRepo *repository.SubPackageRepository, resRepo *repository.RestaurantRepository) error {
 	var err error
 	var exist bool

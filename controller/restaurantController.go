@@ -255,3 +255,15 @@ func (rc *RestaurantController) EndTableOrderingSession(c *gin.Context) {
 	api.SuccessMessage(http.StatusOK, "Restaurant table ordering session ended successfully.", tableId, c)
 }
 
+
+func (rc *RestaurantController) CreateRestaurantOrder(c *gin.Context) {
+	var req client.CreateRestaurantOrderRequest
+	
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.Error(err)
+		return
+	}
+
+	
+}
+
