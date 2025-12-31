@@ -439,11 +439,6 @@ const docTemplate = `{
         },
         "/table/{tableId}/order": {
             "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -474,11 +469,6 @@ const docTemplate = `{
         },
         "/table/{tableId}/session/end": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "summary": "End Table Ordering Session API",
                 "parameters": [
                     {
@@ -494,11 +484,6 @@ const docTemplate = `{
         },
         "/table/{tableId}/session/start": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "summary": "Start Table Ordering Session API",
                 "parameters": [
                     {

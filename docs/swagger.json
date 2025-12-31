@@ -433,11 +433,6 @@
         },
         "/table/{tableId}/order": {
             "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -468,11 +463,6 @@
         },
         "/table/{tableId}/session/end": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "summary": "End Table Ordering Session API",
                 "parameters": [
                     {
@@ -488,11 +478,6 @@
         },
         "/table/{tableId}/session/start": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "summary": "Start Table Ordering Session API",
                 "parameters": [
                     {

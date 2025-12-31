@@ -217,7 +217,6 @@ func (rc *RestaurantController) GetTableQrCode(c *gin.Context) {
 
 // @Summary Start Table Ordering Session API
 // @Param tableId path string true "Table ID"
-// @Security BearerAuth
 // @Router /table/{tableId}/session/start [get]
 func (rc *RestaurantController) StartTableOrderingSession(c *gin.Context) {
 	tblIdParam := c.Param("tableId")
@@ -237,7 +236,6 @@ func (rc *RestaurantController) StartTableOrderingSession(c *gin.Context) {
 
 // @Summary End Table Ordering Session API
 // @Param tableId path string true "Table ID"
-// @Security BearerAuth
 // @Router /table/{tableId}/session/end [get]
 func (rc *RestaurantController) EndTableOrderingSession(c *gin.Context) {
 	tblIdParam := c.Param("tableId")
@@ -261,7 +259,6 @@ func (rc *RestaurantController) EndTableOrderingSession(c *gin.Context) {
 // @Accept json
 // @Param tableId path string true "Table ID"
 // @Param request body client.CreateRestaurantOrderRequest true "CreateRestaruantOrder body"
-// @Security BearerAuth
 // @Router /table/{tableId}/order [post]
 func (rc *RestaurantController) CreateRestaurantOrder(c *gin.Context) {
 	tblIdParam := c.Param("tableId")
