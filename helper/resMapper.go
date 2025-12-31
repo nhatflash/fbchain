@@ -140,4 +140,33 @@ func MapToRestaurantTableResponse(t *model.RestaurantTable) *client.RestaurantTa
 }
 
 
+func MapToRestaurantOrderResponse(o *model.RestaurantOrder) *client.RestaurantOrderResponse {
+	var itemsRes []client.RestaurantOrderItemResponse
+	for _, i := range o.Items {
+		item := MapToRestaurantOrderItemResponse(&i)
+		itemsRes = append(itemsRes, *item)
+	}
+	return &client.RestaurantOrderResponse{
+		Id: o.Id,
+		RestaurantId: o.RestaurantId,
+		TableId: o.TableId,
+		Amount: o.Amount,
+		Status: o.Status,
+		Notes: o.Notes,
+		Items: itemsRes,
+	}
+}
+
+
+func MapToRestaurantOrderItemResponse(i *model.RestaurantOrderItem) *client.RestaurantOrderItemResponse {
+	return &client.RestaurantOrderItemResponse{
+		Id: i.Id,
+		ROrderId: i.ROrderId,
+		ItemId: i.ItemId,
+		Quantity: i.Quantity,
+		Total: i.Total,
+	}
+}
+
+
 

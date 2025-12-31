@@ -437,6 +437,81 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/table/{tableId}/order": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create Restaurant Order API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Table ID",
+                        "name": "tableId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "CreateRestaruantOrder body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.CreateRestaurantOrderRequest"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/table/{tableId}/session/end": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "End Table Ordering Session API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Table ID",
+                        "name": "tableId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/table/{tableId}/session/start": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "summary": "Start Table Ordering Session API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Table ID",
+                        "name": "tableId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/tenant/order": {
             "post": {
                 "security": [
@@ -571,6 +646,23 @@ const docTemplate = `{
                 }
             }
         },
+        "client.CreateRestaurantOrderRequest": {
+            "type": "object",
+            "required": [
+                "items"
+            ],
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/client.RestaurantItemOrderRequest"
+                    }
+                },
+                "notes": {
+                    "type": "string"
+                }
+            }
+        },
         "client.CreateRestaurantRequest": {
             "type": "object",
             "required": [
@@ -686,6 +778,21 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "subPackageId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "client.RestaurantItemOrderRequest": {
+            "type": "object",
+            "required": [
+                "item",
+                "quantity"
+            ],
+            "properties": {
+                "item": {
+                    "type": "string"
+                },
+                "quantity": {
                     "type": "integer"
                 }
             }

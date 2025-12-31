@@ -36,6 +36,17 @@ definitions:
     - confirmNewPassword
     - newPassword
     type: object
+  client.CreateRestaurantOrderRequest:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/client.RestaurantItemOrderRequest'
+        type: array
+      notes:
+        type: string
+    required:
+    - items
+    type: object
   client.CreateRestaurantRequest:
     properties:
       contactEmail:
@@ -115,6 +126,16 @@ definitions:
     required:
     - restaurantId
     - subPackageId
+    type: object
+  client.RestaurantItemOrderRequest:
+    properties:
+      item:
+        type: string
+      quantity:
+        type: integer
+    required:
+    - item
+    - quantity
     type: object
   client.SignInRequest:
     properties:
@@ -612,6 +633,52 @@ paths:
       security:
       - BearerAuth: []
       summary: Get Restaurant Table QR Code
+  /table/{tableId}/order:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Table ID
+        in: path
+        name: tableId
+        required: true
+        type: string
+      - description: CreateRestaruantOrder body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.CreateRestaurantOrderRequest'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Create Restaurant Order API
+  /table/{tableId}/session/end:
+    get:
+      parameters:
+      - description: Table ID
+        in: path
+        name: tableId
+        required: true
+        type: string
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: End Table Ordering Session API
+  /table/{tableId}/session/start:
+    get:
+      parameters:
+      - description: Table ID
+        in: path
+        name: tableId
+        required: true
+        type: string
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Start Table Ordering Session API
   /tenant/order:
     post:
       consumes:

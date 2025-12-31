@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"github.com/nhatflash/fbchain/constant"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -41,7 +40,7 @@ func (ac *AuthController) SignIn(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	api.SuccessMessage(http.StatusOK, constant.LOGIN_SUCCESS_MSG, res, c)
+	api.SuccessMessage(http.StatusOK, "Sign in successfully.", res, c)
 }
 
 // @Summary Tenant sign up API
@@ -64,7 +63,7 @@ func (ac *AuthController) TenantSignUp(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	api.SuccessMessage(http.StatusCreated, constant.TENANT_SIGNUP_SUCCESS_MSG, res, c)
+	api.SuccessMessage(http.StatusCreated, "Tenant sign up successfully.", res, c)
 }
 
 
@@ -88,7 +87,7 @@ func (ac *AuthController) VerifyChangePassword(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	api.SuccessMessage(http.StatusOK, constant.VERIFY_CHANGE_PASSWORD_SUCCESS_MSG, res, c)
+	api.SuccessMessage(http.StatusOK, "Change password verification successfully.", res, c)
 }
 
 // @Summary Get change password OTP API
@@ -102,7 +101,7 @@ func (ac *AuthController) GetChangePasswordVerifiedOTP(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	api.SuccessMessage(http.StatusOK, constant.CHANGE_PASSWORD_OTP_SENT_SUCCESS_MSG, res, c)
+	api.SuccessMessage(http.StatusOK, "Change password OTP retrieved successfully.", res, c)
 }
 
 
@@ -123,5 +122,5 @@ func (ac *AuthController) ChangePassword(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	api.SuccessMessage(http.StatusOK, constant.PASSWORD_CHANGE_SUCCESS_MSG, nil, c)
+	api.SuccessMessage(http.StatusOK, "Change password done successfully.", nil, c)
 }

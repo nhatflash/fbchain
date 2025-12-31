@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/api"
 	"github.com/nhatflash/fbchain/client"
-	"github.com/nhatflash/fbchain/constant"
 	_ "github.com/nhatflash/fbchain/docs"
 	"github.com/nhatflash/fbchain/service"
 	appErr "github.com/nhatflash/fbchain/error"
@@ -46,7 +45,7 @@ func (pc *PaymentController) PayOrderWithCash(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	api.SuccessMessage(http.StatusOK, constant.PAYMENT_WITH_CASH_SUCCESS, nil, c)
+	api.SuccessMessage(http.StatusOK, "Pay order with cash successfully.", nil, c)
 }
 
 

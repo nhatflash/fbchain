@@ -84,3 +84,33 @@ func (rir *RestaurantItemRepository) FindRestaurantItemsByRestaurantId(ctx conte
 	}
 	return items, nil
 }
+
+func (rir *RestaurantItemRepository) FindRestaurantItemsByListIds(ctx context.Context, restaurantId int64, ids []string) ([]model.RestaurantItem, error) {
+	var objectIds []bson.ObjectID
+	var err error
+	for _, id := range ids {
+		var oid bson.ObjectID
+		oid, err = bson.ObjectIDFromHex(id)
+		if err != nil {
+			return nil, err
+		}
+		objectIds = append(objectIds, oid)
+	}
+
+	filter := bson.D{
+		{Key: "restaurantId", Value: restaurantId},
+		{Key: "_id", Value: bson.D{
+			{Key: "$in", Value: objectIds},
+		}},
+	}
+	var cursor *mongo.Cursor
+	cursor, err = rir.rItemColl.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	var items []model.RestaurantItem
+	if err = cursor.All(ctx, &items); err != nil {
+		return nil, err
+	}
+	return items, err
+}

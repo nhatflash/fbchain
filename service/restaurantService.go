@@ -6,17 +6,18 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ncruces/zenity"
 	"github.com/nhatflash/fbchain/client"
+	"github.com/nhatflash/fbchain/constant"
 	"github.com/nhatflash/fbchain/enum"
 	appErr "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/helper"
 	"github.com/nhatflash/fbchain/model"
 	"github.com/nhatflash/fbchain/repository"
+	"github.com/redis/go-redis/v9"
+	"github.com/shopspring/decimal"
 	"github.com/skip2/go-qrcode"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"github.com/ncruces/zenity"
-	"github.com/redis/go-redis/v9"
-	"github.com/nhatflash/fbchain/constant"
 )
 
 type IRestaurantService interface {
@@ -39,6 +40,7 @@ type IRestaurantService interface {
 	HandleShowRestaurantItemsViaQRCode(ctx context.Context, tableId int64) ([]model.RestaurantItem, error)
 	HandleStartTableOrderingSession(ctx context.Context, tableId int64) error
 	HandleEndTableOrderingSession(ctx context.Context, tableId int64) error
+	HandleCreateRestaurantOrder(ctx context.Context, tableId int64, req *client.CreateRestaurantOrderRequest) (*client.RestaurantOrderResponse, error)
 }
 
 type RestaurantService struct {
@@ -46,6 +48,7 @@ type RestaurantService struct {
 	SubPackageRepo 		*repository.SubPackageRepository
 	RestaurantItemRepo 	*repository.RestaurantItemRepository
 	RestaurantTableRepo *repository.RestaurantTableRepository
+	RestaurantOrderRepo *repository.RestaurantOrderRepository
 	Rdb 				*redis.Client
 }
 
@@ -53,12 +56,14 @@ func NewRestaurantService(rr *repository.RestaurantRepository,
 						  spr *repository.SubPackageRepository, 
 						  rir *repository.RestaurantItemRepository, 
 						  rtr *repository.RestaurantTableRepository, 
+						  ror *repository.RestaurantOrderRepository,
 						  rdb *redis.Client) IRestaurantService {
 	return &RestaurantService{
 		RestaurantRepo: rr,
 		SubPackageRepo: spr,
 		RestaurantItemRepo: rir,
 		RestaurantTableRepo: rtr,
+		RestaurantOrderRepo: ror,
 		Rdb: rdb,
 	}
 }
@@ -370,15 +375,86 @@ func (rs *RestaurantService) HandleEndTableOrderingSession(ctx context.Context, 
 }
 
 
+
 func (rs *RestaurantService) HandleCreateRestaurantOrder(ctx context.Context, tableId int64, req *client.CreateRestaurantOrderRequest) (*client.RestaurantOrderResponse, error) {
 	var err error
+
+	// checking the tableId still in the session
+	tableIdStr := strconv.FormatInt(tableId, 10)
+	sessionKey := constant.RESTAURANT_ORDERING_SESSION_KEY + tableIdStr
+	var exists int64
+	exists, err = rs.Rdb.Exists(ctx, sessionKey).Result()
+	if err != nil {
+		return nil, err
+	}
+	if exists != 1 {
+		return nil, appErr.BadRequestError("This table session for order item has been expired.")
+	}
+
 	var table *model.RestaurantTable
 	table, err = rs.FindRestaurantTableById(ctx, tableId)
 	if err != nil {
 		return nil, err
 	}
+
+	// process the item requests
+	quantities := make(map[string]int)
+	var reqIds []string
+	for _, rq := range req.Items {
+		reqIds = append(reqIds, rq.ItemId)
+		quantities[rq.ItemId] = *rq.Quantity
+	}
+
+	// get the items with the restaurantId that associated with the table
+	var items []model.RestaurantItem
+	items, err = rs.RestaurantItemRepo.FindRestaurantItemsByListIds(ctx, table.RestaurantId, reqIds)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(items) != len(reqIds) {
+		return nil, appErr.BadRequestError("Some of your items in your order does not belong to this restaurant.")
+	}
+
+	// get the total amount
+	var amount decimal.Decimal
+	var oItems []model.RestaurantOrderItem
+	for _, item := range items {
+		itemId := item.Id.Hex()
+		q := quantities[itemId]
+		quantity := decimal.NewFromInt(int64(q))
+		priceStr := item.Price.String()
+
+		var price decimal.Decimal
+		price, err = decimal.NewFromString(priceStr)
+		if err != nil {
+			return nil, err
+		}
+		price = price.Mul(quantity)
+		amount.Add(price)
+		oItem := model.RestaurantOrderItem{
+			ItemId: itemId,
+			Quantity: q,
+			Total: price,
+		}
+		oItems = append(oItems, oItem)
+	}
+
+	// create order model for passing data into repository
+	order := model.RestaurantOrder{
+		RestaurantId: table.RestaurantId,
+		TableId: tableId,
+		Amount: amount,
+		Notes: req.Notes,
+	}
+
 	var rOrder *model.RestaurantOrder
-	return nil, nil
+	rOrder, err = rs.RestaurantOrderRepo.CreateInitialRestaurantOrder(ctx, &order, oItems)
+	if err != nil {
+		return nil, err
+	}
+
+	return helper.MapToRestaurantOrderResponse(rOrder), nil
 }
 
 

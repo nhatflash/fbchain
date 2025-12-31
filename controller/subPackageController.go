@@ -2,7 +2,6 @@ package controller
 
 import (
 	"net/http"
-	"github.com/nhatflash/fbchain/constant"
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/api"
 	"github.com/nhatflash/fbchain/client"
@@ -41,5 +40,5 @@ func (spc *SubPackageController) CreateSubPackage(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	api.SuccessMessage(http.StatusCreated, constant.SUBSCRIPTION_CREATED_SUCCESS, res, c)
+	api.SuccessMessage(http.StatusCreated, "Subscription package created successfully.", res, c)
 } 

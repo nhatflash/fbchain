@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/api"
 	"github.com/nhatflash/fbchain/client"
-	"github.com/nhatflash/fbchain/constant"
 	_ "github.com/nhatflash/fbchain/docs"
 	appErr "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/helper"
@@ -54,5 +53,5 @@ func (uc *UserController) ChangeUserProfile(c *gin.Context) {
 		return
 	}
 	res := helper.MapToUserResponse(updatedUser)
-	api.SuccessMessage(http.StatusOK, constant.PROFILE_UPDATED_SUCCESS, res, c)
+	api.SuccessMessage(http.StatusOK, "Profile changed successfully.", res, c)
 }

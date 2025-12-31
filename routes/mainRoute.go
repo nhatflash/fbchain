@@ -28,6 +28,7 @@ func MainRoutes(r *gin.Engine,
 	r.GET("/api/table/:tableId", rc.ShowRestaurantItemsViaQRCode)
 	r.GET("/api/table/:tableId/session/start", rc.StartTableOrderingSession)
 	r.GET("/api/table/:tableId/session/end", rc.EndTableOrderingSession)
+	r.GET("/api/table/:tableId/order", rc.CreateRestaurantOrder)
 }
 
 

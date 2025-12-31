@@ -139,11 +139,10 @@ CREATE TABLE restaurant_order_items (
 
 CREATE TABLE restaurant_order_payments (
 	id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	restaurant_order_id BIGINT NOT NULL REFERENCE restaurant_orders(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	restaurant_order_id BIGINT NOT NULL REFERENCES restaurant_orders(id) ON UPDATE CASCADE ON DELETE RESTRICT,
 	amount DECIMAL(18,2) NOT NULL,
 	method payment_method NOT NULL,
 	status payment_status NOT NULL,
-	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-)
+	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 

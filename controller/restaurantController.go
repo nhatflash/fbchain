@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nhatflash/fbchain/api"
 	"github.com/nhatflash/fbchain/client"
-	"github.com/nhatflash/fbchain/constant"
 	_ "github.com/nhatflash/fbchain/docs"
 	appErr "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/helper"
@@ -63,7 +62,7 @@ func (rc *RestaurantController) CreateRestaurant(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	api.SuccessMessage(http.StatusCreated, constant.RESTAURANT_CREATED_SUCCESS, res, c)
+	api.SuccessMessage(http.StatusCreated, "Restaurant created successfully.", res, c)
 }
 
 
@@ -256,14 +255,33 @@ func (rc *RestaurantController) EndTableOrderingSession(c *gin.Context) {
 }
 
 
+
+// @Summary Create Restaurant Order API
+// @Produce json
+// @Accept json
+// @Param tableId path string true "Table ID"
+// @Param request body client.CreateRestaurantOrderRequest true "CreateRestaruantOrder body"
+// @Security BearerAuth
+// @Router /table/{tableId}/order [post]
 func (rc *RestaurantController) CreateRestaurantOrder(c *gin.Context) {
+	tblIdParam := c.Param("tableId")
+	tableId, err := strconv.ParseInt(tblIdParam, 10, 64)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
 	var req client.CreateRestaurantOrderRequest
-	
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.Error(err)
 		return
 	}
 
-	
+	res, err := rc.RestaurantService.HandleCreateRestaurantOrder(c.Request.Context(), tableId, &req)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	api.SuccessMessage(http.StatusCreated, "Restaurant order created successfully.", res, c)
 }
 
