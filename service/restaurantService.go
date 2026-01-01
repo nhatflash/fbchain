@@ -418,6 +418,10 @@ func (rs *RestaurantService) HandleCreateRestaurantOrder(ctx context.Context, ta
 
 	// get the total amount
 	var amount decimal.Decimal
+	amount, err = decimal.NewFromString("0.00")
+	if err != nil {
+		return nil, err
+	}
 	var oItems []model.RestaurantOrderItem
 	for _, item := range items {
 		itemId := item.Id.Hex()
@@ -431,7 +435,7 @@ func (rs *RestaurantService) HandleCreateRestaurantOrder(ctx context.Context, ta
 			return nil, err
 		}
 		price = price.Mul(quantity)
-		amount.Add(price)
+		amount = amount.Add(price)
 		oItem := model.RestaurantOrderItem{
 			ItemId: itemId,
 			Quantity: q,

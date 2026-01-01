@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"log"
 	"os"
-
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
@@ -41,6 +40,7 @@ import (
 // @securityDefinitions.apiKey BearerAuth
 // @in header
 // @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 func main() {
 	var err error
 
@@ -179,7 +179,6 @@ func main() {
 	r.POST("/graphql", middleware.JwtGraphQLHandler(), func(c *gin.Context) {
 		gqlHandler.ServeHTTP(c.Writer, c.Request)
 	})
-
 
 	r.Run(port)
 }

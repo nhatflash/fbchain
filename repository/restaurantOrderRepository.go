@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"time"
+
 	"github.com/nhatflash/fbchain/enum"
 	"github.com/nhatflash/fbchain/model"
 )
@@ -67,4 +69,27 @@ func (ror *RestaurantOrderRepository) CreateInitialRestaurantOrder(ctx context.C
 		return nil, err
 	}
 	return &o, nil
+}
+
+
+func (ror *RestaurantOrderRepository) DeleteExpiredPendingOrders(ctx context.Context) error {
+	var err error
+	var tx *sql.Tx
+	tx, err = ror.Db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+
+	expiration := time.Now().Add(-15 * time.Minute)
+	query := "DELETE FROM restaurant_orders WHERE created_at < $1 AND status = $2 LIMIT 1000"
+	_, err = tx.ExecContext(ctx, query, expiration, enum.R_ORDER_PENDING)
+	if err != nil {
+		return err
+	}
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+	return nil
 }
