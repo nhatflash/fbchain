@@ -348,8 +348,8 @@ func (rs *RestaurantService) HandleStartTableOrderingSession(ctx context.Context
 		return err
 	}
 	tableIdStr := strconv.FormatInt(tableId, 10)
-	sessionKey := constant.RESTAURANT_ORDERING_SESSION_KEY + tableIdStr
-	duration := time.Duration(constant.RESTAURANT_ORDERING_SESSION_TIME) * time.Minute
+	sessionKey := constant.RestaurantOrderSessionKey + tableIdStr
+	duration := time.Duration(30) * time.Minute
 	
 	if err = rs.Rdb.Set(ctx, sessionKey, "true", duration).Err(); err != nil {
 		return err
@@ -360,7 +360,7 @@ func (rs *RestaurantService) HandleStartTableOrderingSession(ctx context.Context
 
 func (rs *RestaurantService) HandleEndTableOrderingSession(ctx context.Context, tableId int64) error {
 	tableIdStr := strconv.FormatInt(tableId, 10)
-	sessionKey := constant.RESTAURANT_ORDERING_SESSION_KEY + tableIdStr
+	sessionKey := constant.RestaurantOrderSessionKey + tableIdStr
 	var err error
 	var exists int64
 	exists, err = rs.Rdb.Exists(ctx, sessionKey).Result()
@@ -381,7 +381,7 @@ func (rs *RestaurantService) HandleCreateRestaurantOrder(ctx context.Context, ta
 
 	// checking the tableId still in the session
 	tableIdStr := strconv.FormatInt(tableId, 10)
-	sessionKey := constant.RESTAURANT_ORDERING_SESSION_KEY + tableIdStr
+	sessionKey := constant.RestaurantOrderSessionKey + tableIdStr
 	var exists int64
 	exists, err = rs.Rdb.Exists(ctx, sessionKey).Result()
 	if err != nil {

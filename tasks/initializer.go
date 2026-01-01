@@ -1,4 +1,4 @@
-package initializer
+package tasks
 
 import (
 	"database/sql"

@@ -113,7 +113,7 @@ func (as *AuthService) GenerateChangePasswordVerifyOTP(ctx context.Context) (str
 		return "", err
 	}
 	userId := strconv.FormatInt(claims.UserId, 10)
-	validTimeKey := constant.USER_CHANGE_PASSWORD_TIME_KEY + userId
+	validTimeKey := constant.UserChangePasswordTimeKey + userId
 	var exists int64
 	exists, err  = as.Rdb.Exists(ctx, validTimeKey).Result()
 	if err != nil {
@@ -129,8 +129,8 @@ func (as *AuthService) GenerateChangePasswordVerifyOTP(ctx context.Context) (str
 	if err != nil {
 		return "", err
 	}
-	duration := time.Duration(constant.VERIFY_PASSWORD_OTP_EXPIRATION_MIN) * time.Minute
-	otpKey := constant.USER_VERIFY_PASSWORD_OTP_KEY + userId
+	duration := time.Duration(15) * time.Minute
+	otpKey := constant.UserVerifyPasswordOTPKey + userId
 	err = as.Rdb.Set(ctx, otpKey, otp, duration).Err()
 	if err != nil {
 		return "", err
@@ -149,7 +149,7 @@ func (as *AuthService) HandleVerifyChangePassword(ctx context.Context, req *clie
 	
 	userId := strconv.FormatInt(claims.UserId, 10)
 	var actualOTP string
-	otpKey := constant.USER_VERIFY_PASSWORD_OTP_KEY + userId
+	otpKey := constant.UserVerifyPasswordOTPKey + userId
 	actualOTP, err = as.Rdb.Get(ctx, otpKey).Result()
 	if err == redis.Nil {
 		return appErr.UnauthorizedError("OTP code expired or not found.")
@@ -160,9 +160,9 @@ func (as *AuthService) HandleVerifyChangePassword(ctx context.Context, req *clie
 
 	if security.VerifyOTPCode(req.VerifiedCode, actualOTP) {
 		as.Rdb.Del(ctx, otpKey)
-		validTimeKey := constant.USER_CHANGE_PASSWORD_TIME_KEY + userId
-		duration := time.Duration(constant.CHANGE_PASSWORD_TIME) * time.Minute
-		if err = as.Rdb.Set(ctx, validTimeKey, constant.USER_CHANGE_PASSWORD_TIME_VALUE, duration).Err(); err != nil {
+		validTimeKey := constant.UserChangePasswordTimeKey + userId
+		duration := time.Duration(15) * time.Minute
+		if err = as.Rdb.Set(ctx, validTimeKey, "true", duration).Err(); err != nil {
 			return err
 		}
 		return nil
@@ -179,7 +179,7 @@ func (as *AuthService) HandleChangePassword(ctx context.Context, req *client.Cha
 		return err
 	}
 	userId := strconv.FormatInt(claims.UserId, 10)
-	validTimeKey := constant.USER_CHANGE_PASSWORD_TIME_KEY + userId
+	validTimeKey := constant.UserChangePasswordTimeKey + userId
 
 	var exists int64
 	exists, err = as.Rdb.Exists(ctx, validTimeKey).Result()

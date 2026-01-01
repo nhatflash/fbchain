@@ -4,7 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
@@ -13,18 +16,20 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"github.com/hibiken/asynq"
 	env "github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/nhatflash/fbchain/api"
 	"github.com/nhatflash/fbchain/controller"
 	"github.com/nhatflash/fbchain/database"
 	_ "github.com/nhatflash/fbchain/docs"
 	"github.com/nhatflash/fbchain/graph"
 	"github.com/nhatflash/fbchain/helper"
-	"github.com/nhatflash/fbchain/initializer"
 	"github.com/nhatflash/fbchain/middleware"
 	"github.com/nhatflash/fbchain/repository"
 	"github.com/nhatflash/fbchain/routes"
 	"github.com/nhatflash/fbchain/service"
+	"github.com/nhatflash/fbchain/tasks"
 	swgFiles "github.com/swaggo/files"
 	ginSwg "github.com/swaggo/gin-swagger"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -47,8 +52,7 @@ func main() {
 	// Load .env file
 	err = env.Load(".env")
 	if err != nil {
-		log.Fatalln("Error loading .env file")
-		return;
+		log.Fatalf("Error loading .env file: %v\n", err)
 	}
 
 	r := gin.Default()
@@ -62,8 +66,7 @@ func main() {
 	var db *sql.DB
 	db, err = database.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalln("Connect to PostgreSQL failed", err.Error())
-		return
+		log.Fatalf("Connect to PostgreSQL failed: %v\n", err)
 	}
 
 	defer db.Close()
@@ -74,15 +77,13 @@ func main() {
 	var mongodb *mongo.Client
 	mongodb, err = database.ConnectToMongoDB()
 	if err != nil {
-		log.Fatalln("Connect to MongoDB failed", err.Error())
-		return
+		log.Fatalf("Connect to MongoDB failed: %v\n", err)
 	}
 
 	defer mongodb.Disconnect(context.TODO())
 	err = database.ValidateRestaurantItemSchema(mongodb.Database("restaurants"))
 	if err != nil {
-		log.Fatalln("Error when validate restaurant items schema:", err)
-		return
+		log.Fatalf("Error when validate restaurant items schema: %v\n", err)
 	}
 	rItemColl := mongodb.Database("restaurants").Collection("restaurant_items")
 	
@@ -161,10 +162,9 @@ func main() {
 
 
 	// Initialize admin if not exist
-	err = initializer.CreateAdminUserIfNotExists(db)
+	err = tasks.CreateAdminUserIfNotExists(db)
 	if err != nil {
-		log.Fatalln("Error when perform initialize admin account.")
-		return
+		log.Fatalf("Error when perform initialize admin account: %v\n", err)
 	}
 
 	// Define routes for REST API
@@ -180,5 +180,53 @@ func main() {
 		gqlHandler.ServeHTTP(c.Writer, c.Request)
 	})
 
-	r.Run(port)
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, api.ApiResponse{
+			Status: http.StatusOK,
+			Message: "Server alive",
+			Data: nil,
+		})
+	})
+
+
+
+	// set up asynq server for clean up order
+	asqClient := tasks.RegisterAsynqClient()
+	defer asqClient.Close()
+
+	srv, mux := tasks.RegisterAsynqServer(restaurantOrderRepository)
+
+	go func() {
+		if err = srv.Run(mux); err != nil {
+			log.Fatalf("Asynq server start error: %v\n", err)
+		}
+	}()
+
+
+	// setting up scheduler for 
+	var scheduler *asynq.Scheduler
+	scheduler, err = tasks.RegisterAsynqScheduler()
+	if err != nil {
+		log.Fatalf("Error when register Asynq scheduler: %v\n", err)
+	}
+	go func() {
+		if err = scheduler.Run(); err != nil {
+			log.Fatalf("Asynq scheduler start error: %v\n", err)
+		}
+	}()
+
+	
+	// set up go routine for graceful shutdown
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		if err = r.Run(port); err != nil {
+			log.Fatalf("Gin server start error: %v\n", err)
+		}
+	}()
+
+	<-stop
+	log.Println("Shutting down...")
+	srv.Shutdown()
 }

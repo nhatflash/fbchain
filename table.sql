@@ -130,7 +130,7 @@ CREATE TABLE restaurant_orders (
 
 CREATE TABLE restaurant_order_items (
 	id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	restaurant_order_id BIGINT NOT NULL REFERENCES restaurant_orders(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+	restaurant_order_id BIGINT NOT NULL REFERENCES restaurant_orders(id) ON UPDATE CASCADE ON DELETE CASCADE,
 	item_id VARCHAR(255) NOT NULL,
 	quantity INT NOT NULL DEFAULT 1,
 	total DECIMAL(18,2) NOT NULL

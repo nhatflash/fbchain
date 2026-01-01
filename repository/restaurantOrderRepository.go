@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/nhatflash/fbchain/enum"
@@ -81,14 +82,16 @@ func (ror *RestaurantOrderRepository) DeleteExpiredPendingOrders(ctx context.Con
 	}
 
 	defer tx.Rollback()
-
+	
 	expiration := time.Now().Add(-15 * time.Minute)
-	query := "DELETE FROM restaurant_orders WHERE created_at < $1 AND status = $2 LIMIT 1000"
+	query := "DELETE FROM restaurant_orders WHERE created_at < $1 AND status = $2"
 	_, err = tx.ExecContext(ctx, query, expiration, enum.R_ORDER_PENDING)
 	if err != nil {
+		fmt.Println("Order deletion failed.")
 		return err
 	}
 	if err = tx.Commit(); err != nil {
+		fmt.Println("Order commit deletion failed.")
 		return err
 	}
 	return nil

@@ -1,12 +1,9 @@
 package routes
 
 import (
-	"net/http"
-
 	"github.com/nhatflash/fbchain/controller"
 
 	"github.com/gin-gonic/gin"
-	"github.com/nhatflash/fbchain/api"
 	_ "github.com/nhatflash/fbchain/docs"
 )
 
@@ -18,7 +15,6 @@ func MainRoutes(r *gin.Engine,
 				oc *controller.OrderController, 
 				uc *controller.UserController, 
 				pc *controller.PaymentController) {
-	r.GET("/", Ping)
 	AuthRoutes(r, "/api/auth", ac)
 	AdminRoutes(r, "/api/admin", spc)
 	TenantRoutes(r, "/api/tenant", tc, rc, oc)
@@ -31,12 +27,3 @@ func MainRoutes(r *gin.Engine,
 	r.POST("/api/table/:tableId/order", rc.CreateRestaurantOrder)
 }
 
-
-
-func Ping(c *gin.Context) {
-	c.JSON(http.StatusOK, api.ApiResponse {
-		Status: http.StatusOK,
-		Message: "Server alive.",
-		Data: nil,
-	})
-}
