@@ -11,6 +11,7 @@ var ErrInternal = errors.New("INTERNAL_SERVER_ERROR")
 var ErrUnauthorized = errors.New("UNAUTHORIZED")
 var ErrForbidden = errors.New("FORBIDDEN")
 var ErrValidationFailed = errors.New("VALIDATION_FAILED")
+var ErrServiceUnavailable = errors.New("SERVICE_UNAVAILABLE")
 
 type ErrorResponse struct {
 	Status		int				`json:"status"`
@@ -55,6 +56,14 @@ func ForbiddenError(message string) error {
 	return &ErrorResponse{
 		Status: http.StatusForbidden,
 		Code: ErrForbidden,
+		Message: message,
+	}
+}
+
+func ServiceUnavailableError(message string) error {
+	return &ErrorResponse{
+		Status: http.StatusServiceUnavailable,
+		Code: ErrServiceUnavailable,
 		Message: message,
 	}
 }

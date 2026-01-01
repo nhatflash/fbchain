@@ -41,15 +41,17 @@ type IRestaurantService interface {
 	HandleStartTableOrderingSession(ctx context.Context, tableId int64) error
 	HandleEndTableOrderingSession(ctx context.Context, tableId int64) error
 	HandleCreateRestaurantOrder(ctx context.Context, tableId int64, req *client.CreateRestaurantOrderRequest) (*client.RestaurantOrderResponse, error)
+	HandlePayRestaurantOrderWithCash(ctx context.Context, orderId int64, tableId int64) error
 }
 
 type RestaurantService struct {
-	RestaurantRepo 		*repository.RestaurantRepository
-	SubPackageRepo 		*repository.SubPackageRepository
-	RestaurantItemRepo 	*repository.RestaurantItemRepository
-	RestaurantTableRepo *repository.RestaurantTableRepository
-	RestaurantOrderRepo *repository.RestaurantOrderRepository
-	Rdb 				*redis.Client
+	RestaurantRepo 			*repository.RestaurantRepository
+	SubPackageRepo 			*repository.SubPackageRepository
+	RestaurantItemRepo 		*repository.RestaurantItemRepository
+	RestaurantTableRepo 	*repository.RestaurantTableRepository
+	RestaurantOrderRepo 	*repository.RestaurantOrderRepository
+	RestaurantPaymentRepo 	*repository.RestaurantPaymentRepository
+	Rdb 					*redis.Client
 }
 
 func NewRestaurantService(rr *repository.RestaurantRepository, 
@@ -57,6 +59,7 @@ func NewRestaurantService(rr *repository.RestaurantRepository,
 						  rir *repository.RestaurantItemRepository, 
 						  rtr *repository.RestaurantTableRepository, 
 						  ror *repository.RestaurantOrderRepository,
+						  rpr *repository.RestaurantPaymentRepository,
 						  rdb *redis.Client) IRestaurantService {
 	return &RestaurantService{
 		RestaurantRepo: rr,
@@ -64,6 +67,7 @@ func NewRestaurantService(rr *repository.RestaurantRepository,
 		RestaurantItemRepo: rir,
 		RestaurantTableRepo: rtr,
 		RestaurantOrderRepo: ror,
+		RestaurantPaymentRepo: rpr,
 		Rdb: rdb,
 	}
 }
@@ -462,14 +466,34 @@ func (rs *RestaurantService) HandleCreateRestaurantOrder(ctx context.Context, ta
 }
 
 
-func (rs *RestaurantService) HandlePayRestaurantOrder(ctx context.Context, orderId int64) (*model.RestaurantOrderPayment, error) {
+func (rs *RestaurantService) HandlePayRestaurantOrderWithCash(ctx context.Context, orderId int64, tableId int64) error {
 	var err error
 	var o *model.RestaurantOrder
 	o, err = rs.RestaurantOrderRepo.FindRestaurantOrderById(ctx, orderId)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return nil, nil
+	var t *model.RestaurantTable
+	t, err = rs.FindRestaurantTableById(ctx, tableId)
+	if err != nil {
+		return err
+	}
+
+	if t.Id != o.TableId {
+		return appErr.BadRequestError("The order does not belong with the requested table.")
+	}
+	expiration := time.Duration(-15)*time.Minute
+	if o.CreatedAt.After(time.Now().Add(expiration)) || o.Status != enum.R_ORDER_PENDING {
+		return appErr.BadRequestError("This order has been expired or has not been allowed to pay.")
+	}
+	
+	if err = rs.RestaurantPaymentRepo.HandleCashPayment(ctx, orderId, o.Amount); err != nil {
+		return err
+	}
+	tblIdStr := strconv.FormatInt(o.TableId, 10)
+	sessionKey := constant.RestaurantOrderSessionKey + tblIdStr
+	rs.Rdb.Del(ctx, sessionKey)
+	return nil
 }
 
 

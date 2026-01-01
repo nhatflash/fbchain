@@ -21,9 +21,6 @@ func MainRoutes(r *gin.Engine,
 	ProfileRoutes(r, "/api/profile", uc)
 	PaymentRoutes(r, "/api/payment", pc)
 	RestaurantRoutes(r, "/api/restaurant", rc)
-	r.GET("/api/table/:tableId", rc.ShowRestaurantItemsViaQRCode)
-	r.GET("/api/table/:tableId/session/start", rc.StartTableOrderingSession)
-	r.GET("/api/table/:tableId/session/end", rc.EndTableOrderingSession)
-	r.POST("/api/table/:tableId/order", rc.CreateRestaurantOrder)
+	TableRoutes(r, "/api/table", rc)
 }
 

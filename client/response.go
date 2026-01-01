@@ -8,38 +8,38 @@ import (
 )
 
 type UserResponse struct {
-	Id           int64            `json:"id"`
-	Email        string           `json:"email"`
-	Role         enum.Role       `json:"role"`
-	Phone        *string           `json:"phone"`
-	Identity     *string           `json:"identity"`
-	FirstName    string           `json:"firstName"`
-	LastName     string           `json:"lastName"`
-	Gender       enum.Gender     `json:"gender"`
-	Birthdate    time.Time        `json:"birthdate"`
-	PostalCode   *string           `json:"postalCode"`
-	Address      *string           `json:"address"`
-	ProfileImage *string           `json:"profileImage"`
-	Status       enum.UserStatus `json:"status"`
+	Id           int64            	`json:"id"`
+	Email        string          	`json:"email"`
+	Role         enum.Role       	`json:"role"`
+	Phone        *string           	`json:"phone"`
+	Identity     *string           	`json:"identity"`
+	FirstName    string           	`json:"firstName"`
+	LastName     string           	`json:"lastName"`
+	Gender       enum.Gender    	`json:"gender"`
+	Birthdate    time.Time        	`json:"birthdate"`
+	PostalCode   *string          	`json:"postalCode"`
+	Address      *string           	`json:"address"`
+	ProfileImage *string           	`json:"profileImage"`
+	Status       enum.UserStatus 	`json:"status"`
 }
 
 type TenantResponse struct {
 	UserId       int64            `json:"userId"`
 	Email        string           `json:"email"`
-	Phone        *string           `json:"phone"`
-	Identity     *string           `json:"identity"`
+	Phone        *string          `json:"phone"`
+	Identity     *string          `json:"identity"`
 	FirstName    string           `json:"firstName"`
 	LastName     string           `json:"lastName"`
-	Gender       enum.Gender     `json:"gender"`
+	Gender       enum.Gender      `json:"gender"`
 	Birthdate    time.Time        `json:"birthdate"`
-	PostalCode   *string           `json:"postalCode"`
-	Address      *string           `json:"address"`
-	ProfileImage *string           `json:"profileImage"`
+	PostalCode   *string          `json:"postalCode"`
+	Address      *string          `json:"address"`
+	ProfileImage *string          `json:"profileImage"`
 	Code         string           `json:"code"`
-	Description  *string           `json:"description"`
-	Type         enum.TenantType `json:"type"`
-	Notes        *string           `json:"notes"`
-	Status       enum.UserStatus `json:"status"`
+	Description  *string          `json:"description"`
+	Type         enum.TenantType  `json:"type"`
+	Notes        *string          `json:"notes"`
+	Status       enum.UserStatus  `json:"status"`
 }
 
 type SignInResponse struct {
@@ -114,13 +114,13 @@ type RestaurantTableResponse struct {
 
 
 type RestaurantOrderResponse struct {
-	Id 				int64					`json:"id"`
-	RestaurantId 	int64					`json:"restaurantId"`
-	TableId 		int64				`json:"tableId"`
-	Amount 			decimal.Decimal 			`json:"amount"`
+	Id 				int64							`json:"id"`
+	RestaurantId 	int64							`json:"restaurantId"`
+	TableId 		int64							`json:"tableId"`
+	Amount 			decimal.Decimal 				`json:"amount"`
 	Status 			enum.RestaurantOrderStatus		`json:"status"`
-	Notes 			*string 			`json:"notes"`
-	Items 			[]RestaurantOrderItemResponse 		`json:"items"`
+	Notes 			*string 						`json:"notes"`
+	Items 			[]RestaurantOrderItemResponse 	`json:"items"`
 }
 
 
@@ -129,13 +129,13 @@ type RestaurantOrderItemResponse struct {
 	ROrderId 		int64					`json:"rOrderId"`
 	ItemId 			string 					`json:"itemId"`
 	Quantity 		int 					`json:"quantity"`
-	Total 			decimal.Decimal 			`json:"total"`
+	Total 			decimal.Decimal 		`json:"total"`
 }
 
 
 type RestaurantOrderPaymentResponse struct {
-	Id 				int64 					`json:"id"`
-	ROrderId 		int64				`json:"rOrderId"`
+	Id 				int64 						`json:"id"`
+	ROrderId 		int64						`json:"rOrderId"`
 	Amount 			decimal.Decimal 			`json:"amount"`
 	Method 			enum.PaymentMethod			`json:"method"`
 	Status 			enum.PaymentStatus 			`json:"status"`

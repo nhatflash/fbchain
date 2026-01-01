@@ -137,12 +137,14 @@ CREATE TABLE restaurant_order_items (
 );
 
 
-CREATE TABLE restaurant_order_payments (
+CREATE TABLE restaurant_payments (
 	id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	restaurant_order_id BIGINT NOT NULL REFERENCES restaurant_orders(id) ON UPDATE CASCADE ON DELETE RESTRICT,
 	amount DECIMAL(18,2) NOT NULL,
+	bank_code VARCHAR(50),
 	method payment_method NOT NULL,
 	status payment_status NOT NULL,
+	is_cashed BOOLEAN NOT NULL DEFAULT FALSE,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

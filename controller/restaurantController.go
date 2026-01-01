@@ -282,3 +282,29 @@ func (rc *RestaurantController) CreateRestaurantOrder(c *gin.Context) {
 	api.SuccessMessage(http.StatusCreated, "Restaurant order created successfully.", res, c)
 }
 
+
+// @Summary Pay Restaurant Order With Cash API
+// @Param orderId path string true "Order ID"
+// @Param tableId path string true "Table ID"
+// @Router /table/{tableId}/order/{orderId}/cash [post]
+func (rc *RestaurantController) PayRestaurantOrderWithCash(c *gin.Context) {
+	tableIdParam := c.Param("tableId")
+	tableId, err := strconv.ParseInt(tableIdParam, 10, 64)
+	if err != nil {
+		c.Error(appErr.BadRequestError("Invalid tableId format."))
+		return
+	}
+	orderIdParam := c.Param("orderId")
+	orderId, err := strconv.ParseInt(orderIdParam, 10, 64)
+	if err != nil {
+		c.Error(appErr.BadRequestError("Invalid orderId format."))
+		return
+	}
+
+	if err := rc.RestaurantService.HandlePayRestaurantOrderWithCash(c.Request.Context(), orderId, tableId); err != nil {
+		c.Error(err)
+		return
+	}
+	api.SuccessMessage(http.StatusOK, "Paid restaurant order with cash successfully.", nil, c)
+}
+

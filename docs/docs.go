@@ -467,6 +467,28 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/table/{tableId}/order/{orderId}/cash": {
+            "post": {
+                "summary": "Pay Restaurant Order With Cash API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "orderId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Table ID",
+                        "name": "tableId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/table/{tableId}/session/end": {
             "get": {
                 "summary": "End Table Ordering Session API",
@@ -1106,6 +1128,7 @@ const docTemplate = `{
     },
     "securityDefinitions": {
         "BearerAuth": {
+            "description": "Type \"Bearer\" followed by a space and JWT token.",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"

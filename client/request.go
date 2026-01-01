@@ -5,8 +5,8 @@ import (
 )
 
 type SignInRequest struct {
-	Login    string `json:"login" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Login    string 			`json:"login" binding:"required"`
+	Password string 			`json:"password" binding:"required"`
 }
 
 type TenantSignUpRequest struct {
@@ -50,8 +50,8 @@ type CreateRestaurantRequest struct {
 }
 
 type PaySubPackageRequest struct {
-	RestaurantId   *int64 `json:"restaurantId" binding:"required"`
-	SubPackageId   *int64 `json:"subPackageId" binding:"required"`
+	RestaurantId   *int64 				`json:"restaurantId" binding:"required"`
+	SubPackageId   *int64 				`json:"subPackageId" binding:"required"`
 }
 
 
@@ -68,7 +68,7 @@ type UpdateProfileRequest struct {
 }
 
 type VerifyChangePasswordRequest struct {
-	VerifiedCode 	string			`json:"verifiedCode" binding:"required"`
+	VerifiedCode 	string				`json:"verifiedCode" binding:"required"`
 }
 
 type ChangePasswordRequest struct {

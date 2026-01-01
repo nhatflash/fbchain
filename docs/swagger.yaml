@@ -653,6 +653,21 @@ paths:
       - application/json
       responses: {}
       summary: Create Restaurant Order API
+  /table/{tableId}/order/{orderId}/cash:
+    post:
+      parameters:
+      - description: Order ID
+        in: path
+        name: orderId
+        required: true
+        type: string
+      - description: Table ID
+        in: path
+        name: tableId
+        required: true
+        type: string
+      responses: {}
+      summary: Pay Restaurant Order With Cash API
   /table/{tableId}/session/end:
     get:
       parameters:
@@ -723,6 +738,7 @@ paths:
       summary: Complete Tenant Info API
 securityDefinitions:
   BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
     in: header
     name: Authorization
     type: apiKey

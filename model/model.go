@@ -145,11 +145,13 @@ type RestaurantOrderItem struct {
 }
 
 
-type RestaurantOrderPayment struct {
+type RestaurantPayment struct {
 	Id 				int64						`json:"id"`
 	ROrderId 		int64 						`json:"rOrderId"`
 	Amount 			decimal.Decimal 			`json:"amount"`
+	BankCode 		*string						`json:"bankCode"`
 	Method 			enum.PaymentMethod   		`json:"method"`
 	Status 			enum.PaymentStatus 			`json:"status"`
+	IsCashed 		bool 						`json:"isCashed"`
 	CreatedAt 		time.Time 					`json:"createdAt"`
 }
