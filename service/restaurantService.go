@@ -462,6 +462,17 @@ func (rs *RestaurantService) HandleCreateRestaurantOrder(ctx context.Context, ta
 }
 
 
+func (rs *RestaurantService) HandlePayRestaurantOrder(ctx context.Context, orderId int64) (*model.RestaurantOrderPayment, error) {
+	var err error
+	var o *model.RestaurantOrder
+	o, err = rs.RestaurantOrderRepo.FindRestaurantOrderById(ctx, orderId)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+
 func validateCreateRestaurantRequest(ctx context.Context, name string, subPackageRepo *repository.SubPackageRepository, resRepo *repository.RestaurantRepository) error {
 	var err error
 	var exist bool
