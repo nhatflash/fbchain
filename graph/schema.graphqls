@@ -39,6 +39,13 @@ enum OrderStatus {
   ORDER_CANCELED
 }
 
+enum RestaurantOrderStatus {
+  R_ORDER_PENDING
+  R_ORDER_WORKING
+  R_ORDER_FINISHED
+  R_ORDER_CANCELED
+}
+
 type Todo {
   id: ID!
   text: String!
@@ -150,6 +157,31 @@ type Order {
 }
 
 
+type RestaurantOrder {
+  id: ID!
+  amount: String!
+  status: RestaurantOrderStatus
+  notes: String
+  createdAt: DateTime
+  updatedAt: DateTime
+  restaurantId: String
+  tableId: String
+  restaurant: Restaurant
+  table: RestaurantTable
+  items: [RestaurantOrderItem!]!
+}
+
+
+type RestaurantOrderItem {
+  id: ID!
+  itemId: String!
+  quantity: Int
+  total: String
+  rOrderId: String
+  rOrder: RestaurantOrder
+}
+
+
 type Query {
   me: User
   users: [User!]!
@@ -168,6 +200,10 @@ type Query {
   subPackage(id: ID!): SubPackage
   orders: [Order!]!
   order(id: ID!): Order
+  restaurantOrders: [RestaurantOrder!]!
+  restaurantOrder(id: ID!): RestaurantOrder
+  restaurantOrderItems: [RestaurantOrderItem!]!
+  restaurantOrderItem(id: ID!): RestaurantOrderItem
 }
 
 input NewTodo {

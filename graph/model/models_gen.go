@@ -73,6 +73,29 @@ type RestaurantItem struct {
 	Restaurant   *Restaurant      `json:"restaurant,omitempty"`
 }
 
+type RestaurantOrder struct {
+	ID           string                      `json:"id"`
+	Amount       string                      `json:"amount"`
+	Status       *enum.RestaurantOrderStatus `json:"status,omitempty"`
+	Notes        *string                     `json:"notes,omitempty"`
+	CreatedAt    *time.Time                  `json:"createdAt,omitempty"`
+	UpdatedAt    *time.Time                  `json:"updatedAt,omitempty"`
+	RestaurantID *string                     `json:"restaurantId,omitempty"`
+	TableID      *string                     `json:"tableId,omitempty"`
+	Restaurant   *Restaurant                 `json:"restaurant,omitempty"`
+	Table        *RestaurantTable            `json:"table,omitempty"`
+	Items        []*RestaurantOrderItem      `json:"items"`
+}
+
+type RestaurantOrderItem struct {
+	ID       string           `json:"id"`
+	ItemID   string           `json:"itemId"`
+	Quantity *int32           `json:"quantity,omitempty"`
+	Total    *string          `json:"total,omitempty"`
+	ROrderID *string          `json:"rOrderId,omitempty"`
+	ROrder   *RestaurantOrder `json:"rOrder,omitempty"`
+}
+
 type RestaurantTable struct {
 	ID           string      `json:"id"`
 	Label        string      `json:"label"`

@@ -150,3 +150,92 @@ func (ror *RestaurantOrderRepository) FindRestaurantOrderItemsByOrderId(ctx cont
 	}
 	return items, nil
 }
+
+
+func (ror *RestaurantOrderRepository) FindAllRestaurantOrders(ctx context.Context) ([]model.RestaurantOrder, error) {
+	var err error
+	var rows *sql.Rows
+	query := "SELECT * FROM restaurant_orders"
+	rows, err = ror.Db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	var orders []model.RestaurantOrder
+	for rows.Next() {
+		var o model.RestaurantOrder
+		if err = rows.Scan(
+			&o.Id,
+			&o.RestaurantId,
+			&o.TableId,
+			&o.Amount,
+			&o.Status,
+			&o.Notes,
+			&o.CreatedAt,
+			&o.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		var items []model.RestaurantOrderItem
+		items, err = ror.FindRestaurantOrderItemsByOrderId(ctx, o.Id)
+		if err != nil {
+			return nil, err
+		}
+		o.Items = items
+		orders = append(orders, o)
+	}
+	if len(orders) == 0 {
+		return nil, appErr.NotFoundError("No restaurant order found.")
+	}
+	return orders, nil
+}
+
+
+func (ror *RestaurantOrderRepository) FindAllRestaurantOrderItems(ctx context.Context) ([]model.RestaurantOrderItem, error) {
+	var err error
+	var rows *sql.Rows
+	query := "SELECT * FROM restaurant_order_items"
+	rows, err = ror.Db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	var items []model.RestaurantOrderItem
+	for rows.Next() {
+		var i model.RestaurantOrderItem
+		if err = rows.Scan(
+			&i.Id,
+			&i.ROrderId,
+			&i.ItemId,
+			&i.Quantity,
+			&i.Total,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if len(items) == 0 {
+		return nil, appErr.NotFoundError("No restaurant order item found.")
+	}
+	return items, nil
+}
+
+
+func (ror *RestaurantOrderRepository) FindRestaurantOrderItemById(ctx context.Context, id int64) (*model.RestaurantOrderItem, error) {
+	var err error
+	var i model.RestaurantOrderItem
+	query := "SELECT * FROM restaurant_order_items WHERE id = $1 LIMIT 1"
+	err = ror.Db.QueryRowContext(ctx, query, id).Scan(
+		&i.Id,
+		&i.ROrderId,
+		&i.ItemId,
+		&i.Quantity,
+		&i.Total,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, appErr.NotFoundError("No restaurant order item found.")
+		}
+		return nil, err
+	}
+	return &i, nil
+}
+

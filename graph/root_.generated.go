@@ -41,6 +41,8 @@ type ResolverRoot interface {
 	Restaurant() RestaurantResolver
 	RestaurantImage() RestaurantImageResolver
 	RestaurantItem() RestaurantItemResolver
+	RestaurantOrder() RestaurantOrderResolver
+	RestaurantOrderItem() RestaurantOrderItemResolver
 	RestaurantTable() RestaurantTableResolver
 	Tenant() TenantResolver
 }
@@ -68,23 +70,27 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Me               func(childComplexity int) int
-		Order            func(childComplexity int, id string) int
-		Orders           func(childComplexity int) int
-		Restaurant       func(childComplexity int, id string) int
-		RestaurantImage  func(childComplexity int, id string) int
-		RestaurantImages func(childComplexity int) int
-		RestaurantItem   func(childComplexity int, id string) int
-		RestaurantItems  func(childComplexity int) int
-		RestaurantTable  func(childComplexity int, id string) int
-		RestaurantTables func(childComplexity int) int
-		Restaurants      func(childComplexity int) int
-		SubPackage       func(childComplexity int, id string) int
-		SubPackages      func(childComplexity int) int
-		Tenant           func(childComplexity int, id string) int
-		Tenants          func(childComplexity int) int
-		User             func(childComplexity int, id string) int
-		Users            func(childComplexity int) int
+		Me                   func(childComplexity int) int
+		Order                func(childComplexity int, id string) int
+		Orders               func(childComplexity int) int
+		Restaurant           func(childComplexity int, id string) int
+		RestaurantImage      func(childComplexity int, id string) int
+		RestaurantImages     func(childComplexity int) int
+		RestaurantItem       func(childComplexity int, id string) int
+		RestaurantItems      func(childComplexity int) int
+		RestaurantOrder      func(childComplexity int, id string) int
+		RestaurantOrderItem  func(childComplexity int, id string) int
+		RestaurantOrderItems func(childComplexity int) int
+		RestaurantOrders     func(childComplexity int) int
+		RestaurantTable      func(childComplexity int, id string) int
+		RestaurantTables     func(childComplexity int) int
+		Restaurants          func(childComplexity int) int
+		SubPackage           func(childComplexity int, id string) int
+		SubPackages          func(childComplexity int) int
+		Tenant               func(childComplexity int, id string) int
+		Tenants              func(childComplexity int) int
+		User                 func(childComplexity int, id string) int
+		Users                func(childComplexity int) int
 	}
 
 	Restaurant struct {
@@ -124,6 +130,29 @@ type ComplexityRoot struct {
 		RestaurantID func(childComplexity int) int
 		Status       func(childComplexity int) int
 		Type         func(childComplexity int) int
+	}
+
+	RestaurantOrder struct {
+		Amount       func(childComplexity int) int
+		CreatedAt    func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Items        func(childComplexity int) int
+		Notes        func(childComplexity int) int
+		Restaurant   func(childComplexity int) int
+		RestaurantID func(childComplexity int) int
+		Status       func(childComplexity int) int
+		Table        func(childComplexity int) int
+		TableID      func(childComplexity int) int
+		UpdatedAt    func(childComplexity int) int
+	}
+
+	RestaurantOrderItem struct {
+		ID       func(childComplexity int) int
+		ItemID   func(childComplexity int) int
+		Quantity func(childComplexity int) int
+		ROrder   func(childComplexity int) int
+		ROrderID func(childComplexity int) int
+		Total    func(childComplexity int) int
 	}
 
 	RestaurantTable struct {
@@ -365,6 +394,44 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.RestaurantItems(childComplexity), true
+
+	case "Query.restaurantOrder":
+		if e.complexity.Query.RestaurantOrder == nil {
+			break
+		}
+
+		args, err := ec.field_Query_restaurantOrder_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.RestaurantOrder(childComplexity, args["id"].(string)), true
+
+	case "Query.restaurantOrderItem":
+		if e.complexity.Query.RestaurantOrderItem == nil {
+			break
+		}
+
+		args, err := ec.field_Query_restaurantOrderItem_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.RestaurantOrderItem(childComplexity, args["id"].(string)), true
+
+	case "Query.restaurantOrderItems":
+		if e.complexity.Query.RestaurantOrderItems == nil {
+			break
+		}
+
+		return e.complexity.Query.RestaurantOrderItems(childComplexity), true
+
+	case "Query.restaurantOrders":
+		if e.complexity.Query.RestaurantOrders == nil {
+			break
+		}
+
+		return e.complexity.Query.RestaurantOrders(childComplexity), true
 
 	case "Query.restaurantTable":
 		if e.complexity.Query.RestaurantTable == nil {
@@ -658,6 +725,125 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.RestaurantItem.Type(childComplexity), true
+
+	case "RestaurantOrder.amount":
+		if e.complexity.RestaurantOrder.Amount == nil {
+			break
+		}
+
+		return e.complexity.RestaurantOrder.Amount(childComplexity), true
+
+	case "RestaurantOrder.createdAt":
+		if e.complexity.RestaurantOrder.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.RestaurantOrder.CreatedAt(childComplexity), true
+
+	case "RestaurantOrder.id":
+		if e.complexity.RestaurantOrder.ID == nil {
+			break
+		}
+
+		return e.complexity.RestaurantOrder.ID(childComplexity), true
+
+	case "RestaurantOrder.items":
+		if e.complexity.RestaurantOrder.Items == nil {
+			break
+		}
+
+		return e.complexity.RestaurantOrder.Items(childComplexity), true
+
+	case "RestaurantOrder.notes":
+		if e.complexity.RestaurantOrder.Notes == nil {
+			break
+		}
+
+		return e.complexity.RestaurantOrder.Notes(childComplexity), true
+
+	case "RestaurantOrder.restaurant":
+		if e.complexity.RestaurantOrder.Restaurant == nil {
+			break
+		}
+
+		return e.complexity.RestaurantOrder.Restaurant(childComplexity), true
+
+	case "RestaurantOrder.restaurantId":
+		if e.complexity.RestaurantOrder.RestaurantID == nil {
+			break
+		}
+
+		return e.complexity.RestaurantOrder.RestaurantID(childComplexity), true
+
+	case "RestaurantOrder.status":
+		if e.complexity.RestaurantOrder.Status == nil {
+			break
+		}
+
+		return e.complexity.RestaurantOrder.Status(childComplexity), true
+
+	case "RestaurantOrder.table":
+		if e.complexity.RestaurantOrder.Table == nil {
+			break
+		}
+
+		return e.complexity.RestaurantOrder.Table(childComplexity), true
+
+	case "RestaurantOrder.tableId":
+		if e.complexity.RestaurantOrder.TableID == nil {
+			break
+		}
+
+		return e.complexity.RestaurantOrder.TableID(childComplexity), true
+
+	case "RestaurantOrder.updatedAt":
+		if e.complexity.RestaurantOrder.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.RestaurantOrder.UpdatedAt(childComplexity), true
+
+	case "RestaurantOrderItem.id":
+		if e.complexity.RestaurantOrderItem.ID == nil {
+			break
+		}
+
+		return e.complexity.RestaurantOrderItem.ID(childComplexity), true
+
+	case "RestaurantOrderItem.itemId":
+		if e.complexity.RestaurantOrderItem.ItemID == nil {
+			break
+		}
+
+		return e.complexity.RestaurantOrderItem.ItemID(childComplexity), true
+
+	case "RestaurantOrderItem.quantity":
+		if e.complexity.RestaurantOrderItem.Quantity == nil {
+			break
+		}
+
+		return e.complexity.RestaurantOrderItem.Quantity(childComplexity), true
+
+	case "RestaurantOrderItem.rOrder":
+		if e.complexity.RestaurantOrderItem.ROrder == nil {
+			break
+		}
+
+		return e.complexity.RestaurantOrderItem.ROrder(childComplexity), true
+
+	case "RestaurantOrderItem.rOrderId":
+		if e.complexity.RestaurantOrderItem.ROrderID == nil {
+			break
+		}
+
+		return e.complexity.RestaurantOrderItem.ROrderID(childComplexity), true
+
+	case "RestaurantOrderItem.total":
+		if e.complexity.RestaurantOrderItem.Total == nil {
+			break
+		}
+
+		return e.complexity.RestaurantOrderItem.Total(childComplexity), true
 
 	case "RestaurantTable.createdAt":
 		if e.complexity.RestaurantTable.CreatedAt == nil {

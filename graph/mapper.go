@@ -216,3 +216,55 @@ func MapToGqlSubPackages(subPackages []model.SubPackage) []*gqlModel.SubPackage 
 	}
 	return gqlSubPackages
 }
+
+
+func MapToGqlRestaurantOrder(o *model.RestaurantOrder) *gqlModel.RestaurantOrder {
+	orderId := strconv.FormatInt(o.Id, 10)
+	restaurantId := strconv.FormatInt(o.RestaurantId, 10)
+	tableId := strconv.FormatInt(o.TableId, 10)
+	return &gqlModel.RestaurantOrder{
+		ID: orderId,
+		Amount: o.Amount.String(),
+		Status: &o.Status,
+		Notes: o.Notes,
+		CreatedAt: &o.CreatedAt,
+		UpdatedAt: &o.UpdatedAt,
+		RestaurantID: &restaurantId,
+		TableID: &tableId,
+	}
+}
+
+
+func MapToGqlRestaurantOrders(orders []model.RestaurantOrder) []*gqlModel.RestaurantOrder {
+	var gqlOrders []*gqlModel.RestaurantOrder
+	for _, o := range orders {
+		gqlOrder := MapToGqlRestaurantOrder(&o)
+		gqlOrders = append(gqlOrders, gqlOrder)
+	}
+	return gqlOrders
+}
+
+
+func MapToGqlRestaurantOrderItem(i *model.RestaurantOrderItem) *gqlModel.RestaurantOrderItem {
+	id := strconv.FormatInt(i.Id, 10)
+	rOrderId := strconv.FormatInt(i.ROrderId, 10)
+	quantity := int32(i.Quantity)
+	total := i.Total.String()
+	return &gqlModel.RestaurantOrderItem{
+		ID: id,
+		ItemID: i.ItemId,
+		Quantity: &quantity,
+		Total: &total,
+		ROrderID: &rOrderId,
+	}
+}
+
+
+func MapToGqlRestaurantOrderItems(items []model.RestaurantOrderItem) []*gqlModel.RestaurantOrderItem {
+	var gqlItems []*gqlModel.RestaurantOrderItem
+	for _, i := range items {
+		gqlItem := MapToGqlRestaurantOrderItem(&i)
+		gqlItems = append(gqlItems, gqlItem)
+	}
+	return gqlItems
+}

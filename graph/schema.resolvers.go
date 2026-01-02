@@ -286,6 +286,56 @@ func (r *queryResolver) Order(ctx context.Context, id string) (*gqlModel.Order, 
 	return MapToGqlOrder(o), nil
 }
 
+// RestaurantOrders is the resolver for the restaurantOrders field.
+func (r *queryResolver) RestaurantOrders(ctx context.Context) ([]*gqlModel.RestaurantOrder, error) {
+	o, err := r.RestaurantService.FindAllRestaurantOrders(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurantOrders(o), nil
+}
+
+// RestaurantOrder is the resolver for the restaurantOrder field.
+func (r *queryResolver) RestaurantOrder(ctx context.Context, id string) (*gqlModel.RestaurantOrder, error) {
+	var err error
+	var orderId int64
+	orderId, err = strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var o *model.RestaurantOrder
+	o, err = r.RestaurantService.FindRestaurantOrderById(ctx, orderId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurantOrder(o), nil
+}
+
+// RestaurantOrderItems is the resolver for the restaurantOrderItems field.
+func (r *queryResolver) RestaurantOrderItems(ctx context.Context) ([]*gqlModel.RestaurantOrderItem, error) {
+	items, err := r.RestaurantService.FindAllRestaurantOrderItems(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurantOrderItems(items), nil
+}
+
+// RestaurantOrderItem is the resolver for the restaurantOrderItem field.
+func (r *queryResolver) RestaurantOrderItem(ctx context.Context, id string) (*gqlModel.RestaurantOrderItem, error) {
+	var itemId int64
+	var err error
+	itemId, err = strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var i *model.RestaurantOrderItem
+	i, err = r.RestaurantService.FindRestaurantOrderItemById(ctx, itemId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurantOrderItem(i), nil
+}
+
 // Tenant is the resolver for the tenant field.
 func (r *restaurantResolver) Tenant(ctx context.Context, obj *gqlModel.Restaurant) (*gqlModel.Tenant, error) {
 	var tenantId int64
@@ -364,6 +414,70 @@ func (r *restaurantItemResolver) Restaurant(ctx context.Context, obj *gqlModel.R
 		return nil, err
 	}
 	return MapToGqlRestaurant(res), nil
+}
+
+// Restaurant is the resolver for the restaurant field.
+func (r *restaurantOrderResolver) Restaurant(ctx context.Context, obj *gqlModel.RestaurantOrder) (*gqlModel.Restaurant, error) {
+	var err error
+	var restaurantId int64
+	restaurantId, err = strconv.ParseInt(*obj.RestaurantID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var res *model.Restaurant
+	res, err = r.RestaurantService.FindRestaurantById(ctx, restaurantId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurant(res), nil
+}
+
+// Table is the resolver for the table field.
+func (r *restaurantOrderResolver) Table(ctx context.Context, obj *gqlModel.RestaurantOrder) (*gqlModel.RestaurantTable, error) {
+	var err error
+	var tableId int64
+	tableId, err = strconv.ParseInt(*obj.TableID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var t *model.RestaurantTable
+	t, err = r.RestaurantService.FindRestaurantTableById(ctx, tableId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurantTable(t), nil
+}
+
+// Items is the resolver for the items field.
+func (r *restaurantOrderResolver) Items(ctx context.Context, obj *gqlModel.RestaurantOrder) ([]*gqlModel.RestaurantOrderItem, error) {
+	var err error
+	var orderId int64
+	orderId, err = strconv.ParseInt(obj.ID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var items []model.RestaurantOrderItem	
+	items, err = r.RestaurantService.FindRestaurantOrderItemsByOrderId(ctx, orderId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurantOrderItems(items), nil
+}
+
+// ROrder is the resolver for the rOrder field.
+func (r *restaurantOrderItemResolver) ROrder(ctx context.Context, obj *gqlModel.RestaurantOrderItem) (*gqlModel.RestaurantOrder, error) {
+	var err error
+	var orderId int64
+	orderId, err = strconv.ParseInt(*obj.ROrderID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var o *model.RestaurantOrder
+	o, err = r.RestaurantService.FindRestaurantOrderById(ctx, orderId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurantOrder(o), nil
 }
 
 // Restaurant is the resolver for the restaurant field.
@@ -453,6 +567,14 @@ func (r *Resolver) RestaurantImage() RestaurantImageResolver { return &restauran
 // RestaurantItem returns RestaurantItemResolver implementation.
 func (r *Resolver) RestaurantItem() RestaurantItemResolver { return &restaurantItemResolver{r} }
 
+// RestaurantOrder returns RestaurantOrderResolver implementation.
+func (r *Resolver) RestaurantOrder() RestaurantOrderResolver { return &restaurantOrderResolver{r} }
+
+// RestaurantOrderItem returns RestaurantOrderItemResolver implementation.
+func (r *Resolver) RestaurantOrderItem() RestaurantOrderItemResolver {
+	return &restaurantOrderItemResolver{r}
+}
+
 // RestaurantTable returns RestaurantTableResolver implementation.
 func (r *Resolver) RestaurantTable() RestaurantTableResolver { return &restaurantTableResolver{r} }
 
@@ -465,5 +587,7 @@ type queryResolver struct{ *Resolver }
 type restaurantResolver struct{ *Resolver }
 type restaurantImageResolver struct{ *Resolver }
 type restaurantItemResolver struct{ *Resolver }
+type restaurantOrderResolver struct{ *Resolver }
+type restaurantOrderItemResolver struct{ *Resolver }
 type restaurantTableResolver struct{ *Resolver }
 type tenantResolver struct{ *Resolver }

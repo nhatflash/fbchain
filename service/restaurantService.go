@@ -42,6 +42,11 @@ type IRestaurantService interface {
 	HandleEndTableOrderingSession(ctx context.Context, tableId int64) error
 	HandleCreateRestaurantOrder(ctx context.Context, tableId int64, req *client.CreateRestaurantOrderRequest) (*client.RestaurantOrderResponse, error)
 	HandlePayRestaurantOrderWithCash(ctx context.Context, orderId int64, tableId int64) error
+	FindRestaurantOrderById(ctx context.Context, id int64) (*model.RestaurantOrder, error)
+	FindAllRestaurantOrders(ctx context.Context) ([]model.RestaurantOrder, error)
+	FindAllRestaurantOrderItems(ctx context.Context) ([]model.RestaurantOrderItem, error)
+	FindRestaurantOrderItemById(ctx context.Context, id int64) (*model.RestaurantOrderItem, error)
+	FindRestaurantOrderItemsByOrderId(ctx context.Context, orderId int64) ([]model.RestaurantOrderItem, error)
 }
 
 type RestaurantService struct {
@@ -469,7 +474,7 @@ func (rs *RestaurantService) HandleCreateRestaurantOrder(ctx context.Context, ta
 func (rs *RestaurantService) HandlePayRestaurantOrderWithCash(ctx context.Context, orderId int64, tableId int64) error {
 	var err error
 	var o *model.RestaurantOrder
-	o, err = rs.RestaurantOrderRepo.FindRestaurantOrderById(ctx, orderId)
+	o, err = rs.FindRestaurantOrderById(ctx, orderId)
 	if err != nil {
 		return err
 	}
@@ -519,4 +524,42 @@ func validateCreateRestaurantRequest(ctx context.Context, name string, subPackag
 
 
 
+func (rs *RestaurantService) FindRestaurantOrderById(ctx context.Context, id int64) (*model.RestaurantOrder, error) {
+	o, err := rs.RestaurantOrderRepo.FindRestaurantOrderById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return o, nil
+}
 
+func (rs *RestaurantService) FindAllRestaurantOrders(ctx context.Context) ([]model.RestaurantOrder, error) {
+	o, err := rs.RestaurantOrderRepo.FindAllRestaurantOrders(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return o, nil
+}
+
+func (rs *RestaurantService) FindAllRestaurantOrderItems(ctx context.Context) ([]model.RestaurantOrderItem, error) {
+	i, err := rs.RestaurantOrderRepo.FindAllRestaurantOrderItems(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return i, nil
+}
+
+func (rs *RestaurantService) FindRestaurantOrderItemById(ctx context.Context, id int64) (*model.RestaurantOrderItem, error) {
+	i, err := rs.RestaurantOrderRepo.FindRestaurantOrderItemById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return i, nil
+}
+
+func (rs *RestaurantService) FindRestaurantOrderItemsByOrderId(ctx context.Context, orderId int64) ([]model.RestaurantOrderItem, error) {
+	i, err := rs.RestaurantOrderRepo.FindRestaurantOrderItemsByOrderId(ctx, orderId)
+	if err != nil {
+		return nil, err
+	}
+	return i, nil
+}
