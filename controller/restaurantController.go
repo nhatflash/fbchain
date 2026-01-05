@@ -308,3 +308,30 @@ func (rc *RestaurantController) PayRestaurantOrderWithCash(c *gin.Context) {
 	api.SuccessMessage(http.StatusOK, "Paid restaurant order with cash successfully.", nil, c)
 }
 
+
+
+
+// @Summary Confirm Cash Payment For Restaurant Order API
+// @Param orderId path string true "Order ID"
+// @Security BearerAuth
+// @Router /restaurant/:restaurantId/order/:orderId/confirm [get]
+func (rc *RestaurantController) ConfirmCashPaymentForRestaurantOrder(c *gin.Context) {
+	orderIdParam := c.Param("orderId")
+	orderId, err := strconv.ParseInt(orderIdParam, 10, 64)
+	if err != nil {
+		c.Error(appErr.BadRequestError("Invalid orderId format."))
+		return
+	}
+	restaurantIdParam := c.Param("restaurantId")
+	restaurantId, err := strconv.ParseInt(restaurantIdParam, 10, 64)
+	if err != nil {
+		c.Error(appErr.BadRequestError("Invalid restaurantId format."))
+		return
+	}
+
+	if err := rc.RestaurantService.HandleConfirmRestaurantOrderCashPayment(c.Request.Context(), restaurantId, orderId); err != nil {
+		c.Error(err)
+		return
+	}
+	api.SuccessMessage(http.StatusOK, "Order confirmed successfully", nil, c)
+}

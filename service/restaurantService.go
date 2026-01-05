@@ -47,6 +47,7 @@ type IRestaurantService interface {
 	FindAllRestaurantOrderItems(ctx context.Context) ([]model.RestaurantOrderItem, error)
 	FindRestaurantOrderItemById(ctx context.Context, id int64) (*model.RestaurantOrderItem, error)
 	FindRestaurantOrderItemsByOrderId(ctx context.Context, orderId int64) ([]model.RestaurantOrderItem, error)
+	HandleConfirmRestaurantOrderCashPayment(ctx context.Context, restaurantId int64, orderId int64) error
 }
 
 type RestaurantService struct {
@@ -562,4 +563,37 @@ func (rs *RestaurantService) FindRestaurantOrderItemsByOrderId(ctx context.Conte
 		return nil, err
 	}
 	return i, nil
+}
+
+
+func (rs *RestaurantService) HandleConfirmRestaurantOrderCashPayment(ctx context.Context, restaurantId int64, orderId int64) error {
+	var err error
+	var r *model.Restaurant
+	r, err = rs.FindRestaurantById(ctx, restaurantId)
+	if err != nil {
+		return err
+	}
+	var o *model.RestaurantOrder
+	o, err = rs.FindRestaurantOrderById(ctx, orderId)
+	if err != nil {
+		return err
+	}
+	if o.RestaurantId != r.Id {
+		return appErr.BadRequestError("This order does not belong to the current restaurant.")
+	}
+	var p *model.RestaurantPayment
+	p, err = rs.RestaurantPaymentRepo.FindSuccessfulPaymentOnOrderId(ctx, orderId)
+	if err != nil {
+		return err
+	}
+
+	if o.Status != enum.R_ORDER_PENDING || p.IsCashed {
+		return appErr.BadRequestError("This order is already confirmed.")
+	}
+
+	err = rs.RestaurantPaymentRepo.ConfirmCashedPayment(ctx, orderId, p.Id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

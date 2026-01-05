@@ -9,9 +9,15 @@ import (
 
 func RestaurantRoutes(r *gin.Engine, prefix string, rc *controller.RestaurantController) {
 
-	restaurant := r.Group(prefix, middleware.JwtRestHandler(), middleware.RoleBasedHandler("TENANT"))
-	restaurant.POST("/", rc.CreateRestaurant)
-	restaurant.POST("/:restaurantId/item", rc.AddNewRestaurantItem)
-	restaurant.POST("/:restaurantId/table", rc.AddNewRestaurantTable)
-	restaurant.GET("/:restaurantId/table/:tableId/qrCode", rc.GetTableQrCode)
+	restaurant := r.Group(prefix)
+
+	restaurant.POST("/", middleware.JwtRestHandler(), middleware.RoleBasedHandler("TENANT"), rc.CreateRestaurant)
+
+	restaurant.POST("/:restaurantId/item", middleware.JwtRestHandler(), middleware.RoleBasedHandler("TENANT"), rc.AddNewRestaurantItem)
+
+	restaurant.POST("/:restaurantId/table", middleware.JwtRestHandler(), middleware.RoleBasedHandler("TENANT"), rc.AddNewRestaurantTable)
+
+	restaurant.GET("/:restaurantId/table/:tableId/qrCode", middleware.JwtRestHandler(), middleware.RoleBasedHandler("TENANT"), rc.GetTableQrCode)
+
+	restaurant.GET("/:restaurantId/order/:orderId/confirm", middleware.JwtRestHandler(), middleware.RoleBasedHandler("RESTAURANT_STAFF"), rc.ConfirmCashPaymentForRestaurantOrder)
 }
