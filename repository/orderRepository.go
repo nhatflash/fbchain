@@ -161,7 +161,7 @@ func (or *OrderRepository) FindOrdersByTenantId(ctx context.Context, tenantId in
 }
 
 
-func (or *OrderRepository) FinishOrder(ctx context.Context, orderId int64) (*model.Order, error) {
+func (or *OrderRepository) FinishOrder(ctx context.Context, orderId int64, restaurantId int64, subPackageId int64) (*model.Order, error) {
 	var err error
 	var tx *sql.Tx
 	tx, err = or.Db.BeginTx(ctx, nil)
@@ -183,6 +183,11 @@ func (or *OrderRepository) FinishOrder(ctx context.Context, orderId int64) (*mod
 		&o.RestaurantId,
 		&o.SubPackageId,
 	); err != nil {
+		return nil, err
+	}
+	resQuery := "UPDATE restaurants SET sub_package_id = $1 WHERE id = $2"
+	_, err = tx.ExecContext(ctx, resQuery, subPackageId, restaurantId)
+	if err != nil {
 		return nil, err
 	}
 	if err = tx.Commit(); err != nil {
