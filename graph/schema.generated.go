@@ -50,6 +50,9 @@ type QueryResolver interface {
 	RestaurantOrder(ctx context.Context, id string) (*model.RestaurantOrder, error)
 	RestaurantOrderItems(ctx context.Context) ([]*model.RestaurantOrderItem, error)
 	RestaurantOrderItem(ctx context.Context, id string) (*model.RestaurantOrderItem, error)
+	MyRestaurants(ctx context.Context) ([]*model.Restaurant, error)
+	MyOrders(ctx context.Context) ([]*model.Order, error)
+	MyRestaurantOrders(ctx context.Context, restaurantID string) ([]*model.RestaurantOrder, error)
 }
 type RestaurantResolver interface {
 	Tenant(ctx context.Context, obj *model.Restaurant) (*model.Tenant, error)
@@ -102,6 +105,17 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_myRestaurantOrders_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "restaurantId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["restaurantId"] = arg0
 	return args, nil
 }
 
@@ -1828,6 +1842,185 @@ func (ec *executionContext) fieldContext_Query_restaurantOrderItem(ctx context.C
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_restaurantOrderItem_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_myRestaurants(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_myRestaurants,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().MyRestaurants(ctx)
+		},
+		nil,
+		ec.marshalNRestaurant2ᚕᚖgithubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐRestaurantᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_myRestaurants(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Restaurant_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Restaurant_name(ctx, field)
+			case "location":
+				return ec.fieldContext_Restaurant_location(ctx, field)
+			case "description":
+				return ec.fieldContext_Restaurant_description(ctx, field)
+			case "contactEmail":
+				return ec.fieldContext_Restaurant_contactEmail(ctx, field)
+			case "contactPhone":
+				return ec.fieldContext_Restaurant_contactPhone(ctx, field)
+			case "postalCode":
+				return ec.fieldContext_Restaurant_postalCode(ctx, field)
+			case "type":
+				return ec.fieldContext_Restaurant_type(ctx, field)
+			case "avgRating":
+				return ec.fieldContext_Restaurant_avgRating(ctx, field)
+			case "isActive":
+				return ec.fieldContext_Restaurant_isActive(ctx, field)
+			case "notes":
+				return ec.fieldContext_Restaurant_notes(ctx, field)
+			case "tenantId":
+				return ec.fieldContext_Restaurant_tenantId(ctx, field)
+			case "tenant":
+				return ec.fieldContext_Restaurant_tenant(ctx, field)
+			case "images":
+				return ec.fieldContext_Restaurant_images(ctx, field)
+			case "items":
+				return ec.fieldContext_Restaurant_items(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Restaurant", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_myOrders(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_myOrders,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().MyOrders(ctx)
+		},
+		nil,
+		ec.marshalNOrder2ᚕᚖgithubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐOrderᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_myOrders(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Order_id(ctx, field)
+			case "amount":
+				return ec.fieldContext_Order_amount(ctx, field)
+			case "orderDate":
+				return ec.fieldContext_Order_orderDate(ctx, field)
+			case "status":
+				return ec.fieldContext_Order_status(ctx, field)
+			case "tenantId":
+				return ec.fieldContext_Order_tenantId(ctx, field)
+			case "restaurantId":
+				return ec.fieldContext_Order_restaurantId(ctx, field)
+			case "subPackageId":
+				return ec.fieldContext_Order_subPackageId(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Order_updatedAt(ctx, field)
+			case "tenant":
+				return ec.fieldContext_Order_tenant(ctx, field)
+			case "restaurant":
+				return ec.fieldContext_Order_restaurant(ctx, field)
+			case "subPackage":
+				return ec.fieldContext_Order_subPackage(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Order", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_myRestaurantOrders(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_myRestaurantOrders,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().MyRestaurantOrders(ctx, fc.Args["restaurantId"].(string))
+		},
+		nil,
+		ec.marshalNRestaurantOrder2ᚕᚖgithubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐRestaurantOrderᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_myRestaurantOrders(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_RestaurantOrder_id(ctx, field)
+			case "amount":
+				return ec.fieldContext_RestaurantOrder_amount(ctx, field)
+			case "status":
+				return ec.fieldContext_RestaurantOrder_status(ctx, field)
+			case "notes":
+				return ec.fieldContext_RestaurantOrder_notes(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_RestaurantOrder_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_RestaurantOrder_updatedAt(ctx, field)
+			case "restaurantId":
+				return ec.fieldContext_RestaurantOrder_restaurantId(ctx, field)
+			case "tableId":
+				return ec.fieldContext_RestaurantOrder_tableId(ctx, field)
+			case "restaurant":
+				return ec.fieldContext_RestaurantOrder_restaurant(ctx, field)
+			case "table":
+				return ec.fieldContext_RestaurantOrder_table(ctx, field)
+			case "items":
+				return ec.fieldContext_RestaurantOrder_items(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type RestaurantOrder", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_myRestaurantOrders_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5494,6 +5687,72 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_restaurantOrderItem(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "myRestaurants":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_myRestaurants(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "myOrders":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_myOrders(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "myRestaurantOrders":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_myRestaurantOrders(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 

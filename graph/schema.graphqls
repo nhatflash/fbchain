@@ -204,6 +204,9 @@ type Query {
   restaurantOrder(id: ID!): RestaurantOrder
   restaurantOrderItems: [RestaurantOrderItem!]!
   restaurantOrderItem(id: ID!): RestaurantOrderItem
+  myRestaurants: [Restaurant!]!
+  myOrders: [Order!]!
+  myRestaurantOrders(restaurantId: ID!): [RestaurantOrder!]!
 }
 
 input NewTodo {

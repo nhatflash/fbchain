@@ -71,6 +71,9 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Me                   func(childComplexity int) int
+		MyOrders             func(childComplexity int) int
+		MyRestaurantOrders   func(childComplexity int, restaurantID string) int
+		MyRestaurants        func(childComplexity int) int
 		Order                func(childComplexity int, id string) int
 		Orders               func(childComplexity int) int
 		Restaurant           func(childComplexity int, id string) int
@@ -325,6 +328,32 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Me(childComplexity), true
+
+	case "Query.myOrders":
+		if e.complexity.Query.MyOrders == nil {
+			break
+		}
+
+		return e.complexity.Query.MyOrders(childComplexity), true
+
+	case "Query.myRestaurantOrders":
+		if e.complexity.Query.MyRestaurantOrders == nil {
+			break
+		}
+
+		args, err := ec.field_Query_myRestaurantOrders_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.MyRestaurantOrders(childComplexity, args["restaurantId"].(string)), true
+
+	case "Query.myRestaurants":
+		if e.complexity.Query.MyRestaurants == nil {
+			break
+		}
+
+		return e.complexity.Query.MyRestaurants(childComplexity), true
 
 	case "Query.order":
 		if e.complexity.Query.Order == nil {

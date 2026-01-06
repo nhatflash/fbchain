@@ -11,16 +11,16 @@ func RestaurantRoutes(r *gin.Engine, prefix string, rc *controller.RestaurantCon
 
 	restaurant := r.Group(prefix)
 
-	restaurant.POST("/", middleware.JwtRestHandler(), middleware.RoleBasedHandler("TENANT"), rc.CreateRestaurant)
+	restaurant.POST("/", middleware.RoleBasedHandler("TENANT"), rc.CreateRestaurant)
 
-	restaurant.POST("/:restaurantId/item", middleware.JwtRestHandler(), middleware.RoleBasedHandler("TENANT"), rc.AddNewRestaurantItem)
+	restaurant.POST("/:restaurantId/item", middleware.RoleBasedHandler("TENANT"), rc.AddNewRestaurantItem)
 
-	restaurant.POST("/:restaurantId/table", middleware.JwtRestHandler(), middleware.RoleBasedHandler("TENANT"), rc.AddNewRestaurantTable)
+	restaurant.POST("/:restaurantId/table", middleware.RoleBasedHandler("TENANT"), rc.AddNewRestaurantTable)
 
-	restaurant.GET("/:restaurantId/table/:tableId/qrCode", middleware.JwtRestHandler(), middleware.RoleBasedHandler("TENANT"), rc.GetTableQrCode)
+	restaurant.GET("/:restaurantId/table/:tableId/qrCode", middleware.RoleBasedHandler("TENANT"), rc.GetTableQrCode)
 
-	restaurant.GET("/:restaurantId/order/:orderId/confirm", middleware.JwtRestHandler(), middleware.RoleBasedHandler("RESTAURANT_STAFF"), rc.ConfirmCashPaymentForRestaurantOrder)
+	restaurant.GET("/:restaurantId/order/:orderId/confirm", middleware.RoleBasedHandler("RESTAURANT_STAFF"), rc.ConfirmCashPaymentForRestaurantOrder)
 
 
-	restaurant.POST("/:restaurantId/staff", middleware.JwtRestHandler(), middleware.RoleBasedHandler("TENANT"), tc.CreateNewRestaurantStaff)
+	restaurant.POST("/:restaurantId/staff", middleware.RoleBasedHandler("TENANT"), tc.CreateNewRestaurantStaff)
 }
