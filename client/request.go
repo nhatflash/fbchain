@@ -116,3 +116,24 @@ type CreateRestaurantOrderRequest struct {
 	Items 				[]*RestaurantItemOrderRequest 			`json:"items" binding:"required,dive"`
 	Notes 				*string 								`json:"notes" binding:"omitempty"`
 }
+
+
+type CreateRestaurantStaffRequest struct {
+	Email 				string 								`json:"email" binding:"required,email"`
+	Password 			string 								`json:"password" binding:"required"`
+	ConfirmPassword 	string								`json:"confirmPassword" binding:"required"`
+	Phone 				string 								`json:"phone" binding:"required,phone"`
+	Identity 			string 								`json:"identity" binding:"required,identity"`
+	FirstName 			string 								`json:"firstName" binding:"required,name"`
+	LastName 			string 								`json:"lastName" binding:"required,name"`
+	Gender 				enum.Gender 						`json:"gender" binding:"required"`
+	Birthdate 			string								`json:"birthdate" binding:"required"`
+	PostalCode 			string 								`json:"postalCode" binding:"required,postalcode"`
+	Address 			string								`json:"address" binding:"required"`
+	ProfileImage 		*string 							`json:"profileImage" binding:"omitempty"`
+	Type 				enum.RestaurantStaffType 			`json:"type" binding:"required"`
+	ShiftStart 			*string 							`json:"shiftStart" binding:"omitempty"`
+	ShiftEnd 			*string 							`json:"shiftEnd" binding:"omitempty"`
+	Salary 				string 								`json:"salary" binding:"required,price"`
+	Notes 				*string 							`json:"notes" binding:"omitempty"`
+}

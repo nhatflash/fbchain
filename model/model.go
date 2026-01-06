@@ -155,3 +155,16 @@ type RestaurantPayment struct {
 	IsCashed 		bool 						`json:"isCashed"`
 	CreatedAt 		time.Time 					`json:"createdAt"`
 }
+
+
+type RestaurantStaff struct {
+	Id 				int64						`json:"id"`
+	UserId 			int64						`json:"userId"`
+	RestaurantId 	int64						`json:"restaurantId"`
+	Code 			string 						`json:"code"`
+	Type 			enum.RestaurantStaffType 	`json:"type"`
+	ShiftStart 		*time.Time 					`json:"shiftStart"`
+	ShiftEnd 		*time.Time					`json:"shiftEnd"`
+	Salary 			decimal.Decimal				`json:"salary"`
+	Notes 			*string 					`json:"notes"`
+}

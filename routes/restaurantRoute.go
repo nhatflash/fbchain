@@ -7,7 +7,7 @@ import (
 )
 
 
-func RestaurantRoutes(r *gin.Engine, prefix string, rc *controller.RestaurantController) {
+func RestaurantRoutes(r *gin.Engine, prefix string, rc *controller.RestaurantController, tc *controller.TenantController) {
 
 	restaurant := r.Group(prefix)
 
@@ -20,4 +20,7 @@ func RestaurantRoutes(r *gin.Engine, prefix string, rc *controller.RestaurantCon
 	restaurant.GET("/:restaurantId/table/:tableId/qrCode", middleware.JwtRestHandler(), middleware.RoleBasedHandler("TENANT"), rc.GetTableQrCode)
 
 	restaurant.GET("/:restaurantId/order/:orderId/confirm", middleware.JwtRestHandler(), middleware.RoleBasedHandler("RESTAURANT_STAFF"), rc.ConfirmCashPaymentForRestaurantOrder)
+
+
+	restaurant.POST("/:restaurantId/staff", middleware.JwtRestHandler(), middleware.RoleBasedHandler("TENANT"), tc.CreateNewRestaurantStaff)
 }

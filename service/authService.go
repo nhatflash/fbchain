@@ -228,12 +228,17 @@ func GenerateTenantCode() string {
 }
 
 
-
-
 func GenerateStaffCode() string {
 	now := time.Now()
 	unixMilli := now.UnixMilli()
 	return fmt.Sprintf("STAFF-%d", unixMilli)
+}
+
+
+func GenerateRestaurantStaffCode() string {
+	now := time.Now()
+	unixMilli := now.UnixMilli()
+	return fmt.Sprintf("RSTAFF-%d", unixMilli)
 }
 
 

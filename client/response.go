@@ -24,6 +24,7 @@ type UserResponse struct {
 }
 
 type TenantResponse struct {
+	Id 			 int64 		  	  `json:"id"`
 	UserId       int64            `json:"userId"`
 	Email        string           `json:"email"`
 	Phone        *string          `json:"phone"`
@@ -139,4 +140,27 @@ type RestaurantOrderPaymentResponse struct {
 	Amount 			decimal.Decimal 			`json:"amount"`
 	Method 			enum.PaymentMethod			`json:"method"`
 	Status 			enum.PaymentStatus 			`json:"status"`
+}
+
+
+type RestaurantStaffResponse struct {
+	Id 				int64						`json:"id"`
+	UserId 			int64						`json:"userId"`
+	RestaurantId 	int64						`json:"restaurantId"`
+	Email 			string 						`json:"email"`
+	Phone 			string 						`json:"phone"`
+	Identity 		string 						`json:"identity"`
+	FirstName 		string 						`json:"firstName"`
+	LastName 		string 						`json:"lastName"`
+	Gender 			enum.Gender 				`json:"gender"`
+	Birthdate 		time.Time 					`json:"birthdate"`
+	PostalCode 		string						`json:"postalCode"`
+	Address 		string 						`json:"address"`
+	ProfileImage 	*string						`json:"profileImage"`
+	Code 			string 						`json:"code"`
+	Type 			enum.RestaurantStaffType 	`json:"type"`
+	ShiftStart 		*time.Time					`json:"shiftStart"`
+	ShiftEnd 		*time.Time 					`json:"shiftEnd"`
+	Salary 			decimal.Decimal 			`json:"salary"`
+	Notes 			*string 					`json:"notes"`
 }

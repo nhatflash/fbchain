@@ -94,3 +94,12 @@ const (
 	R_ORDER_FINISHED RestaurantOrderStatus = "FINISHED"
 	R_ORDER_CANCELED RestaurantOrderStatus = "CANCELED"
 )
+
+
+type RestaurantStaffType string
+
+const (
+	RS_MANAGING RestaurantStaffType = "MANAGING"
+	RS_SERVING RestaurantStaffType = "SERVING"
+	RS_COOKING RestaurantStaffType = "COOKING"
+)

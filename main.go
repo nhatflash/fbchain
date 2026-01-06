@@ -101,7 +101,7 @@ func main() {
 
 	authService := service.NewAuthService(userRepository, tenantRepository, rdb)
 	userService := service.NewUserService(userRepository)
-	tenantService := service.NewTenantService(tenantRepository, userRepository)
+	tenantService := service.NewTenantService(tenantRepository, userRepository, restaurantRepository)
 	restaurantService := service.NewRestaurantService(restaurantRepository, subPackageRepository, restaurantItemRepository, restaurantTableRepository, restaurantOrderRepository, restaurantPaymentRepository, rdb)
 	subPackageService := service.NewSubPackageService(subPackageRepository)
 	orderService := service.NewOrderService(restaurantRepository, subPackageRepository, orderRepository)

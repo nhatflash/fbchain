@@ -36,6 +36,7 @@ func MapToUserResponse(u *model.User) *client.UserResponse {
 
 func MapToTenantResponse(u *model.User, t *model.Tenant) *client.TenantResponse {
 	return &client.TenantResponse{
+		Id: 		  t.Id,
 		UserId:       u.Id,
 		Email:        u.Email,
 		Phone:        u.Phone,
@@ -168,5 +169,29 @@ func MapToRestaurantOrderItemResponse(i *model.RestaurantOrderItem) *client.Rest
 	}
 }
 
+
+func MapToRestaurantStaffResponse(u *model.User, rs *model.RestaurantStaff) *client.RestaurantStaffResponse {
+	return &client.RestaurantStaffResponse{
+		Id: rs.Id,
+		UserId: u.Id,
+		RestaurantId: rs.RestaurantId,
+		Email: u.Email,
+		Phone: *u.Phone,
+		Identity: *u.Identity,
+		FirstName: u.FirstName,
+		LastName: u.LastName,
+		Gender: u.Gender,
+		Birthdate: u.Birthdate,
+		PostalCode: *u.PostalCode,
+		Address: *u.Address,
+		ProfileImage: u.ProfileImage,
+		Code: rs.Code,
+		Type: rs.Type,
+		ShiftStart: rs.ShiftStart,
+		ShiftEnd: rs.ShiftEnd,
+		Salary: rs.Salary,
+		Notes: rs.Notes,
+	}
+}
 
 

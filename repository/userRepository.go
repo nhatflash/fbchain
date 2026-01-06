@@ -9,6 +9,7 @@ import (
 	"github.com/nhatflash/fbchain/enum"
 	appErr "github.com/nhatflash/fbchain/error"
 	"github.com/nhatflash/fbchain/model"
+	"github.com/shopspring/decimal"
 )
 
 type UserRepository struct {
@@ -306,4 +307,62 @@ func (ur *UserRepository) ChangeUserPassword(ctx context.Context, userId int64, 
 		return nil
 	}
 	return tx.Commit()
+}
+
+
+func (ur *UserRepository) CreateRestaurantStaffUser(ctx context.Context, email string, password string, phone string, identity string, firstName string, lastName string, gender *enum.Gender, birthdate *time.Time, postalCode string, address string, profileImage *string, restaurantId int64, code string, RSType *enum.RestaurantStaffType, shiftStart *time.Time, shiftEnd *time.Time, salary decimal.Decimal, notes *string) (*model.User, *model.RestaurantStaff, error) {
+	var err error
+	var tx *sql.Tx
+	tx, err = ur.Db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	defer tx.Rollback()
+
+	var u model.User
+	userQuery := "INSERT INTO users (email, password, role, phone, identity, first_name, last_name, gender, birthdate, postal_code, address, profile_image, status, is_verified) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *"
+	if err = tx.QueryRowContext(ctx, userQuery, email, password, enum.ROLE_RESTAURANT_STAFF, phone, identity, firstName, lastName, gender, birthdate, postalCode, address, profileImage, enum.USER_ACTIVE, true).Scan(
+		&u.Id,
+		&u.Email,
+		&u.Password,
+		&u.Role,
+		&u.Phone,
+		&u.Identity,
+		&u.FirstName,
+		&u.LastName,
+		&u.Gender,
+		&u.Birthdate,
+		&u.PostalCode,
+		&u.Address,
+		&u.ProfileImage,
+		&u.Status,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+		&u.IsVerified,
+	); err != nil {
+		return nil, nil, err
+	}
+
+	var rs model.RestaurantStaff
+	rsQuery := "INSERT INTO restaurant_staffs (user_id, restaurant_id, code, type, shift_start, shift_end, salary, notes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *"
+	if err = tx.QueryRowContext(ctx, rsQuery, u.Id, restaurantId, code, RSType, shiftStart, shiftEnd, salary, notes).Scan(
+		&rs.Id,
+		&rs.UserId,
+		&rs.RestaurantId,
+		&rs.Code,
+		&rs.Type,
+		&rs.ShiftStart,
+		&rs.ShiftEnd,
+		&rs.Salary,
+		&rs.Notes,
+	); err != nil {
+		return nil, nil, err
+	}
+
+	if err = tx.Commit(); err != nil {
+		return nil, nil, err
+	}
+
+	return &u, &rs, nil
 }

@@ -313,8 +313,9 @@ func (rc *RestaurantController) PayRestaurantOrderWithCash(c *gin.Context) {
 
 // @Summary Confirm Cash Payment For Restaurant Order API
 // @Param orderId path string true "Order ID"
+// @Param restaurantId path string true "Restaurant ID"
 // @Security BearerAuth
-// @Router /restaurant/:restaurantId/order/:orderId/confirm [get]
+// @Router /restaurant/{restaurantId}/order/{orderId}/confirm [get]
 func (rc *RestaurantController) ConfirmCashPaymentForRestaurantOrder(c *gin.Context) {
 	orderIdParam := c.Param("orderId")
 	orderId, err := strconv.ParseInt(orderIdParam, 10, 64)
