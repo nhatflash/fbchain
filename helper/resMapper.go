@@ -195,3 +195,28 @@ func MapToRestaurantStaffResponse(u *model.User, rs *model.RestaurantStaff) *cli
 }
 
 
+func MapToStaffResponse(u *model.User, s *model.Staff) *client.StaffResponse {
+	return &client.StaffResponse{
+		Id: s.Id,
+		UserId: u.Id,
+		Email: u.Email,
+		Role: u.Role,
+		Phone: *u.Phone,
+		Identity: *u.Identity,
+		FirstName: u.FirstName,
+		LastName: u.LastName,
+		Gender: u.Gender,
+		Birthdate: u.Birthdate,
+		PostalCode: *u.PostalCode,
+		Address: *u.Address,
+		ProfileImage: u.ProfileImage,
+		Code: s.Code,
+		ShiftType: s.ShiftType,
+		ShiftStart: s.ShiftStart,
+		ShiftEnd: s.ShiftEnd,
+		Salary: s.Salary,
+		Notes: s.Notes,
+	}
+}
+
+

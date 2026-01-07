@@ -137,3 +137,31 @@ type CreateRestaurantStaffRequest struct {
 	Salary 				string 								`json:"salary" binding:"required,price"`
 	Notes 				*string 							`json:"notes" binding:"omitempty"`
 }
+
+type StaffRole string
+
+const (
+	SR_STAFF StaffRole = "STAFF"
+	SR_MANAGER StaffRole = "MANAGER"
+)
+
+type CreateStaffRequest struct {
+	Email 				string 								`json:"email" binding:"required,email"`
+	Password 			string 								`json:"password" binding:"required"`
+	ConfirmPassword 	string								`json:"confirmPassword" binding:"required"`
+	Role 				StaffRole 							`json:"role" binding:"required"`
+	Phone 				string 								`json:"phone" binding:"required,phone"`
+	Identity 			string 								`json:"identity" binding:"required,identity"`
+	FirstName 			string 								`json:"firstName" binding:"required,name"`
+	LastName 			string 								`json:"lastName" binding:"required,name"`
+	Gender 				enum.Gender 						`json:"gender" binding:"required"`
+	Birthdate 			string								`json:"birthdate" binding:"required"`
+	PostalCode 			string 								`json:"postalCode" binding:"required,postalcode"`
+	Address 			string								`json:"address" binding:"required"`
+	ProfileImage 		*string 							`json:"profileImage" binding:"omitempty"`
+	ShiftType 			enum.StaffShiftType 				`json:"shiftType" binding:"required"`
+	ShiftStart 			*string 							`json:"shiftStart" binding:"omitempty"`
+	ShiftEnd 			*string 							`json:"shiftEnd" binding:"omitempty"`
+	Salary 				string 								`json:"salary" binding:"required,price"`
+	Notes 				*string 							`json:"notes" binding:"omitempty"`
+}

@@ -15,6 +15,34 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/signup/staff": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create New Staff API",
+                "parameters": [
+                    {
+                        "description": "CreateStaff body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.CreateStaffRequest"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/admin/subscription": {
             "post": {
                 "security": [
@@ -845,6 +873,81 @@ const docTemplate = `{
                 }
             }
         },
+        "client.CreateStaffRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "birthdate",
+                "confirmPassword",
+                "email",
+                "firstName",
+                "gender",
+                "identity",
+                "lastName",
+                "password",
+                "phone",
+                "postalCode",
+                "role",
+                "salary",
+                "shiftType"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "birthdate": {
+                    "type": "string"
+                },
+                "confirmPassword": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "$ref": "#/definitions/enum.Gender"
+                },
+                "identity": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "postalCode": {
+                    "type": "string"
+                },
+                "profileImage": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/client.StaffRole"
+                },
+                "salary": {
+                    "type": "string"
+                },
+                "shiftEnd": {
+                    "type": "string"
+                },
+                "shiftStart": {
+                    "type": "string"
+                },
+                "shiftType": {
+                    "$ref": "#/definitions/enum.StaffShiftType"
+                }
+            }
+        },
         "client.CreateSubPackageRequest": {
             "type": "object",
             "required": [
@@ -965,6 +1068,17 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "client.StaffRole": {
+            "type": "string",
+            "enum": [
+                "STAFF",
+                "MANAGER"
+            ],
+            "x-enum-varnames": [
+                "SR_STAFF",
+                "SR_MANAGER"
+            ]
         },
         "client.TenantInfoRequest": {
             "type": "object",
@@ -1238,6 +1352,17 @@ const docTemplate = `{
                 "ROLE_MANAGER",
                 "ROLE_STAFF",
                 "ROLE_TENANT"
+            ]
+        },
+        "enum.StaffShiftType": {
+            "type": "string",
+            "enum": [
+                "FULLTIME",
+                "PARTTIME"
+            ],
+            "x-enum-varnames": [
+                "STAFF_FULLTIME",
+                "STAFF_PARTTIME"
             ]
         },
         "enum.TenantType": {

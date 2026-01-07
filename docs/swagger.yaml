@@ -127,6 +127,60 @@ definitions:
     - salary
     - type
     type: object
+  client.CreateStaffRequest:
+    properties:
+      address:
+        type: string
+      birthdate:
+        type: string
+      confirmPassword:
+        type: string
+      email:
+        type: string
+      firstName:
+        type: string
+      gender:
+        $ref: '#/definitions/enum.Gender'
+      identity:
+        type: string
+      lastName:
+        type: string
+      notes:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      postalCode:
+        type: string
+      profileImage:
+        type: string
+      role:
+        $ref: '#/definitions/client.StaffRole'
+      salary:
+        type: string
+      shiftEnd:
+        type: string
+      shiftStart:
+        type: string
+      shiftType:
+        $ref: '#/definitions/enum.StaffShiftType'
+    required:
+    - address
+    - birthdate
+    - confirmPassword
+    - email
+    - firstName
+    - gender
+    - identity
+    - lastName
+    - password
+    - phone
+    - postalCode
+    - role
+    - salary
+    - shiftType
+    type: object
   client.CreateSubPackageRequest:
     properties:
       description:
@@ -207,6 +261,14 @@ definitions:
       refreshToken:
         type: string
     type: object
+  client.StaffRole:
+    enum:
+    - STAFF
+    - MANAGER
+    type: string
+    x-enum-varnames:
+    - SR_STAFF
+    - SR_MANAGER
   client.TenantInfoRequest:
     properties:
       address:
@@ -397,6 +459,14 @@ definitions:
     - ROLE_MANAGER
     - ROLE_STAFF
     - ROLE_TENANT
+  enum.StaffShiftType:
+    enum:
+    - FULLTIME
+    - PARTTIME
+    type: string
+    x-enum-varnames:
+    - STAFF_FULLTIME
+    - STAFF_PARTTIME
   enum.TenantType:
     enum:
     - PERSONAL
@@ -433,6 +503,23 @@ info:
   title: FB Chain Management API
   version: "1.0"
 paths:
+  /admin/signup/staff:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: CreateStaff body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.CreateStaffRequest'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Create New Staff API
   /admin/subscription:
     post:
       consumes:

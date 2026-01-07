@@ -9,7 +9,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-
+	appErr "github.com/nhatflash/fbchain/error"
 	gqlModel "github.com/nhatflash/fbchain/graph/model"
 	"github.com/nhatflash/fbchain/model"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -359,21 +359,64 @@ func (r *queryResolver) RestaurantOrderItem(ctx context.Context, id string) (*gq
 
 // MyRestaurants is the resolver for the myRestaurants field.
 func (r *queryResolver) MyRestaurants(ctx context.Context) ([]*gqlModel.Restaurant, error) {
-	_, err := CheckRoleAccessUser(ctx, "TENANT")
+	claims, err := CheckRoleAccessUser(ctx, "TENANT")
 	if err != nil {
 		return nil, err
 	}
-	panic(fmt.Errorf("not implemented: MyRestaurants - myRestaurants"))
+	t, err := r.TenantService.FindTenantByUserId(ctx, claims.UserId)
+	if err != nil {
+		return nil, err
+	}
+	res, err := r.RestaurantService.FindRestaurantsByTenantId(ctx, t.Id)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurants(res), nil
 }
 
 // MyOrders is the resolver for the myOrders field.
 func (r *queryResolver) MyOrders(ctx context.Context) ([]*gqlModel.Order, error) {
-	panic(fmt.Errorf("not implemented: MyOrders - myOrders"))
+	claims, err := CheckRoleAccessUser(ctx, "TENANT")
+	if err != nil {
+		return nil, err
+	}
+	t, err := r.TenantService.FindTenantByUserId(ctx, claims.UserId)
+	if err != nil {
+		return nil, err
+	}
+	orders, err := r.OrderService.FindOrdersByTenantId(ctx, t.Id)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlOrders(orders), nil
 }
 
 // MyRestaurantOrders is the resolver for the myRestaurantOrders field.
 func (r *queryResolver) MyRestaurantOrders(ctx context.Context, restaurantID string) ([]*gqlModel.RestaurantOrder, error) {
-	panic(fmt.Errorf("not implemented: MyRestaurantOrders - myRestaurantOrders"))
+	claims, err := CheckRoleAccessUser(ctx, "TENANT")
+	if err != nil {
+		return nil, err
+	}
+	t, err := r.TenantService.FindTenantByUserId(ctx, claims.UserId)
+	if err != nil {
+		return nil, err
+	}
+	resId, err := strconv.ParseInt(restaurantID, 10, 64)
+	if err != nil {
+		return nil, appErr.BadRequestError("Invalid restaurant ID format.")
+	}
+	res, err := r.RestaurantService.FindRestaurantById(ctx, resId)
+	if err != nil {
+		return nil, err
+	}
+	if res.TenantId != t.Id {
+		return nil, appErr.UnauthorizedError("The requested restaurant does not belong to you.")
+	}
+	rOrders, err := r.RestaurantService.FindRestaurantOrdersByRestaurantId(ctx, resId)
+	if err != nil {
+		return nil, err
+	}
+	return MapToGqlRestaurantOrders(rOrders), nil
 }
 
 // Tenant is the resolver for the tenant field.

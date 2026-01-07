@@ -366,3 +366,59 @@ func (ur *UserRepository) CreateRestaurantStaffUser(ctx context.Context, email s
 
 	return &u, &rs, nil
 }
+
+
+func (ur *UserRepository) CreateStaffUser(ctx context.Context, email string, password string, role *enum.Role, phone string, identity string, firstName string, lastName string, gender *enum.Gender, birthdate *time.Time, postalCode string, address string, profileImage *string, code string, shiftType *enum.StaffShiftType, shiftStart *time.Time, shiftEnd *time.Time, salary decimal.Decimal, notes *string) (*model.User, *model.Staff, error) {
+	var err error
+	var tx *sql.Tx
+	tx, err = ur.Db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	defer tx.Rollback()
+
+	var u model.User
+	userQuery := "INSERT INTO users (email, password, role, phone, identity, first_name, last_name, gender, birthdate, postal_code, address, profile_image, status, is_verified) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *"
+	if err = tx.QueryRowContext(ctx, userQuery, email, password, role, phone, identity, firstName, lastName, gender, birthdate, postalCode, address, profileImage, enum.USER_ACTIVE, true).Scan(
+		&u.Id,
+		&u.Email,
+		&u.Password,
+		&u.Role,
+		&u.Phone,
+		&u.Identity,
+		&u.FirstName,
+		&u.LastName,
+		&u.Gender,
+		&u.Birthdate,
+		&u.PostalCode,
+		&u.Address,
+		&u.ProfileImage,
+		&u.Status,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+		&u.IsVerified,
+	); err != nil {
+		return nil, nil, err
+	}
+
+	var s model.Staff
+	staffQuery := "INSERT INTO staffs (user_id, code, shift_type, shift_start, shift_end, salary, notes) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *"
+	if err = tx.QueryRowContext(ctx, staffQuery, u.Id, code, shiftType, shiftStart, shiftEnd, salary, notes).Scan(
+		&s.Id,
+		&s.UserId,
+		&s.Code,
+		&s.ShiftType,
+		&s.ShiftEnd,
+		&s.Salary,
+		&s.Notes,
+	); err != nil {
+		return nil, nil, err
+	}
+
+	if err = tx.Commit(); err != nil {
+		return nil, nil, err
+	}
+
+	return &u, &s, nil
+}

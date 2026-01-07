@@ -101,6 +101,7 @@ func main() {
 
 	authService := service.NewAuthService(userRepository, tenantRepository, rdb)
 	userService := service.NewUserService(userRepository)
+	adminService := service.NewAdminService(userRepository)
 	tenantService := service.NewTenantService(tenantRepository, userRepository, restaurantRepository)
 	restaurantService := service.NewRestaurantService(restaurantRepository, subPackageRepository, restaurantItemRepository, restaurantTableRepository, restaurantOrderRepository, restaurantPaymentRepository, rdb)
 	subPackageService := service.NewSubPackageService(subPackageRepository)
@@ -109,6 +110,7 @@ func main() {
 	vnPayService := service.NewVnPayService(orderRepository)
 
 	authController := controller.NewAuthController(authService)
+	adminController := controller.NewAdminController(adminService)
 	tenantController := controller.NewTenantController(tenantService, userService)
 	restaurantController := controller.NewRestaurantController(userService, restaurantService, tenantService)
 	subPackageController := controller.NewSubPackageController(subPackageService)
@@ -169,7 +171,7 @@ func main() {
 	}
 
 	// Define routes for REST API
-	routes.MainRoutes(r, authController, tenantController, subPackageController, restaurantController, orderController, userController, paymentController)
+	routes.MainRoutes(r, authController, tenantController, subPackageController, restaurantController, orderController, userController, paymentController, adminController)
 	r.GET("/swagger/*any", ginSwg.WrapHandler(swgFiles.Handler))
 
 

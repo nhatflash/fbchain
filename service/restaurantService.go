@@ -48,6 +48,7 @@ type IRestaurantService interface {
 	FindRestaurantOrderItemById(ctx context.Context, id int64) (*model.RestaurantOrderItem, error)
 	FindRestaurantOrderItemsByOrderId(ctx context.Context, orderId int64) ([]model.RestaurantOrderItem, error)
 	HandleConfirmRestaurantOrderCashPayment(ctx context.Context, restaurantId int64, orderId int64) error
+	FindRestaurantOrdersByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantOrder, error)
 }
 
 type RestaurantService struct {
@@ -596,4 +597,13 @@ func (rs *RestaurantService) HandleConfirmRestaurantOrderCashPayment(ctx context
 		return err
 	}
 	return nil
+}
+
+
+func (rs *RestaurantService) FindRestaurantOrdersByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantOrder, error) {
+	orders, err := rs.RestaurantOrderRepo.FindRestaurantOrdersByRestaurantId(ctx, restaurantId)
+	if err != nil {
+		return nil, err
+	}
+	return orders, nil
 }

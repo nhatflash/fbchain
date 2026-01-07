@@ -241,6 +241,11 @@ func GenerateRestaurantStaffCode() string {
 	return fmt.Sprintf("RSTAFF-%d", unixMilli)
 }
 
+func GenerateManagerCode() string {
+	now := time.Now()
+	unixMilli := now.UnixMilli()
+	return fmt.Sprintf("MANAGER-%d", unixMilli)
+}
 
 
 func ValidateSignUpRequest(ctx context.Context, email string, password string, confirmPassword string, ur *repository.UserRepository) error {

@@ -239,3 +239,34 @@ func (ror *RestaurantOrderRepository) FindRestaurantOrderItemById(ctx context.Co
 	return &i, nil
 }
 
+
+func (ror *RestaurantOrderRepository) FindRestaurantOrdersByRestaurantId(ctx context.Context, restaurantId int64) ([]model.RestaurantOrder, error) {
+	var err error
+	var rows *sql.Rows
+	query := "SELECT * FROM restaurant_orders WHERE restaurant_id = $1"
+	rows, err = ror.Db.QueryContext(ctx, query, restaurantId)
+	if err != nil {
+		return nil, err
+	}
+	var orders []model.RestaurantOrder
+	for rows.Next() {
+		var o model.RestaurantOrder
+		if err = rows.Scan(
+			&o.Id,
+			&o.RestaurantId,
+			&o.TableId,
+			&o.Amount,
+			&o.Status,
+			&o.Notes,
+			&o.CreatedAt,
+			&o.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		orders = append(orders, o)
+	}
+	if len(orders) == 0 {
+		return nil, appErr.NotFoundError("No restaurant orders found.")
+	}
+	return orders, nil
+}

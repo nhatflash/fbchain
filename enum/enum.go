@@ -103,3 +103,11 @@ const (
 	RS_SERVING RestaurantStaffType = "SERVING"
 	RS_COOKING RestaurantStaffType = "COOKING"
 )
+
+
+type StaffShiftType string
+
+const (
+	STAFF_FULLTIME StaffShiftType = "FULLTIME"
+	STAFF_PARTTIME StaffShiftType = "PARTTIME"
+)

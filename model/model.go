@@ -168,3 +168,15 @@ type RestaurantStaff struct {
 	Salary 			decimal.Decimal				`json:"salary"`
 	Notes 			*string 					`json:"notes"`
 }
+
+
+type Staff struct {
+	Id 				int64 						`json:"id"`
+	UserId 			int64						`json:"userId"`
+	Code 			string 						`json:"code"`
+	ShiftType  		enum.StaffShiftType			`json:"shiftType"`
+	ShiftStart 		*time.Time 					`json:"shiftStart"`
+	ShiftEnd 		*time.Time 					`json:"shiftEnd"`
+	Salary 			decimal.Decimal 			`json:"salary"`
+	Notes 			*string 					`json:"notes"`
+}

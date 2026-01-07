@@ -14,9 +14,10 @@ func MainRoutes(r *gin.Engine,
 				rc *controller.RestaurantController, 
 				oc *controller.OrderController, 
 				uc *controller.UserController, 
-				pc *controller.PaymentController) {
+				pc *controller.PaymentController, 
+				adc *controller.AdminController) {
 	AuthRoutes(r, "/api/auth", ac)
-	AdminRoutes(r, "/api/admin", spc)
+	AdminRoutes(r, "/api/admin", spc, adc)
 	TenantRoutes(r, "/api/tenant", tc, rc, oc)
 	ProfileRoutes(r, "/api/profile", uc)
 	PaymentRoutes(r, "/api/payment", pc)

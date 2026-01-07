@@ -164,3 +164,26 @@ type RestaurantStaffResponse struct {
 	Salary 			decimal.Decimal 			`json:"salary"`
 	Notes 			*string 					`json:"notes"`
 }
+
+
+type StaffResponse struct {
+	Id 				int64						`json:"id"`
+	UserId 			int64						`json:"userId"`
+	Email 			string 						`json:"email"`
+	Role 			enum.Role 					`json:"role"`
+	Phone 			string 						`json:"phone"`
+	Identity 		string 						`json:"identity"`
+	FirstName 		string 						`json:"firstName"`
+	LastName 		string 						`json:"lastName"`
+	Gender 			enum.Gender 				`json:"gender"`
+	Birthdate 		time.Time 					`json:"birthdate"`
+	PostalCode 		string						`json:"postalCode"`
+	Address 		string 						`json:"address"`
+	ProfileImage 	*string						`json:"profileImage"`
+	Code 			string 						`json:"code"`
+	ShiftType 		enum.StaffShiftType			`json:"shiftType"`
+	ShiftStart 		*time.Time					`json:"shiftStart"`
+	ShiftEnd 		*time.Time 					`json:"shiftEnd"`
+	Salary 			decimal.Decimal 			`json:"salary"`
+	Notes 			*string 					`json:"notes"`
+}
