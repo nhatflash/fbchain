@@ -176,6 +176,8 @@ models:
     model: github.com/nhatflash/fbchain/enum.OrderStatus
   RestaurantOrderStatus:
     model: github.com/nhatflash/fbchain/enum.RestaurantOrderStatus
+  StaffShiftType:
+    model: github.com/nhatflash/fbchain/enum.StaffShiftType
   Tenant:
     fields:
       user:
@@ -223,6 +225,10 @@ models:
   RestaurantOrderItem:
     fields:
       rOrder:
+        resolver: true
+  Staff:
+    fields:
+      user:
         resolver: true
 
       

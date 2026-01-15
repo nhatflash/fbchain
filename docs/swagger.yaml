@@ -655,32 +655,17 @@ paths:
         "400":
           description: Bad Request
           schema: {}
-      security:
-      - BearerAuth: []
       summary: Pay order with cash API
-  /payment/online/{method}:
-    post:
-      consumes:
-      - application/json
+  /payment/vnpay/{orderId}:
+    get:
       parameters:
-      - description: Online method
-        enum:
-        - VNPAY
-        in: path
-        name: method
-        required: true
-        type: string
       - description: Order ID
-        in: query
+        in: path
         name: orderId
         required: true
         type: string
-      produces:
-      - application/json
       responses: {}
-      security:
-      - BearerAuth: []
-      summary: Pay order with online payment API
+      summary: Get VnPay Payment Url API
   /profile:
     patch:
       consumes:

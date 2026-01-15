@@ -106,6 +106,18 @@ type RestaurantTable struct {
 	Restaurant   *Restaurant `json:"restaurant,omitempty"`
 }
 
+type Staff struct {
+	ID         string               `json:"id"`
+	UserID     string               `json:"userId"`
+	Code       *string              `json:"code,omitempty"`
+	ShiftType  *enum.StaffShiftType `json:"shiftType,omitempty"`
+	ShiftStart *time.Time           `json:"shiftStart,omitempty"`
+	ShiftEnd   *time.Time           `json:"shiftEnd,omitempty"`
+	Salary     *string              `json:"salary,omitempty"`
+	Notes      *string              `json:"notes,omitempty"`
+	User       *User                `json:"user,omitempty"`
+}
+
 type SubPackage struct {
 	ID            string     `json:"id"`
 	Name          string     `json:"name"`

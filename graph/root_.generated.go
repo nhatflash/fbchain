@@ -44,6 +44,7 @@ type ResolverRoot interface {
 	RestaurantOrder() RestaurantOrderResolver
 	RestaurantOrderItem() RestaurantOrderItemResolver
 	RestaurantTable() RestaurantTableResolver
+	Staff() StaffResolver
 	Tenant() TenantResolver
 }
 
@@ -88,6 +89,8 @@ type ComplexityRoot struct {
 		RestaurantTable      func(childComplexity int, id string) int
 		RestaurantTables     func(childComplexity int) int
 		Restaurants          func(childComplexity int) int
+		Staff                func(childComplexity int, id string) int
+		Staffs               func(childComplexity int) int
 		SubPackage           func(childComplexity int, id string) int
 		SubPackages          func(childComplexity int) int
 		Tenant               func(childComplexity int, id string) int
@@ -166,6 +169,18 @@ type ComplexityRoot struct {
 		Notes        func(childComplexity int) int
 		Restaurant   func(childComplexity int) int
 		RestaurantID func(childComplexity int) int
+	}
+
+	Staff struct {
+		Code       func(childComplexity int) int
+		ID         func(childComplexity int) int
+		Notes      func(childComplexity int) int
+		Salary     func(childComplexity int) int
+		ShiftEnd   func(childComplexity int) int
+		ShiftStart func(childComplexity int) int
+		ShiftType  func(childComplexity int) int
+		User       func(childComplexity int) int
+		UserID     func(childComplexity int) int
 	}
 
 	SubPackage struct {
@@ -487,6 +502,25 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Restaurants(childComplexity), true
+
+	case "Query.staff":
+		if e.complexity.Query.Staff == nil {
+			break
+		}
+
+		args, err := ec.field_Query_staff_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Staff(childComplexity, args["id"].(string)), true
+
+	case "Query.staffs":
+		if e.complexity.Query.Staffs == nil {
+			break
+		}
+
+		return e.complexity.Query.Staffs(childComplexity), true
 
 	case "Query.subPackage":
 		if e.complexity.Query.SubPackage == nil {
@@ -922,6 +956,69 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.RestaurantTable.RestaurantID(childComplexity), true
+
+	case "Staff.code":
+		if e.complexity.Staff.Code == nil {
+			break
+		}
+
+		return e.complexity.Staff.Code(childComplexity), true
+
+	case "Staff.id":
+		if e.complexity.Staff.ID == nil {
+			break
+		}
+
+		return e.complexity.Staff.ID(childComplexity), true
+
+	case "Staff.notes":
+		if e.complexity.Staff.Notes == nil {
+			break
+		}
+
+		return e.complexity.Staff.Notes(childComplexity), true
+
+	case "Staff.salary":
+		if e.complexity.Staff.Salary == nil {
+			break
+		}
+
+		return e.complexity.Staff.Salary(childComplexity), true
+
+	case "Staff.shiftEnd":
+		if e.complexity.Staff.ShiftEnd == nil {
+			break
+		}
+
+		return e.complexity.Staff.ShiftEnd(childComplexity), true
+
+	case "Staff.shiftStart":
+		if e.complexity.Staff.ShiftStart == nil {
+			break
+		}
+
+		return e.complexity.Staff.ShiftStart(childComplexity), true
+
+	case "Staff.shiftType":
+		if e.complexity.Staff.ShiftType == nil {
+			break
+		}
+
+		return e.complexity.Staff.ShiftType(childComplexity), true
+
+	case "Staff.user":
+		if e.complexity.Staff.User == nil {
+			break
+		}
+
+		return e.complexity.Staff.User(childComplexity), true
+
+	case "Staff.userId":
+		if e.complexity.Staff.UserID == nil {
+			break
+		}
+
+		return e.complexity.Staff.UserID(childComplexity), true
 
 	case "SubPackage.createdAt":
 		if e.complexity.SubPackage.CreatedAt == nil {

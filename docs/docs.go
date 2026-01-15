@@ -228,11 +228,6 @@ const docTemplate = `{
         },
         "/payment/cash": {
             "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -265,36 +260,15 @@ const docTemplate = `{
                 }
             }
         },
-        "/payment/online/{method}": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Pay order with online payment API",
+        "/payment/vnpay/{orderId}": {
+            "get": {
+                "summary": "Get VnPay Payment Url API",
                 "parameters": [
-                    {
-                        "enum": [
-                            "VNPAY"
-                        ],
-                        "type": "string",
-                        "description": "Online method",
-                        "name": "method",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "Order ID",
                         "name": "orderId",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],

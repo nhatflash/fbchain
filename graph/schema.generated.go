@@ -53,6 +53,8 @@ type QueryResolver interface {
 	MyRestaurants(ctx context.Context) ([]*model.Restaurant, error)
 	MyOrders(ctx context.Context) ([]*model.Order, error)
 	MyRestaurantOrders(ctx context.Context, restaurantID string) ([]*model.RestaurantOrder, error)
+	Staffs(ctx context.Context) ([]*model.Staff, error)
+	Staff(ctx context.Context, id string) (*model.Staff, error)
 }
 type RestaurantResolver interface {
 	Tenant(ctx context.Context, obj *model.Restaurant) (*model.Tenant, error)
@@ -75,6 +77,9 @@ type RestaurantOrderItemResolver interface {
 }
 type RestaurantTableResolver interface {
 	Restaurant(ctx context.Context, obj *model.RestaurantTable) (*model.Restaurant, error)
+}
+type StaffResolver interface {
+	User(ctx context.Context, obj *model.Staff) (*model.User, error)
 }
 type TenantResolver interface {
 	User(ctx context.Context, obj *model.Tenant) (*model.User, error)
@@ -186,6 +191,17 @@ func (ec *executionContext) field_Query_restaurantTable_args(ctx context.Context
 }
 
 func (ec *executionContext) field_Query_restaurant_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_staff_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
@@ -2021,6 +2037,116 @@ func (ec *executionContext) fieldContext_Query_myRestaurantOrders(ctx context.Co
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_myRestaurantOrders_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_staffs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_staffs,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().Staffs(ctx)
+		},
+		nil,
+		ec.marshalNStaff2ᚕᚖgithubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐStaffᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_staffs(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Staff_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Staff_userId(ctx, field)
+			case "code":
+				return ec.fieldContext_Staff_code(ctx, field)
+			case "shiftType":
+				return ec.fieldContext_Staff_shiftType(ctx, field)
+			case "shiftStart":
+				return ec.fieldContext_Staff_shiftStart(ctx, field)
+			case "shiftEnd":
+				return ec.fieldContext_Staff_shiftEnd(ctx, field)
+			case "salary":
+				return ec.fieldContext_Staff_salary(ctx, field)
+			case "notes":
+				return ec.fieldContext_Staff_notes(ctx, field)
+			case "user":
+				return ec.fieldContext_Staff_user(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Staff", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_staff(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_staff,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().Staff(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		ec.marshalOStaff2ᚖgithubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐStaff,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_staff(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Staff_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Staff_userId(ctx, field)
+			case "code":
+				return ec.fieldContext_Staff_code(ctx, field)
+			case "shiftType":
+				return ec.fieldContext_Staff_shiftType(ctx, field)
+			case "shiftStart":
+				return ec.fieldContext_Staff_shiftStart(ctx, field)
+			case "shiftEnd":
+				return ec.fieldContext_Staff_shiftEnd(ctx, field)
+			case "salary":
+				return ec.fieldContext_Staff_salary(ctx, field)
+			case "notes":
+				return ec.fieldContext_Staff_notes(ctx, field)
+			case "user":
+				return ec.fieldContext_Staff_user(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Staff", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_staff_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -3937,6 +4063,291 @@ func (ec *executionContext) fieldContext_RestaurantTable_restaurant(_ context.Co
 	return fc, nil
 }
 
+func (ec *executionContext) _Staff_id(ctx context.Context, field graphql.CollectedField, obj *model.Staff) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Staff_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Staff_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Staff",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Staff_userId(ctx context.Context, field graphql.CollectedField, obj *model.Staff) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Staff_userId,
+		func(ctx context.Context) (any, error) {
+			return obj.UserID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Staff_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Staff",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Staff_code(ctx context.Context, field graphql.CollectedField, obj *model.Staff) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Staff_code,
+		func(ctx context.Context) (any, error) {
+			return obj.Code, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Staff_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Staff",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Staff_shiftType(ctx context.Context, field graphql.CollectedField, obj *model.Staff) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Staff_shiftType,
+		func(ctx context.Context) (any, error) {
+			return obj.ShiftType, nil
+		},
+		nil,
+		ec.marshalOStaffShiftType2ᚖgithubᚗcomᚋnhatflashᚋfbchainᚋenumᚐStaffShiftType,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Staff_shiftType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Staff",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type StaffShiftType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Staff_shiftStart(ctx context.Context, field graphql.CollectedField, obj *model.Staff) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Staff_shiftStart,
+		func(ctx context.Context) (any, error) {
+			return obj.ShiftStart, nil
+		},
+		nil,
+		ec.marshalODateTime2ᚖtimeᚐTime,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Staff_shiftStart(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Staff",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Staff_shiftEnd(ctx context.Context, field graphql.CollectedField, obj *model.Staff) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Staff_shiftEnd,
+		func(ctx context.Context) (any, error) {
+			return obj.ShiftEnd, nil
+		},
+		nil,
+		ec.marshalODateTime2ᚖtimeᚐTime,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Staff_shiftEnd(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Staff",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Staff_salary(ctx context.Context, field graphql.CollectedField, obj *model.Staff) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Staff_salary,
+		func(ctx context.Context) (any, error) {
+			return obj.Salary, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Staff_salary(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Staff",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Staff_notes(ctx context.Context, field graphql.CollectedField, obj *model.Staff) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Staff_notes,
+		func(ctx context.Context) (any, error) {
+			return obj.Notes, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Staff_notes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Staff",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Staff_user(ctx context.Context, field graphql.CollectedField, obj *model.Staff) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Staff_user,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Staff().User(ctx, obj)
+		},
+		nil,
+		ec.marshalOUser2ᚖgithubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐUser,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Staff_user(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Staff",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "phone":
+				return ec.fieldContext_User_phone(ctx, field)
+			case "identity":
+				return ec.fieldContext_User_identity(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "gender":
+				return ec.fieldContext_User_gender(ctx, field)
+			case "birthdate":
+				return ec.fieldContext_User_birthdate(ctx, field)
+			case "postalCode":
+				return ec.fieldContext_User_postalCode(ctx, field)
+			case "address":
+				return ec.fieldContext_User_address(ctx, field)
+			case "profileImage":
+				return ec.fieldContext_User_profileImage(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _SubPackage_id(ctx context.Context, field graphql.CollectedField, obj *model.SubPackage) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -5762,6 +6173,47 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "staffs":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_staffs(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "staff":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_staff(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -6414,6 +6866,95 @@ func (ec *executionContext) _RestaurantTable(ctx context.Context, sel ast.Select
 					}
 				}()
 				res = ec._RestaurantTable_restaurant(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var staffImplementors = []string{"Staff"}
+
+func (ec *executionContext) _Staff(ctx context.Context, sel ast.SelectionSet, obj *model.Staff) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, staffImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Staff")
+		case "id":
+			out.Values[i] = ec._Staff_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "userId":
+			out.Values[i] = ec._Staff_userId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "code":
+			out.Values[i] = ec._Staff_code(ctx, field, obj)
+		case "shiftType":
+			out.Values[i] = ec._Staff_shiftType(ctx, field, obj)
+		case "shiftStart":
+			out.Values[i] = ec._Staff_shiftStart(ctx, field, obj)
+		case "shiftEnd":
+			out.Values[i] = ec._Staff_shiftEnd(ctx, field, obj)
+		case "salary":
+			out.Values[i] = ec._Staff_salary(ctx, field, obj)
+		case "notes":
+			out.Values[i] = ec._Staff_notes(ctx, field, obj)
+		case "user":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Staff_user(ctx, field, obj)
 				return res
 			}
 
@@ -7178,6 +7719,60 @@ func (ec *executionContext) marshalNRestaurantTable2ᚖgithubᚗcomᚋnhatflash�
 	return ec._RestaurantTable(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNStaff2ᚕᚖgithubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐStaffᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Staff) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNStaff2ᚖgithubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐStaff(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNStaff2ᚖgithubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐStaff(ctx context.Context, sel ast.SelectionSet, v *model.Staff) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Staff(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNSubPackage2ᚕᚖgithubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐSubPackageᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.SubPackage) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -7542,6 +8137,32 @@ func (ec *executionContext) unmarshalORestaurantType2ᚖgithubᚗcomᚋnhatflash
 }
 
 func (ec *executionContext) marshalORestaurantType2ᚖgithubᚗcomᚋnhatflashᚋfbchainᚋenumᚐRestaurantType(ctx context.Context, sel ast.SelectionSet, v *enum.RestaurantType) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalString(string(*v))
+	return res
+}
+
+func (ec *executionContext) marshalOStaff2ᚖgithubᚗcomᚋnhatflashᚋfbchainᚋgraphᚋmodelᚐStaff(ctx context.Context, sel ast.SelectionSet, v *model.Staff) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Staff(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOStaffShiftType2ᚖgithubᚗcomᚋnhatflashᚋfbchainᚋenumᚐStaffShiftType(ctx context.Context, v any) (*enum.StaffShiftType, error) {
+	if v == nil {
+		return nil, nil
+	}
+	tmp, err := graphql.UnmarshalString(v)
+	res := enum.StaffShiftType(tmp)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOStaffShiftType2ᚖgithubᚗcomᚋnhatflashᚋfbchainᚋenumᚐStaffShiftType(ctx context.Context, sel ast.SelectionSet, v *enum.StaffShiftType) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

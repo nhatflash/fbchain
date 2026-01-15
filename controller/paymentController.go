@@ -32,7 +32,6 @@ func NewPaymentController(ps service.IPaymentService, vs service.IVnPayService) 
 // @Param request body client.PayOrderWithCashRequest true "PayOrderWithCash body"
 // @Success 200 {object} string
 // @Failure 400 {object} error
-// @Security BearerAuth
 // @Router /payment/cash [post]
 func (pc *PaymentController) PayOrderWithCash(c *gin.Context) {
 	var err error
@@ -49,36 +48,26 @@ func (pc *PaymentController) PayOrderWithCash(c *gin.Context) {
 }
 
 
-
-// @Summary Pay order with online payment API
-// @Accept json
-// @Produce json
-// @Param method path client.OnlineMethod true "Online method"
-// @Param orderId query string true "Order ID"
-// @Security BearerAuth
-// @Router /payment/online/{method} [post]
-func (pc *PaymentController) PayOrderWithOnlinePayment(c *gin.Context) {
+// @Summary Get VnPay Payment Url API
+// @Param orderId path string true "Order ID"
+// @Router /payment/vnpay/{orderId} [get]
+func (pc *PaymentController) GetVnPayPaymentUrl(c *gin.Context) {
 	var err error
-	method := c.Param("method")
-	orderId := c.Query("orderId")
-
-	var oId int64
-	oId, err = strconv.ParseInt(orderId, 10, 64)
+	orderIdParam := c.Param("orderId")
+	
+	var orderId int64
+	orderId, err = strconv.ParseInt(orderIdParam, 10, 64);
 	if err != nil {
-		c.Error(appErr.BadRequestError("Invalid orderId."))
+		c.Error(appErr.BadRequestError("Invalid orderId format."))
 		return
 	}
-	var res string
-	switch method {
-		case "VNPAY":
-			res, err = pc.VnPayService.GetOrderVnPayUrl(c.Request.Context(), c.ClientIP(), oId)
-			if err != nil {
-				c.Error(err)
-				return
-			}
-		default:
-			c.Error(appErr.BadRequestError("Invalid method"))
-			return
+
+	var url string
+	clientIp := c.ClientIP()
+	url, err = pc.VnPayService.GetOrderVnPayUrl(c.Request.Context(), clientIp, orderId)
+	if err != nil {
+		c.Error(err)
+		return
 	}
-	api.SuccessMessage(http.StatusOK, "Url retrieved successfully.", res, c)
-} 
+	api.SuccessMessage(http.StatusOK, "VnPay url retrieved successfully.", url, c)
+}

@@ -46,6 +46,11 @@ enum RestaurantOrderStatus {
   R_ORDER_CANCELED
 }
 
+enum StaffShiftType {
+  STAFF_FULLTIME
+  STAFF_PARTTIME
+}
+
 type Todo {
   id: ID!
   text: String!
@@ -181,6 +186,17 @@ type RestaurantOrderItem {
   rOrder: RestaurantOrder
 }
 
+type Staff {
+  id: ID!
+  userId: String!
+  code: String
+  shiftType: StaffShiftType
+  shiftStart: DateTime
+  shiftEnd: DateTime
+  salary: String
+  notes: String
+  user: User
+}
 
 type Query {
   me: User
@@ -207,6 +223,8 @@ type Query {
   myRestaurants: [Restaurant!]!
   myOrders: [Order!]!
   myRestaurantOrders(restaurantId: ID!): [RestaurantOrder!]!
+  staffs: [Staff!]!
+  staff(id: ID!): Staff
 }
 
 input NewTodo {
